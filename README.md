@@ -6,20 +6,20 @@ Bu rehber, projenin frontend kısmını yerel ortamınıza kurmanız ve çalış
 Kurulum Adımları
 Depoyu Klonlayın:
 
-bash
+
 ```
 git clone <repo-url>
 cd <proje-klasörü>
 ```
 Bağımlılıkları Yükleyin:
 
-bash
+
 ```
 npm install
 ```
 Geliştirme Sunucusunu Başlatın:
 
-bash
+
 ```
 npm run dev
 ```
