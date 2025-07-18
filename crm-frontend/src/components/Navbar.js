@@ -26,29 +26,18 @@ export default function Navbar() {
             >
               Dashboard
             </Link>
-            <Link
-              href="/crm"
-              className="text-gray-600 hover:text-primary-green transition-colors"
-            >
-              CRM
-            </Link>
-            <Link
-              href="/erp"
-              className="text-gray-600 hover:text-primary-green transition-colors"
-            >
-              ERP
-            </Link>
-            <Link
-              href="/hr"
-              className="text-gray-600 hover:text-primary-green transition-colors"
-            >
-              İnsan Kaynakları
-            </Link>
+
             <Link
               href="/reports"
               className="text-gray-600 hover:text-primary-green transition-colors"
             >
               Raporlar
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-gray-600 hover:text-primary-green transition-colors"
+            >
+              İletişim
             </Link>
           </nav>
 
