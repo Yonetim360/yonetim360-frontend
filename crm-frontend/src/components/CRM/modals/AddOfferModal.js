@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,32 +18,54 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useCRMStore } from "@/stores/useCRMStore";
 
-export default function AddOfferModal({
-  isOfferModalOpen,
-  setIsOfferModalOpen,
-  customers,
-}) {
-  const [offerForm, setOfferForm] = useState({
-    customer: "",
-    products: "",
-    amount: "",
-    validUntil: "",
-    notes: "",
-  });
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
-  const handleOfferSubmit = (e) => {
-    e.preventDefault();
-    console.log("Yeni teklif:", offerForm);
-    setIsOfferModalOpen(false);
-    setOfferForm({
+// Zod şeması
+const offerSchema = z.object({
+  customer: z.string().min(1, "Müşteri seçimi zorunludur"),
+  products: z.string().min(1, "Ürün/hizmet bilgisi zorunludur"),
+  amount: z
+    .string()
+    .min(1, "Tutar bilgisi zorunludur")
+    .regex(/^₺?\d+(,\d{3})*(\.\d{2})?$/, "Geçerli bir tutar girin"),
+  validUntil: z.string().min(1, "Geçerlilik tarihi zorunludur"),
+  notes: z.string().optional(),
+});
+
+export default function AddOfferModal() {
+  const {
+    isOfferModalOpen,
+    setIsOfferModalOpen,
+    customers,
+    handleOfferSubmit,
+    isLoading,
+  } = useCRMStore();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(offerSchema),
+    defaultValues: {
       customer: "",
       products: "",
       amount: "",
       validUntil: "",
       notes: "",
-    });
+    },
+  });
+
+  const onSubmit = (data) => {
+    handleOfferSubmit(data);
+    reset();
+    setIsOfferModalOpen(false);
   };
 
   return (
@@ -56,74 +79,68 @@ export default function AddOfferModal({
             Müşteri için yeni bir teklif hazırlayın.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleOfferSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4"
+          noValidate
+        >
           <div className="space-y-2">
-            <Label htmlFor="offer-customer">Müşteri *</Label>
-            <Select
-              value={offerForm.customer}
-              onValueChange={(value) =>
-                setOfferForm({ ...offerForm, customer: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Müşteri seçin" />
-              </SelectTrigger>
-              <SelectContent>
-                {customers.map((customer) => (
-                  <SelectItem key={customer.id} value={customer.name}>
-                    {customer.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Müşteri *</Label>
+            <Controller
+              name="customer"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Müşteri seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.name}>
+                        {customer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.customer && (
+              <p className="text-sm text-red-500">{errors.customer.message}</p>
+            )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="offer-products">Ürün/Hizmetler *</Label>
+            <Label>Ürün/Hizmetler *</Label>
             <Textarea
-              id="offer-products"
-              value={offerForm.products}
-              onChange={(e) =>
-                setOfferForm({ ...offerForm, products: e.target.value })
-              }
+              {...register("products")}
               placeholder="Web Sitesi + Mobil Uygulama"
               rows={3}
-              required
             />
+            {errors.products && (
+              <p className="text-sm text-red-500">{errors.products.message}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="offer-amount">Tutar *</Label>
-              <Input
-                id="offer-amount"
-                value={offerForm.amount}
-                onChange={(e) =>
-                  setOfferForm({ ...offerForm, amount: e.target.value })
-                }
-                placeholder="₺125,000"
-                required
-              />
+              <Label>Tutar *</Label>
+              <Input {...register("amount")} placeholder="₺125,000" />
+              {errors.amount && (
+                <p className="text-sm text-red-500">{errors.amount.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="offer-valid">Geçerlilik Tarihi *</Label>
-              <Input
-                id="offer-valid"
-                type="date"
-                value={offerForm.validUntil}
-                onChange={(e) =>
-                  setOfferForm({ ...offerForm, validUntil: e.target.value })
-                }
-                required
-              />
+              <Label>Geçerlilik Tarihi *</Label>
+              <Input {...register("validUntil")} type="date" />
+              {errors.validUntil && (
+                <p className="text-sm text-red-500">
+                  {errors.validUntil.message}
+                </p>
+              )}
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="offer-notes">Notlar</Label>
+            <Label>Notlar</Label>
             <Textarea
-              id="offer-notes"
-              value={offerForm.notes}
-              onChange={(e) =>
-                setOfferForm({ ...offerForm, notes: e.target.value })
-              }
+              {...register("notes")}
               placeholder="Teklif detayları ve özel notlar..."
               rows={3}
             />
@@ -136,8 +153,12 @@ export default function AddOfferModal({
             >
               İptal
             </Button>
-            <Button type="submit" className="bg-red hover:bg-red/90">
-              Teklif Oluştur
+            <Button
+              type="submit"
+              className="bg-red hover:bg-red/90"
+              disabled={isLoading}
+            >
+              {isLoading ? "Oluşturuluyor..." : "Teklif Oluştur"}
             </Button>
           </DialogFooter>
         </form>

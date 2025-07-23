@@ -12,8 +12,10 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useCRMStore } from "@/stores/useCRMStore";
 
-export default function CustomerInfo({ customers, setIsCustomerModalOpen }) {
+export default function CustomerInfo() {
+  const { customers, setIsCustomerModalOpen } = useCRMStore();
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

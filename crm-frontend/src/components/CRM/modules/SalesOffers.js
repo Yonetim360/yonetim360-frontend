@@ -1,9 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCRMStore } from "@/stores/useCRMStore";
 import { Plus } from "lucide-react";
 
-export default function SalesOffers({ offers, setIsOfferModalOpen }) {
+export default function SalesOffers() {
+  const { offers, setIsOfferModalOpen } = useCRMStore();
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

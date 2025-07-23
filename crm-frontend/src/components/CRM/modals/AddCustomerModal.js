@@ -18,22 +18,41 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 
-export default function AddCustomerModal({
-  isCustomerModalOpen,
-  setIsCustomerModalOpen,
-  customers,
-  onSubmit,
-  customerForm,
-  setCustomerForm,
-  isLoading = false,
-}) {
-  const handleCustomerSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(customerForm);
-    setIsCustomerModalOpen(false);
-    setCustomerForm({
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useCRMStore } from "@/stores/useCRMStore";
+
+// 1. Zod şeması
+const customerSchema = z.object({
+  name: z.string().min(1, "Şirket adı zorunludur"),
+  contact: z.string().min(1, "İletişim kişisi zorunludur"),
+  email: z.email("Geçerli bir e-posta girin"),
+  phone: z.string().min(5, "Telefon numarası zorunludur"),
+  segment: z.enum(["kurumsal", "kobi", "bireysel"]),
+  status: z.enum(["aktif", "potansiyel", "pasif"]),
+  address: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export default function AddCustomerModal() {
+  const {
+    isCustomerModalOpen,
+    setIsCustomerModalOpen,
+    isLoading,
+    handleCustomerSubmit: onSubmit,
+  } = useCRMStore();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(customerSchema),
+    defaultValues: {
       name: "",
       contact: "",
       email: "",
@@ -42,7 +61,13 @@ export default function AddCustomerModal({
       status: "",
       address: "",
       notes: "",
-    });
+    },
+  });
+
+  const handleCustomerSubmit = (data) => {
+    onSubmit(data);
+    reset(); // formu sıfırla
+    setIsCustomerModalOpen(false); // modal kapat
   };
 
   return (
@@ -56,125 +81,94 @@ export default function AddCustomerModal({
             Yeni müşteri bilgilerini girin ve kaydedin.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleCustomerSubmit} className="space-y-4" noValidate>
+
+        <form
+          onSubmit={handleSubmit(handleCustomerSubmit)}
+          className="space-y-4"
+          noValidate
+        >
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="company-name">Şirket Adı *</Label>
-              <Input
-                id="company-name"
-                value={customerForm.name}
-                onChange={(e) =>
-                  setCustomerForm({ ...customerForm, name: e.target.value })
-                }
-                placeholder="ABC Teknoloji A.Ş."
-                required
-              />
+              <Label>Şirket Adı *</Label>
+              <Input {...register("name")} placeholder="ABC Teknoloji A.Ş." />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-person">İletişim Kişisi *</Label>
-              <Input
-                id="contact-person"
-                value={customerForm.contact}
-                onChange={(e) =>
-                  setCustomerForm({
-                    ...customerForm,
-                    contact: e.target.value,
-                  })
-                }
-                placeholder="Ahmet Yılmaz"
-                required
-              />
+              <Label>İletişim Kişisi *</Label>
+              <Input {...register("contact")} placeholder="Ahmet Yılmaz" />
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="email">E-posta *</Label>
+              <Label>E-posta *</Label>
               <Input
-                id="email"
+                {...register("email")}
                 type="email"
-                value={customerForm.email}
-                onChange={(e) =>
-                  setCustomerForm({ ...customerForm, email: e.target.value })
-                }
-                placeholder="ahmet@abcteknoloji.com"
-                required
+                placeholder="ahmet@abc.com"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefon *</Label>
-              <Input
-                id="phone"
-                value={customerForm.phone}
-                onChange={(e) =>
-                  setCustomerForm({ ...customerForm, phone: e.target.value })
-                }
-                placeholder="+90 212 555 0123"
-                required
-              />
+              <Label>Telefon *</Label>
+              <Input {...register("phone")} placeholder="+90 555 555 55 55" />
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="segment">Segment</Label>
-              <Select
-                value={customerForm.segment}
-                onValueChange={(value) =>
-                  setCustomerForm({ ...customerForm, segment: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Segment seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="kurumsal">Kurumsal</SelectItem>
-                  <SelectItem value="kobi">KOBİ</SelectItem>
-                  <SelectItem value="bireysel">Bireysel</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Segment</Label>
+              <Controller
+                control={control}
+                name="segment"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Segment seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="kurumsal">Kurumsal</SelectItem>
+                      <SelectItem value="kobi">KOBİ</SelectItem>
+                      <SelectItem value="bireysel">Bireysel</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="status">Durum</Label>
-              <Select
-                value={customerForm.status}
-                onValueChange={(value) =>
-                  setCustomerForm({ ...customerForm, status: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Durum seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="aktif">Aktif</SelectItem>
-                  <SelectItem value="potansiyel">Potansiyel</SelectItem>
-                  <SelectItem value="pasif">Pasif</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Durum</Label>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Durum seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aktif">Aktif</SelectItem>
+                      <SelectItem value="potansiyel">Potansiyel</SelectItem>
+                      <SelectItem value="pasif">Pasif</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="address">Adres</Label>
+            <Label>Adres</Label>
             <Textarea
-              id="address"
-              value={customerForm.address}
-              onChange={(e) =>
-                setCustomerForm({ ...customerForm, address: e.target.value })
-              }
-              placeholder="Şirket adresi..."
+              {...register("address")}
+              placeholder="Adres girin..."
               rows={3}
             />
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="notes">Notlar</Label>
-            <Textarea
-              id="notes"
-              value={customerForm.notes}
-              onChange={(e) =>
-                setCustomerForm({ ...customerForm, notes: e.target.value })
-              }
-              placeholder="Müşteri hakkında notlar..."
-              rows={3}
-            />
+            <Label>Notlar</Label>
+            <Textarea {...register("notes")} placeholder="Notlar..." rows={3} />
           </div>
+
           <DialogFooter>
             <Button
               type="button"
@@ -186,8 +180,9 @@ export default function AddCustomerModal({
             <Button
               type="submit"
               className="bg-primary-green hover:bg-primary-green/90"
+              disabled={isLoading}
             >
-              Müşteri Ekle
+              {isLoading ? "Ekleniyor..." : "Müşteri Ekle"}
             </Button>
           </DialogFooter>
         </form>

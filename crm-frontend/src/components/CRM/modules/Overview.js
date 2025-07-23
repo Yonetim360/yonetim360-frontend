@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,9 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useCRMStore } from "@/stores/useCRMStore";
 import {
   AlertCircle,
-  Badge,
   BarChart3,
   Clock,
   FileText,
@@ -18,6 +19,12 @@ import {
 } from "lucide-react";
 
 export default function Overview() {
+  const {
+    setIsCustomerModalOpen,
+    setIsCommunicationModalOpen,
+    setIsOfferModalOpen,
+    setIsSupportModalOpen,
+  } = useCRMStore();
   return (
     <div className="space-y-6">
       <div>

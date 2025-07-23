@@ -1,12 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCRMStore } from "@/stores/useCRMStore";
 import { AlertCircle, Clock, Phone, Plus } from "lucide-react";
 
-export default function Communication({
-  communications,
-  setIsCommunicationModalOpen,
-}) {
+export default function Communication() {
+  const { communications, setIsCommunicationModalOpen } = useCRMStore();
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

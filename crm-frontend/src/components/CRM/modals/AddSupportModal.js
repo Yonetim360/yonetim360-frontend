@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,27 +18,51 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCRMStore } from "@/stores/useCRMStore";
 
-export default function AddSupportModal({
-  isSupportModalOpen,
-  setIsSupportModalOpen,
-  customers,
-  onSubmit,
-  supportForm,
-  setSupportForm,
-  isLoading = false,
-}) {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(supportForm);
-    setIsSupportModalOpen(false);
-    setSupportForm({
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+// Zod schema for support ticket validation
+const supportSchema = z.object({
+  customer: z.string().min(1, "Müşteri seçimi zorunludur"),
+  subject: z.string().min(5, "Konu en az 5 karakter olmalıdır"),
+  description: z.string().min(10, "Açıklama en az 10 karakter olmalıdır"),
+  priority: z.enum(["düşük", "orta", "yüksek", "kritik"]),
+  assignedTo: z.string().optional(),
+});
+
+export default function AddSupportModal() {
+  const {
+    isSupportModalOpen,
+    setIsSupportModalOpen,
+    customers,
+    isLoading,
+    handleSupportSubmit,
+  } = useCRMStore();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(supportSchema),
+    defaultValues: {
       customer: "",
       subject: "",
       description: "",
       priority: "",
       assignedTo: "",
-    });
+    },
+  });
+
+  const onSubmit = (data) => {
+    handleSupportSubmit(data);
+    reset();
+    setIsSupportModalOpen(false);
   };
 
   return (
@@ -51,99 +76,111 @@ export default function AddSupportModal({
             Müşteri destek talebi oluşturun ve takip edin.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4"
+          noValidate
+        >
           <div className="space-y-2">
-            <Label htmlFor="support-customer">Müşteri *</Label>
-            <Select
-              value={supportForm.customer}
-              onValueChange={(value) =>
-                setSupportForm({ ...supportForm, customer: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Müşteri seçin" />
-              </SelectTrigger>
-              <SelectContent>
-                {customers.map((customer) => (
-                  <SelectItem key={customer.id} value={customer.name}>
-                    {customer.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="support-subject">Konu *</Label>
-            <Input
-              id="support-subject"
-              value={supportForm.subject}
-              onChange={(e) =>
-                setSupportForm({ ...supportForm, subject: e.target.value })
-              }
-              placeholder="Sistem yavaşlığı"
-              required
+            <Label>Müşteri *</Label>
+            <Controller
+              name="customer"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Müşteri seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((customer) => (
+                      <SelectItem key={customer.id} value={customer.name}>
+                        {customer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
+            {errors.customer && (
+              <p className="text-sm text-red-500">{errors.customer.message}</p>
+            )}
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="support-description">Açıklama *</Label>
+            <Label>Konu *</Label>
+            <Input {...register("subject")} placeholder="Sistem yavaşlığı" />
+            {errors.subject && (
+              <p className="text-sm text-red-500">{errors.subject.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Açıklama *</Label>
             <Textarea
-              id="support-description"
-              value={supportForm.description}
-              onChange={(e) =>
-                setSupportForm({
-                  ...supportForm,
-                  description: e.target.value,
-                })
-              }
+              {...register("description")}
               placeholder="Sorunun detaylı açıklaması..."
               rows={4}
-              required
             />
+            {errors.description && (
+              <p className="text-sm text-red-500">
+                {errors.description.message}
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="support-priority">Öncelik *</Label>
-              <Select
-                value={supportForm.priority}
-                onValueChange={(value) =>
-                  setSupportForm({ ...supportForm, priority: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Öncelik seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="düşük">Düşük</SelectItem>
-                  <SelectItem value="orta">Orta</SelectItem>
-                  <SelectItem value="yüksek">Yüksek</SelectItem>
-                  <SelectItem value="kritik">Kritik</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Öncelik *</Label>
+              <Controller
+                name="priority"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Öncelik seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="düşük">Düşük</SelectItem>
+                      <SelectItem value="orta">Orta</SelectItem>
+                      <SelectItem value="yüksek">Yüksek</SelectItem>
+                      <SelectItem value="kritik">Kritik</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.priority && (
+                <p className="text-sm text-red-500">
+                  {errors.priority.message}
+                </p>
+              )}
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="support-assigned">Atanan Kişi</Label>
-              <Select
-                value={supportForm.assignedTo}
-                onValueChange={(value) =>
-                  setSupportForm({ ...supportForm, assignedTo: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Kişi seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="teknik-ekip">Teknik Ekip</SelectItem>
-                  <SelectItem value="geliştirme-ekibi">
-                    Geliştirme Ekibi
-                  </SelectItem>
-                  <SelectItem value="müşteri-hizmetleri">
-                    Müşteri Hizmetleri
-                  </SelectItem>
-                  <SelectItem value="satış-ekibi">Satış Ekibi</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Atanan Kişi</Label>
+              <Controller
+                name="assignedTo"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kişi seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="teknik-ekip">Teknik Ekip</SelectItem>
+                      <SelectItem value="geliştirme-ekibi">
+                        Geliştirme Ekibi
+                      </SelectItem>
+                      <SelectItem value="müşteri-hizmetleri">
+                        Müşteri Hizmetleri
+                      </SelectItem>
+                      <SelectItem value="satış-ekibi">Satış Ekibi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </div>
+
           <DialogFooter>
             <Button
               type="button"

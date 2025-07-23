@@ -1,7 +1,4 @@
 "use client";
-
-import { useState } from "react";
-
 import {
   Card,
   CardContent,
@@ -32,226 +29,49 @@ import AddCustomerModal from "@/components/CRM/modals/AddCustomerModal";
 import AddContactModal from "@/components/CRM/modals/AddContactModal";
 import AddOfferModal from "@/components/CRM/modals/AddOfferModal";
 import AddSupportModal from "@/components/CRM/modals/AddSupportModal";
+import { useCRMStore } from "../../stores/useCRMStore";
 
 export default function Page() {
-  const [activeModule, setActiveModule] = useState("overview");
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-  const [isCommunicationModalOpen, setIsCommunicationModalOpen] =
-    useState(false);
-  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
-  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const {
+    activeModule,
+    isLoading,
+    //modals
+    isCustomerModalOpen,
+    isCommunicationModalOpen,
+    isOfferModalOpen,
+    isSupportModalOpen,
+    //forms
+    supportForm,
+    customerForm,
+    //state setters
+    setActiveModule,
+    setIsLoading,
+    setIsCustomerModalOpen,
+    setIsCommunicationModalOpen,
+    setIsOfferModalOpen,
+    setIsSupportModalOpen,
+    setSupportForm,
+    setCustomerForm,
 
-  const [isLoading, setIsLoading] = useState(false);
+    //datas
+    modules,
+    customers,
+    communications,
+    offers,
+    supportTickets,
+  } = useCRMStore();
 
-  /* Form States */
-  const [supportForm, setSupportForm] = useState({
-    customer: "",
-    subject: "",
-    description: "",
-    priority: "",
-    assignedTo: "",
-  });
+  /* Modal Submit Handlers */
 
-  const [customerForm, setCustomerForm] = useState({
-    name: "",
-    contact: "",
-    email: "",
-    phone: "",
-    segment: "",
-    status: "",
-    address: "",
-    notes: "",
-  });
-
-  /*Initial datas*/
-
-  const modules = [
-    {
-      id: "overview",
-      name: "Genel Bakış",
-      icon: BarChart3,
-      color: "text-dark-gray",
-      bgColor: "bg-dark-gray/10",
-    },
-    {
-      id: "customer-info",
-      name: "Müşteri Bilgileri Takibi",
-      icon: Users,
-      color: "text-primary-green",
-      bgColor: "bg-primary-green/10",
-    },
-    {
-      id: "communication",
-      name: "İletişim ve Görüşme Takibi",
-      icon: Phone,
-      color: "text-orange",
-      bgColor: "bg-orange/10",
-    },
-    {
-      id: "sales-offers",
-      name: "Teklif ve Satış Takibi",
-      icon: FileText,
-      color: "text-red",
-      bgColor: "bg-red/10",
-    },
-    {
-      id: "support",
-      name: "Müşteri Destek Talep Takip",
-      icon: Headphones,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      id: "whatsapp",
-      name: "WhatsApp Hatırlatma",
-      icon: MessageCircle,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      id: "calendar",
-      name: "Takvim / Görev",
-      icon: CalendarDays,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
-    },
-    {
-      id: "announcements",
-      name: "Duyuru / Talep",
-      icon: Megaphone,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100",
-    },
-    {
-      id: "solution-center",
-      name: "Çözüm Merkezi",
-      icon: HelpCircle,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-100",
-    },
-  ];
-
-  const customers = [
-    {
-      id: 1,
-      name: "ABC Teknoloji A.Ş.",
-      contact: "Ahmet Yılmaz",
-      email: "ahmet@abcteknoloji.com",
-      phone: "+90 212 555 0123",
-      status: "Aktif",
-      lastContact: "2024-01-15",
-      value: "₺125,000",
-      segment: "Kurumsal",
-    },
-    {
-      id: 2,
-      name: "XYZ İnşaat Ltd.",
-      contact: "Fatma Demir",
-      email: "fatma@xyzinsaat.com",
-      phone: "+90 216 555 0456",
-      status: "Potansiyel",
-      lastContact: "2024-01-12",
-      value: "₺85,000",
-      segment: "KOBİ",
-    },
-    {
-      id: 3,
-      name: "DEF Danışmanlık",
-      contact: "Mehmet Kaya",
-      email: "mehmet@defdanismanlik.com",
-      phone: "+90 312 555 0789",
-      status: "Aktif",
-      lastContact: "2024-01-10",
-      value: "₺200,000",
-      segment: "Kurumsal",
-    },
-  ];
-
-  const communications = [
-    {
-      id: 1,
-      customer: "ABC Teknoloji A.Ş.",
-      type: "Telefon",
-      date: "2024-01-15",
-      time: "14:30",
-      duration: "25 dk",
-      subject: "Proje görüşmesi",
-      notes: "Yeni proje için detaylar konuşuldu. Teklif hazırlanacak.",
-      status: "Tamamlandı",
-    },
-    {
-      id: 2,
-      customer: "XYZ İnşaat Ltd.",
-      type: "E-posta",
-      date: "2024-01-14",
-      time: "10:15",
-      subject: "Teklif sunumu",
-      notes: "Hazırlanan teklif e-posta ile gönderildi.",
-      status: "Beklemede",
-    },
-  ];
-
-  const offers = [
-    {
-      id: 1,
-      customer: "ABC Teknoloji A.Ş.",
-      offerNo: "TKL-2024-001",
-      date: "2024-01-10",
-      amount: "₺125,000",
-      status: "Onaylandı",
-      validUntil: "2024-02-10",
-      products: "Web Sitesi + Mobil Uygulama",
-    },
-    {
-      id: 2,
-      customer: "XYZ İnşaat Ltd.",
-      offerNo: "TKL-2024-002",
-      date: "2024-01-12",
-      amount: "₺85,000",
-      status: "Beklemede",
-      validUntil: "2024-02-12",
-      products: "ERP Sistemi",
-    },
-  ];
-
-  const supportTickets = [
-    {
-      id: 1,
-      customer: "ABC Teknoloji A.Ş.",
-      ticketNo: "DES-2024-001",
-      subject: "Sistem yavaşlığı",
-      priority: "Yüksek",
-      status: "Açık",
-      createdDate: "2024-01-15",
-      assignedTo: "Teknik Ekip",
-    },
-    {
-      id: 2,
-      customer: "DEF Danışmanlık",
-      ticketNo: "DES-2024-002",
-      subject: "Rapor hatası",
-      priority: "Orta",
-      status: "Çözüldü",
-      createdDate: "2024-01-14",
-      assignedTo: "Geliştirme Ekibi",
-    },
-  ];
-
-  {
-    /* Modal Submit Handlers */
-  }
   const handleSupportSubmit = async (formdata) => {
-    setIsLoading(true);
-
-    console.log(formdata);
-    setIsLoading(false);
-  };
-
-  const handleCustomerSubmit = async (formdata) => {
-    setIsLoading(true);
-
-    console.log(formdata);
-    setIsLoading(false);
+    try {
+      setIsLoading(true);
+      console.log(formdata);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   {
@@ -263,36 +83,16 @@ export default function Page() {
         return <Overview />;
 
       case "customer-info":
-        return (
-          <CustomerInfo
-            customers={customers}
-            setIsCustomerModalOpen={setIsCustomerModalOpen}
-          />
-        );
+        return <CustomerInfo />;
 
       case "communication":
-        return (
-          <Communication
-            communications={communications}
-            setIsCommunicationModalOpen={setIsCommunicationModalOpen}
-          />
-        );
+        return <Communication />;
 
       case "sales-offers":
-        return (
-          <SalesOffers
-            offers={offers}
-            setIsOfferModalOpen={setIsOfferModalOpen}
-          />
-        );
+        return <SalesOffers />;
 
       case "support":
-        return (
-          <Support
-            supportTickets={supportTickets}
-            setIsSupportModalOpen={setIsSupportModalOpen}
-          />
-        );
+        return <Support />;
 
       case "calendar":
         return <MyCalendar />;
@@ -359,39 +159,15 @@ export default function Page() {
 
       {/* Modals */}
       {/* Müşteri Ekleme Modal */}
-      <AddCustomerModal
-        isCustomerModalOpen={isCustomerModalOpen}
-        setIsCustomerModalOpen={setIsCustomerModalOpen}
-        customers={customers}
-        customerForm={customerForm}
-        setCustomerForm={setCustomerForm}
-        onSubmit={handleCustomerSubmit}
-        isLoading={isLoading}
-      />
+      <AddCustomerModal />
 
       {/* İletişim Ekleme Modal */}
-      <AddContactModal
-        isCommunicationModalOpen={isCommunicationModalOpen}
-        setIsCommunicationModalOpen={setIsCommunicationModalOpen}
-        customers={customers}
-      />
+      <AddContactModal />
 
       {/* Teklif Ekleme Modal */}
-      <AddOfferModal
-        isOfferModalOpen={isOfferModalOpen}
-        setIsOfferModalOpen={setIsOfferModalOpen}
-        customers={customers}
-      />
+      <AddOfferModal />
       {/* Destek Talebi Ekleme Modal */}
-      <AddSupportModal
-        isSupportModalOpen={isSupportModalOpen}
-        setIsSupportModalOpen={setIsSupportModalOpen}
-        customers={customers}
-        onSubmit={handleSupportSubmit}
-        supportForm={supportForm}
-        setSupportForm={setSupportForm}
-        isLoading={isLoading}
-      />
+      <AddSupportModal />
     </div>
   );
 }
