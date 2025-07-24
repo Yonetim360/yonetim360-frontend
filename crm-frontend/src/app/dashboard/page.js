@@ -127,7 +127,7 @@ export default function Page() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-gray-600 mb-6 leading-relaxed">
+                    <p className="text-gray-600 mb-6 md:h-24 leading-relaxed">
                       {service.description}
                     </p>
 

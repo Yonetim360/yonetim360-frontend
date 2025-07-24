@@ -24,6 +24,7 @@ export const useCRMStore = create((set) => ({
       icon: BarChart3,
       color: "text-dark-gray",
       bgColor: "bg-dark-gray/10",
+      subModules: [],
     },
     {
       id: "customer-info",
@@ -31,6 +32,7 @@ export const useCRMStore = create((set) => ({
       icon: Users,
       color: "text-primary-green",
       bgColor: "bg-primary-green/10",
+      subModules: [],
     },
     {
       id: "communication",
@@ -38,6 +40,10 @@ export const useCRMStore = create((set) => ({
       icon: Phone,
       color: "text-orange",
       bgColor: "bg-orange/10",
+      subModules: [
+        { id: "communicationHistory", name: "Görüşme Geçmişi" },
+        { id: "upcomingMeetings", name: "Gelecek Görüşmeler" },
+      ],
     },
     {
       id: "sales-offers",
@@ -45,6 +51,7 @@ export const useCRMStore = create((set) => ({
       icon: FileText,
       color: "text-red",
       bgColor: "bg-red/10",
+      subModules: [],
     },
     {
       id: "support",
@@ -52,6 +59,7 @@ export const useCRMStore = create((set) => ({
       icon: Headphones,
       color: "text-blue-600",
       bgColor: "bg-blue-100",
+      subModules: [],
     },
     {
       id: "whatsapp",
@@ -59,6 +67,7 @@ export const useCRMStore = create((set) => ({
       icon: MessageCircle,
       color: "text-green-600",
       bgColor: "bg-green-100",
+      subModules: [],
     },
     {
       id: "calendar",
@@ -66,6 +75,7 @@ export const useCRMStore = create((set) => ({
       icon: CalendarDays,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
+      subModules: [],
     },
     {
       id: "announcements",
@@ -73,6 +83,7 @@ export const useCRMStore = create((set) => ({
       icon: Megaphone,
       color: "text-yellow-600",
       bgColor: "bg-yellow-100",
+      subModules: [],
     },
     {
       id: "solution-center",
@@ -80,6 +91,7 @@ export const useCRMStore = create((set) => ({
       icon: HelpCircle,
       color: "text-indigo-600",
       bgColor: "bg-indigo-100",
+      subModules: [],
     },
   ],
 
