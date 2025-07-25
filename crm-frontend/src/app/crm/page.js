@@ -15,10 +15,10 @@ import Communication from "@/components/CRM/modules/Communication";
 import SalesOffers from "@/components/CRM/modules/SalesOffers";
 import Support from "@/components/CRM/modules/Support";
 import DefaultCase from "@/components/CRM/modules/DefaultCase";
-import AddCustomerModal from "@/components/CRM/modals/AddCustomerModal";
-import AddContactModal from "@/components/CRM/modals/AddContactModal";
-import AddOfferModal from "@/components/CRM/modals/AddOfferModal";
-import AddSupportModal from "@/components/CRM/modals/AddSupportModal";
+import AddCustomerModal from "@/components/CRM/modals/addingModals/AddCustomerModal";
+import AddContactModal from "@/components/CRM/modals/addingModals/AddContactModal";
+import AddOfferModal from "@/components/CRM/modals/addingModals/AddOfferModal";
+import AddSupportModal from "@/components/CRM/modals/addingModals/AddSupportModal";
 import { useCRMStore } from "../../stores/useCRMStore";
 import { useState } from "react";
 

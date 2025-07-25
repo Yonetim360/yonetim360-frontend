@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 import ClientLayout from "./ClientLayout";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
     <html lang="tr">
       <body className={inter.className}>
         <ClientLayout>{children}</ClientLayout>
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );

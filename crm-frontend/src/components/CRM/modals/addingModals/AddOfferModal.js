@@ -84,30 +84,57 @@ export default function AddOfferModal() {
           className="space-y-4"
           noValidate
         >
-          <div className="space-y-2">
-            <Label>Müşteri *</Label>
-            <Controller
-              name="customer"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Müşteri seçin" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {customers.map((customer) => (
-                      <SelectItem key={customer.id} value={customer.name}>
-                        {customer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Müşteri *</Label>
+              <Controller
+                name="customer"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Müşteri seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {customers.map((customer) => (
+                        <SelectItem key={customer.id} value={customer.name}>
+                          {customer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.customer && (
+                <p className="text-sm text-red-500">
+                  {errors.customer.message}
+                </p>
               )}
-            />
-            {errors.customer && (
-              <p className="text-sm text-red-500">{errors.customer.message}</p>
-            )}
+            </div>
+            <div className="space-y-2">
+              <Label>Durum *</Label>
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Teklif Durumu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beklemede">Beklemede</SelectItem>
+                      <SelectItem value="onaylandi">Onaylandı</SelectItem>
+                      <SelectItem value="reddedildi">Reddedildi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
           </div>
+
           <div className="space-y-2">
             <Label>Ürün/Hizmetler *</Label>
             <Textarea

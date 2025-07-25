@@ -9,11 +9,13 @@ import {
   Phone,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
 import { create } from "zustand";
 
 export const useCRMStore = create((set) => ({
   activeModule: "overview",
   isLoading: false,
+  selectedOffer: null,
 
   /*Initial datas*/
 
@@ -71,7 +73,7 @@ export const useCRMStore = create((set) => ({
     },
     {
       id: "calendar",
-      name: "Takvim / Görev",
+      name: "Takvim",
       icon: CalendarDays,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
@@ -79,7 +81,7 @@ export const useCRMStore = create((set) => ({
     },
     {
       id: "announcements",
-      name: "Duyuru / Talep",
+      name: "Duyurular",
       icon: Megaphone,
       color: "text-yellow-600",
       bgColor: "bg-yellow-100",
@@ -206,6 +208,7 @@ export const useCRMStore = create((set) => ({
   isCommunicationModalOpen: false,
   isOfferModalOpen: false,
   isSupportModalOpen: false,
+  isOfferDetailsModalOpen: false,
 
   // Formlar
   supportForm: {
@@ -275,13 +278,16 @@ export const useCRMStore = create((set) => ({
   setIsOfferModalOpen: (val) => set({ isOfferModalOpen: val }),
   setIsSupportModalOpen: (val) => set({ isSupportModalOpen: val }),
 
+  setIsOfferDetailsModalOpen: (val) => set({ isOfferDetailsModalOpen: val }),
+  setSelectedOffer: (offer) => set({ selectedOffer: offer }),
   // Handlers
   handleCustomerSubmit: async (formdata) => {
     try {
       set({ isLoading: true });
       console.log(formdata);
+      toast.success("Müşteri başarıyla oluşturuldu.");
     } catch (error) {
-      console.log(error);
+      toast.error(error);
     } finally {
       set({ isLoading: false });
     }
