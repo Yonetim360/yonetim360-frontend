@@ -43,25 +43,34 @@ export default function Navbar() {
 
           <div className="flex items-center space-x-4">
             <Button
+              asChild
               variant="ghost"
               size="icon"
-              className={"hidden md:inline-flex"}
+              className="hidden md:inline-flex"
             >
-              <Bell className="h-5 w-5" />
+              <Link href="/notifications">
+                <Bell className="h-5 w-5" />
+              </Link>
             </Button>
             <Button
+              asChild
               variant="ghost"
               size="icon"
-              className={"hidden md:inline-flex"}
+              className="hidden md:inline-flex"
             >
-              <Settings className="h-5 w-5" />
+              <Link href="/settings">
+                <Settings className="h-5 w-5" />
+              </Link>
             </Button>
             <Button
+              asChild
               variant="ghost"
               size="icon"
-              className={"hidden md:inline-flex"}
+              className="hidden md:inline-flex"
             >
-              <User className="h-5 w-5" />
+              <Link href="/profile">
+                <User className="h-5 w-5" />
+              </Link>
             </Button>
             <Link href="/login">
               <Button className="bg-primary-green hover:bg-primary-green/90">
