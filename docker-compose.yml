@@ -14,7 +14,8 @@ services:
       - CHOKIDAR_USEPOLLING=true
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: ./jenkins
     container_name: crm-jenkins
     restart: unless-stopped
     ports:
