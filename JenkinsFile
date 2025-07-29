@@ -2,8 +2,8 @@ pipeline {
   agent any
 
   environment {
-    IMAGE_NAME = 'react-app'
-    CONTAINER_NAME = 'react-frontend'
+    IMAGE_NAME = 'crm-frontend-frontend'        
+    CONTAINER_NAME = 'crm-frontend'             
   }
 
   stages {
