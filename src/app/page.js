@@ -29,7 +29,7 @@ export default function HomePage() {
               <Building2 className="h-16 w-16 text-primary-green" />
             </div>
             <h1 className="text-5xl md:text-6xl font-bold text-dark-gray mb-6">
-              Yönetim360
+              Yönetim360 - İşletme Yönetim Sistemi
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
               İşletmenizi yönetmenin en kolay yolu. CRM, ERP ve İnsan Kaynakları
