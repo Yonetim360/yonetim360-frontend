@@ -1,7 +1,6 @@
 pipeline {
     agent any
     
-    // SCM otomatik olarak credential ile checkout yapacak
     options {
         skipDefaultCheckout(false)
     }
@@ -9,14 +8,12 @@ pipeline {
     stages {
         stage('Build Docker Image') {
             steps {
-                // Docker build işlemleri
                 script {
-                    // Örnek Docker build
-                    sh 'docker build -t yonetim360-frontend .'
+                    sh 'docker build -f Dockerfile.dev -t yonetim360-frontend .'
                 }
             }
         }
-        
+
         stage('Stop Existing Container') {
             steps {
                 script {
@@ -27,7 +24,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Run New Container') {
             steps {
                 script {
@@ -40,3 +37,4 @@ pipeline {
         }
     }
 }
+  
