@@ -1,37 +1,42 @@
 pipeline {
-  agent any
-
-  environment {
-    IMAGE_NAME = 'crm-frontend-frontend'        
-    CONTAINER_NAME = 'crm-frontend'             
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/Yonetim360/yonetim360-frontend.git'
-      }
+    agent any
+    
+    // SCM otomatik olarak credential ile checkout yapacak
+    options {
+        skipDefaultCheckout(false)
     }
-
-    stage('Build Docker Image') {
-      steps {
-        sh 'docker build -t $IMAGE_NAME .'
-      }
+    
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                // Docker build işlemleri
+                script {
+                    // Örnek Docker build
+                    sh 'docker build -t yonetim360-frontend .'
+                }
+            }
+        }
+        
+        stage('Stop Existing Container') {
+            steps {
+                script {
+                    sh '''
+                        docker stop yonetim360-frontend-container || true
+                        docker rm yonetim360-frontend-container || true
+                    '''
+                }
+            }
+        }
+        
+        stage('Run New Container') {
+            steps {
+                script {
+                    sh '''
+                        docker run -d --name yonetim360-frontend-container \
+                        -p 3000:3000 yonetim360-frontend
+                    '''
+                }
+            }
+        }
     }
-
-    stage('Stop Existing Container') {
-      steps {
-        sh '''
-        docker stop $CONTAINER_NAME || true
-        docker rm $CONTAINER_NAME || true
-        '''
-      }
-    }
-
-    stage('Run New Container') {
-      steps {
-        sh 'docker run -d --name $CONTAINER_NAME -p 3000:80 $IMAGE_NAME'
-      }
-    }
-  }
 }
