@@ -13,9 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCRMStore } from "@/stores/useCRMStore";
+import CustomerDetailsModal from "../../modals/customer/CustomerDetailsModal";
 
 export default function CustomerInfo() {
-  const { customers, setIsCustomerModalOpen } = useCRMStore();
+  const {
+    customers,
+    setIsCustomerModalOpen,
+    setIsCustomerDetailsModalOpen,
+    setSelectedCustomer,
+  } = useCRMStore();
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -85,18 +91,6 @@ export default function CustomerInfo() {
 
                 {/* Sağ taraf - Değer, durum ve aksiyonlar */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
-                  {/* Değer ve segment bilgisi */}
-                  <div className="flex justify-between sm:block sm:text-right">
-                    <div>
-                      <div className="font-semibold text-dark-gray text-sm sm:text-base">
-                        {customer.value}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {customer.segment}
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Durum badge'i */}
                   <div className="flex justify-start sm:justify-center">
                     <Badge
@@ -124,6 +118,10 @@ export default function CustomerInfo() {
                       <span className="sr-only">Görüntüle</span>
                     </Button>
                     <Button
+                      onClick={() => (
+                        setIsCustomerDetailsModalOpen(true),
+                        setSelectedCustomer(customer)
+                      )}
                       variant="outline"
                       size="sm"
                       className="h-8 w-8 p-0 bg-transparent"
@@ -163,6 +161,8 @@ export default function CustomerInfo() {
           </div>
         </CardContent>
       </Card>
+      {/*Modals */}
+      <CustomerDetailsModal />
     </div>
   );
 }

@@ -8,17 +8,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import MyCalendar from "@/components/CRM/modules/MyCalendar";
-import Overview from "@/components/CRM/modules/Overview";
-import CustomerInfo from "@/components/CRM/modules/CustomerInfo";
-import Communication from "@/components/CRM/modules/Communication";
-import SalesOffers from "@/components/CRM/modules/SalesOffers";
-import Support from "@/components/CRM/modules/Support";
+import MyCalendar from "@/components/CRM/modules/calendar/MyCalendar";
+import Overview from "@/components/CRM/modules/overview/Overview";
+import CustomerInfo from "@/components/CRM/modules/customerInfo/CustomerInfo";
+import Communication from "@/components/CRM/modules/communication/Communications";
+import SalesOffers from "@/components/CRM/modules/offers/SalesOffers";
+import Support from "@/components/CRM/modules/support/Support";
 import DefaultCase from "@/components/CRM/modules/DefaultCase";
-import AddCustomerModal from "@/components/CRM/modals/addingModals/AddCustomerModal";
-import AddContactModal from "@/components/CRM/modals/addingModals/AddContactModal";
-import AddOfferModal from "@/components/CRM/modals/addingModals/AddOfferModal";
-import AddSupportModal from "@/components/CRM/modals/addingModals/AddSupportModal";
+import AddCustomerModal from "@/components/CRM/modals/customer/AddCustomerModal";
+import AddContactModal from "@/components/CRM/modals/contact/AddContactModal";
+import AddOfferModal from "@/components/CRM/modals/offer/AddOfferModal";
+import AddSupportModal from "@/components/CRM/modals/support/AddSupportModal";
 import { useCRMStore } from "../../stores/useCRMStore";
 import { useState } from "react";
 

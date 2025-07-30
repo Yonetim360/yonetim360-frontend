@@ -16,6 +16,7 @@ export const useCRMStore = create((set) => ({
   activeModule: "overview",
   isLoading: false,
   selectedOffer: null,
+  selectedCustomer: null,
 
   /*Initial datas*/
 
@@ -104,10 +105,11 @@ export const useCRMStore = create((set) => ({
       contact: "Ahmet Yılmaz",
       email: "ahmet@abcteknoloji.com",
       phone: "+90 212 555 0123",
-      status: "Aktif",
-      lastContact: "2024-01-15",
-      value: "₺125,000",
       segment: "Kurumsal",
+      status: "Aktif",
+      address: "123 Main St, City, Country",
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      lastContact: "2024-01-15",
     },
     {
       id: 2,
@@ -115,10 +117,11 @@ export const useCRMStore = create((set) => ({
       contact: "Fatma Demir",
       email: "fatma@xyzinsaat.com",
       phone: "+90 216 555 0456",
+      segment: "kobi",
       status: "Potansiyel",
+      address: "456 Elm St, City, Country",
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       lastContact: "2024-01-12",
-      value: "₺85,000",
-      segment: "KOBİ",
     },
     {
       id: 3,
@@ -126,10 +129,11 @@ export const useCRMStore = create((set) => ({
       contact: "Mehmet Kaya",
       email: "mehmet@defdanismanlik.com",
       phone: "+90 312 555 0789",
+      segment: "Bireysel",
       status: "Aktif",
+      address: "789 Oak St, City, Country",
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       lastContact: "2024-01-10",
-      value: "₺200,000",
-      segment: "Kurumsal",
     },
   ],
 
@@ -209,6 +213,7 @@ export const useCRMStore = create((set) => ({
   isOfferModalOpen: false,
   isSupportModalOpen: false,
   isOfferDetailsModalOpen: false,
+  isCustomerDetailsModalOpen: false,
 
   // Formlar
   supportForm: {
@@ -227,6 +232,7 @@ export const useCRMStore = create((set) => ({
     status: "",
     address: "",
     notes: "",
+    lastContact: "",
   },
   communicationForm: {
     customer: "",
@@ -279,7 +285,11 @@ export const useCRMStore = create((set) => ({
   setIsSupportModalOpen: (val) => set({ isSupportModalOpen: val }),
 
   setIsOfferDetailsModalOpen: (val) => set({ isOfferDetailsModalOpen: val }),
+  setIsCustomerDetailsModalOpen: (val) =>
+    set({ isCustomerDetailsModalOpen: val }),
+
   setSelectedOffer: (offer) => set({ selectedOffer: offer }),
+  setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
   // Handlers
   handleCustomerSubmit: async (formdata) => {
     try {

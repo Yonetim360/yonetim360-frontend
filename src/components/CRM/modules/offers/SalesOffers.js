@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCRMStore } from "@/stores/useCRMStore";
 import { Plus } from "lucide-react";
-import OfferDetailsModal from "../modals/editingModals/OfferDetailsModal";
+import OfferDetailsModal from "../../modals/offer/OfferDetailsModal";
 
 export default function SalesOffers() {
   const {
