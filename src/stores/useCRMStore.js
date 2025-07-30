@@ -214,6 +214,7 @@ export const useCRMStore = create((set) => ({
   isSupportModalOpen: false,
   isOfferDetailsModalOpen: false,
   isCustomerDetailsModalOpen: false,
+  isViewCustomerModalOpen: false,
 
   // Formlar
   supportForm: {
@@ -285,6 +286,7 @@ export const useCRMStore = create((set) => ({
   setIsSupportModalOpen: (val) => set({ isSupportModalOpen: val }),
 
   setIsOfferDetailsModalOpen: (val) => set({ isOfferDetailsModalOpen: val }),
+  setIsViewCustomerModalOpen: (val) => set({ isViewCustomerModalOpen: val }),
   setIsCustomerDetailsModalOpen: (val) =>
     set({ isCustomerDetailsModalOpen: val }),
 

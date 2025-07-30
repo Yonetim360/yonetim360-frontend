@@ -1,9 +1,10 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Edit,
   Eye,
-  Filter,
+  // Filter,
   Mail,
   Phone,
   Plus,
@@ -14,14 +15,26 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCRMStore } from "@/stores/useCRMStore";
 import CustomerDetailsModal from "../../modals/customer/CustomerDetailsModal";
+import ViewCustomerModal from "../../modals/customer/ViewCustomerModal";
+import { useState } from "react";
 
 export default function CustomerInfo() {
+  const [searchTerm, setSearchTerm] = useState("");
+
   const {
     customers,
     setIsCustomerModalOpen,
     setIsCustomerDetailsModalOpen,
     setSelectedCustomer,
+    setIsViewCustomerModalOpen,
   } = useCRMStore();
+
+  const filteredCustomers =
+    searchTerm.length > 0
+      ? customers.filter((customer) =>
+          customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : customers;
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -47,19 +60,24 @@ export default function CustomerInfo() {
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Müşteri ara..." className="pl-10" />
+              <Input
+                placeholder="Müşteri ara..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full sm:w-auto bg-transparent"
             >
               <Filter className="mr-2 h-4 w-4" />
               Filtrele
-            </Button>
+            </Button> */}
           </div>
 
           <div className="space-y-4">
-            {customers.map((customer) => (
+            {filteredCustomers.map((customer) => (
               <div
                 key={customer.id}
                 className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors gap-4"
@@ -110,6 +128,10 @@ export default function CustomerInfo() {
                   {/* Aksiyon butonları */}
                   <div className="flex space-x-2 justify-end sm:justify-start">
                     <Button
+                      onClick={() => (
+                        setSelectedCustomer(customer),
+                        setIsViewCustomerModalOpen(true)
+                      )}
                       variant="outline"
                       size="sm"
                       className="h-8 w-8 p-0 bg-transparent"
@@ -138,7 +160,7 @@ export default function CustomerInfo() {
           {/* Mobil için sayfalama */}
           <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
             <p className="text-sm text-gray-600 text-center sm:text-left">
-              Toplam {customers.length} müşteri gösteriliyor
+              Toplam {filteredCustomers.length} müşteri gösteriliyor
             </p>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm" disabled>
@@ -163,6 +185,7 @@ export default function CustomerInfo() {
       </Card>
       {/*Modals */}
       <CustomerDetailsModal />
+      <ViewCustomerModal />
     </div>
   );
 }

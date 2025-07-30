@@ -10,7 +10,7 @@ import {
 import { ChevronDown, ChevronRight } from "lucide-react";
 import MyCalendar from "@/components/CRM/modules/calendar/MyCalendar";
 import Overview from "@/components/CRM/modules/overview/Overview";
-import CustomerInfo from "@/components/CRM/modules/customerInfo/CustomerInfo";
+import CustomerInfo from "@/components/CRM/modules/customer/CustomerInfo";
 import Communication from "@/components/CRM/modules/communication/Communications";
 import SalesOffers from "@/components/CRM/modules/offers/SalesOffers";
 import Support from "@/components/CRM/modules/support/Support";
