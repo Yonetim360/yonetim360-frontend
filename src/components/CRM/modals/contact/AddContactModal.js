@@ -88,7 +88,7 @@ export default function AddContactModal() {
           className="space-y-4"
           noValidate
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Müşteri *</Label>
               <Controller
@@ -137,6 +137,26 @@ export default function AddContactModal() {
               {errors.type && (
                 <p className="text-sm text-red-500">{errors.type.message}</p>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label>Toplantı Yöntemi</Label>
+              <Controller
+                name="method"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tür seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="telefon">Telefon</SelectItem>
+                      <SelectItem value="email">E-posta</SelectItem>
+                      <SelectItem value="toplanti">Toplantı</SelectItem>
+                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </div>
           <div className="space-y-2">

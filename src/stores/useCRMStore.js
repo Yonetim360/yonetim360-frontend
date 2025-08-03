@@ -17,6 +17,7 @@ export const useCRMStore = create((set) => ({
   isLoading: false,
   selectedOffer: null,
   selectedCustomer: null,
+  selectedSupport: null,
 
   /*Initial datas*/
 
@@ -171,6 +172,8 @@ export const useCRMStore = create((set) => ({
       status: "Onaylandı",
       validUntil: "2024-02-10",
       products: "Web Sitesi + Mobil Uygulama",
+      discountValue: "1500",
+      discountType: "fixed",
     },
     {
       id: 2,
@@ -194,6 +197,7 @@ export const useCRMStore = create((set) => ({
       status: "Açık",
       createdDate: "2024-01-15",
       assignedTo: "Teknik Ekip",
+      description: "İnternet problemi varmış.",
     },
     {
       id: 2,
@@ -204,6 +208,7 @@ export const useCRMStore = create((set) => ({
       status: "Çözüldü",
       createdDate: "2024-01-14",
       assignedTo: "Geliştirme Ekibi",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     },
   ],
 
@@ -215,6 +220,7 @@ export const useCRMStore = create((set) => ({
   isOfferDetailsModalOpen: false,
   isCustomerDetailsModalOpen: false,
   isViewCustomerModalOpen: false,
+  isSupportDetailsModalOpen: false,
 
   // Formlar
   supportForm: {
@@ -289,9 +295,12 @@ export const useCRMStore = create((set) => ({
   setIsViewCustomerModalOpen: (val) => set({ isViewCustomerModalOpen: val }),
   setIsCustomerDetailsModalOpen: (val) =>
     set({ isCustomerDetailsModalOpen: val }),
+  setIsSupportDetailsModalOpen: (val) =>
+    set({ isSupportDetailsModalOpen: val }),
 
   setSelectedOffer: (offer) => set({ selectedOffer: offer }),
   setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
+  setSelectedSupport: (support) => set({ selectedSupport: support }),
   // Handlers
   handleCustomerSubmit: async (formdata) => {
     try {

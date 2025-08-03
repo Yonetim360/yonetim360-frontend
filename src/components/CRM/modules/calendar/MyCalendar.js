@@ -314,30 +314,6 @@ export default function MyCalendar() {
               day: "Gün",
               list: "Liste",
             }}
-            dayNames={[
-              "Pazar",
-              "Pazartesi",
-              "Salı",
-              "Çarşamba",
-              "Perşembe",
-              "Cuma",
-              "Cumartesi",
-            ]}
-            dayNamesShort={["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"]}
-            monthNames={[
-              "Ocak",
-              "Şubat",
-              "Mart",
-              "Nisan",
-              "Mayıs",
-              "Haziran",
-              "Temmuz",
-              "Ağustos",
-              "Eylül",
-              "Ekim",
-              "Kasım",
-              "Aralık",
-            ]}
             height="auto"
             aspectRatio={1.8}
             eventDisplay="block"

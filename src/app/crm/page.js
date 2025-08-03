@@ -21,6 +21,8 @@ import AddOfferModal from "@/components/CRM/modals/offer/AddOfferModal";
 import AddSupportModal from "@/components/CRM/modals/support/AddSupportModal";
 import { useCRMStore } from "../../stores/useCRMStore";
 import { useState } from "react";
+import PastCommunications from "@/components/CRM/modules/communication/PastCommunications";
+import FutureCommunications from "@/components/CRM/modules/communication/FutureCommunications";
 
 export default function Page() {
   const { activeModule, setActiveModule, setIsLoading, modules } =
@@ -54,19 +56,9 @@ export default function Page() {
     if (activeSubModule) {
       switch (activeSubModule) {
         case "communicationHistory":
-          return (
-            <div className="p-6 bg-white rounded-lg">
-              <h3 className="text-xl font-bold">communicationHistory</h3>
-              <p>communicationHistory</p>
-            </div>
-          );
+          return <PastCommunications />;
         case "upcomingMeetings":
-          return (
-            <div className="p-6 bg-white rounded-lg">
-              <h3 className="text-xl font-bold">upcomingMeetings</h3>
-              <p>upcomingMeetings</p>
-            </div>
-          );
+          return <FutureCommunications />;
         default:
           return <DefaultCase />;
       }

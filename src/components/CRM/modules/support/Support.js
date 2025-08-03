@@ -3,9 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCRMStore } from "@/stores/useCRMStore";
 import { Plus } from "lucide-react";
+import SupportDetailsModal from "../../modals/support/SupportDetailsModal";
 
 export default function Support() {
-  const { supportTickets, setIsSupportModalOpen } = useCRMStore();
+  const {
+    supportTickets,
+    setIsSupportModalOpen,
+    setIsSupportDetailsModalOpen,
+    setSelectedSupport,
+  } = useCRMStore();
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -71,6 +77,9 @@ export default function Support() {
               <div
                 key={ticket.id}
                 className="p-4 border border-gray-200 rounded-lg"
+                onClick={() => (
+                  setIsSupportDetailsModalOpen(true), setSelectedSupport(ticket)
+                )}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -119,6 +128,8 @@ export default function Support() {
           </div>
         </CardContent>
       </Card>
+      {/* Modals*/}
+      <SupportDetailsModal />
     </div>
   );
 }

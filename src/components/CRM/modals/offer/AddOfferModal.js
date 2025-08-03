@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,21 +19,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useCRMStore } from "@/stores/useCRMStore";
-
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { X } from "lucide-react";
 
 // Zod şeması
 const offerSchema = z.object({
   customer: z.string().min(1, "Müşteri seçimi zorunludur"),
+  status: z.string().min(1, "Durum seçimi zorunludur"),
   products: z.string().min(1, "Ürün/hizmet bilgisi zorunludur"),
-  amount: z
-    .string()
-    .min(1, "Tutar bilgisi zorunludur")
-    .regex(/^₺?\d+(,\d{3})*(\.\d{2})?$/, "Geçerli bir tutar girin"),
+  currency: z.string().min(1, "Para birimi seçimi zorunludur"),
+  amount: z.string().min(1, "Tutar bilgisi zorunludur"),
   validUntil: z.string().min(1, "Geçerlilik tarihi zorunludur"),
+  discountType: z.string().optional(),
+  discountValue: z.string().optional(),
+  vatIncluded: z.boolean().optional(),
   notes: z.string().optional(),
 });
 
@@ -50,17 +54,40 @@ export default function AddOfferModal() {
     handleSubmit,
     reset,
     control,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(offerSchema),
     defaultValues: {
       customer: "",
+      status: "beklemede",
       products: "",
+      currency: "TRY",
       amount: "",
       validUntil: "",
+      discountType: "percentage",
+      discountValue: "",
+      vatIncluded: false,
       notes: "",
     },
   });
+
+  const selectedCurrency = watch("currency");
+
+  const getCurrencySymbol = (currency) => {
+    switch (currency) {
+      case "TRY":
+        return "₺";
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "GBP":
+        return "£";
+      default:
+        return "₺";
+    }
+  };
 
   const onSubmit = (data) => {
     handleOfferSubmit(data);
@@ -68,35 +95,52 @@ export default function AddOfferModal() {
     setIsOfferModalOpen(false);
   };
 
+  const handleClose = () => {
+    reset();
+    setIsOfferModalOpen(false);
+  };
+
   return (
     <Dialog open={isOfferModalOpen} onOpenChange={setIsOfferModalOpen}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-dark-gray">
+        <DialogHeader className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-0 top-0 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+            onClick={handleClose}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <DialogTitle className="text-xl font-semibold text-dark-gray">
             Yeni Teklif Oluştur
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-gray-600">
             Müşteri için yeni bir teklif hazırlayın.
           </DialogDescription>
         </DialogHeader>
+
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4"
+          className="space-y-6"
           noValidate
         >
+          {/* Müşteri ve Durum */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Müşteri *</Label>
+              <Label className="text-sm font-medium text-dark-gray">
+                Müşteri <span className="text-red">*</span>
+              </Label>
               <Controller
                 name="customer"
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11">
                       <SelectValue placeholder="Müşteri seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      {customers.map((customer) => (
+                      {customers?.map((customer) => (
                         <SelectItem key={customer.id} value={customer.name}>
                           {customer.name}
                         </SelectItem>
@@ -106,22 +150,20 @@ export default function AddOfferModal() {
                 )}
               />
               {errors.customer && (
-                <p className="text-sm text-red-500">
-                  {errors.customer.message}
-                </p>
+                <p className="text-sm text-red">{errors.customer.message}</p>
               )}
             </div>
+
             <div className="space-y-2">
-              <Label>Durum *</Label>
+              <Label className="text-sm font-medium text-dark-gray">
+                Durum <span className="text-red">*</span>
+              </Label>
               <Controller
                 control={control}
                 name="status"
                 render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-11">
                       <SelectValue placeholder="Teklif Durumu" />
                     </SelectTrigger>
                     <SelectContent>
@@ -132,57 +174,153 @@ export default function AddOfferModal() {
                   </Select>
                 )}
               />
+              {errors.status && (
+                <p className="text-sm text-red">{errors.status.message}</p>
+              )}
             </div>
           </div>
 
+          {/* Ürün/Hizmetler */}
           <div className="space-y-2">
-            <Label>Ürün/Hizmetler *</Label>
+            <Label className="text-sm font-medium text-dark-gray">
+              Ürün/Hizmetler <span className="text-red">*</span>
+            </Label>
             <Textarea
               {...register("products")}
               placeholder="Web Sitesi + Mobil Uygulama"
               rows={3}
+              className="resize-none"
             />
             {errors.products && (
-              <p className="text-sm text-red-500">{errors.products.message}</p>
+              <p className="text-sm text-red">{errors.products.message}</p>
             )}
           </div>
+
+          {/* Tutar ve Geçerlilik Tarihi */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Tutar *</Label>
-              <Input {...register("amount")} placeholder="₺125,000" />
+              <Label className="text-sm font-medium text-dark-gray">
+                Tutar <span className="text-red">*</span>
+              </Label>
+              <div className="flex">
+                <Controller
+                  name="currency"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-20 rounded-r-none border-r-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="TRY">₺</SelectItem>
+                        <SelectItem value="USD">$</SelectItem>
+                        <SelectItem value="EUR">€</SelectItem>
+                        <SelectItem value="GBP">£</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Input
+                  {...register("amount")}
+                  placeholder="125.000"
+                  className="rounded-l-none flex-1"
+                />
+              </div>
               {errors.amount && (
-                <p className="text-sm text-red-500">{errors.amount.message}</p>
+                <p className="text-sm text-red">{errors.amount.message}</p>
               )}
             </div>
+
             <div className="space-y-2">
-              <Label>Geçerlilik Tarihi *</Label>
-              <Input {...register("validUntil")} type="date" />
+              <Label className="text-sm font-medium text-dark-gray">
+                Geçerlilik Tarihi <span className="text-red">*</span>
+              </Label>
+              <Input
+                {...register("validUntil")}
+                type="date"
+                placeholder="gg.aa.yyyy"
+                className="h-11"
+              />
               {errors.validUntil && (
-                <p className="text-sm text-red-500">
-                  {errors.validUntil.message}
-                </p>
+                <p className="text-sm text-red">{errors.validUntil.message}</p>
               )}
             </div>
           </div>
+
+          {/* İndirim */}
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-dark-gray">
+              İndirim
+            </Label>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Controller
+                  name="discountType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Tür" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">Yuzde (%)</SelectItem>
+                        <SelectItem value="fixed">Sabit Tutar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Input
+                  {...register("discountValue")}
+                  placeholder="10"
+                  className="w-20"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Controller
+                  name="vatIncluded"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="vatIncluded"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label
+                  htmlFor="vatIncluded"
+                  className="text-sm font-medium text-dark-gray cursor-pointer"
+                >
+                  KDV Dahil
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Notlar */}
           <div className="space-y-2">
-            <Label>Notlar</Label>
+            <Label className="text-sm font-medium text-dark-gray">Notlar</Label>
             <Textarea
               {...register("notes")}
               placeholder="Teklif detayları ve özel notlar..."
               rows={3}
+              className="resize-none"
             />
           </div>
-          <DialogFooter>
+
+          {/* Footer Buttons */}
+          <DialogFooter className="flex justify-end space-x-2 pt-4">
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOfferModalOpen(false)}
+              onClick={handleClose}
+              className="px-6 bg-transparent"
             >
               İptal
             </Button>
             <Button
               type="submit"
-              className="bg-red hover:bg-red/90"
+              className="bg-red hover:bg-red/90 text-white px-6"
               disabled={isLoading}
             >
               {isLoading ? "Oluşturuluyor..." : "Teklif Oluştur"}
