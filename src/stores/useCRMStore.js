@@ -8,6 +8,7 @@ import {
   MessageCircle,
   Phone,
   Users,
+  IdCardLanyard,
 } from "lucide-react";
 import { toast } from "sonner";
 import { create } from "zustand";
@@ -18,6 +19,7 @@ export const useCRMStore = create((set) => ({
   selectedOffer: null,
   selectedCustomer: null,
   selectedSupport: null,
+  activeSubModule: "",
 
   /*Initial datas*/
 
@@ -39,6 +41,14 @@ export const useCRMStore = create((set) => ({
       subModules: [],
     },
     {
+      id: "agents",
+      name: "Temsilci Takibi",
+      icon: IdCardLanyard,
+      color: "text-[#02d1a1]",
+      bgColor: "bg-[#02d1a1]/10",
+      subModules: [],
+    },
+    {
       id: "communication",
       name: "İletişim ve Görüşme Takibi",
       icon: Phone,
@@ -55,7 +65,10 @@ export const useCRMStore = create((set) => ({
       icon: FileText,
       color: "text-red",
       bgColor: "bg-red/10",
-      subModules: [],
+      subModules: [
+        { id: "offers", name: "Teklif Takibi" },
+        { id: "sales", name: "Satış Takibi" },
+      ],
     },
     {
       id: "support",
@@ -143,7 +156,7 @@ export const useCRMStore = create((set) => ({
       id: 1,
       customer: "ABC Teknoloji A.Ş.",
       type: "Telefon",
-      date: "2024-01-15",
+      date: "2026-01-15",
       time: "14:30",
       duration: "25 dk",
       subject: "Proje görüşmesi",
@@ -196,7 +209,7 @@ export const useCRMStore = create((set) => ({
       priority: "Yüksek",
       status: "Açık",
       createdDate: "2024-01-15",
-      assignedTo: "Teknik Ekip",
+      assignedTo: "Sadık-Turan",
       description: "İnternet problemi varmış.",
     },
     {
@@ -205,9 +218,9 @@ export const useCRMStore = create((set) => ({
       ticketNo: "DES-2024-002",
       subject: "Rapor hatası",
       priority: "Orta",
-      status: "Çözüldü",
+      status: "cozuldu",
       createdDate: "2024-01-14",
-      assignedTo: "Geliştirme Ekibi",
+      assignedTo: "Yeliz-Biri",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     },
   ],
@@ -274,6 +287,7 @@ export const useCRMStore = create((set) => ({
 
   // State Güncelleyiciler
   setActiveModule: (module) => set({ activeModule: module }),
+  setActiveSubModule: (module) => set({ activeSubModule: module }),
   setIsLoading: (isLoading) => set({ isLoading }),
 
   setSupportForm: (form) => set({ supportForm: form }),
@@ -301,6 +315,7 @@ export const useCRMStore = create((set) => ({
   setSelectedOffer: (offer) => set({ selectedOffer: offer }),
   setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
   setSelectedSupport: (support) => set({ selectedSupport: support }),
+
   // Handlers
   handleCustomerSubmit: async (formdata) => {
     try {

@@ -23,14 +23,20 @@ import { useCRMStore } from "../../stores/useCRMStore";
 import { useState } from "react";
 import PastCommunications from "@/components/CRM/modules/communication/PastCommunications";
 import FutureCommunications from "@/components/CRM/modules/communication/FutureCommunications";
+import Offers from "@/components/CRM/modules/offers/Offers";
 
 export default function Page() {
-  const { activeModule, setActiveModule, setIsLoading, modules } =
-    useCRMStore();
+  const {
+    activeModule,
+    setActiveModule,
+    setIsLoading,
+    modules,
+    activeSubModule,
+    setActiveSubModule,
+  } = useCRMStore();
 
   // Genişletilmiş modülleri takip etmek için state
   const [expandedModules, setExpandedModules] = useState(["overview"]);
-  const [activeSubModule, setActiveSubModule] = useState("");
 
   // Modül genişletme/daraltma fonksiyonu
   const toggleModule = (moduleId) => {
@@ -59,6 +65,8 @@ export default function Page() {
           return <PastCommunications />;
         case "upcomingMeetings":
           return <FutureCommunications />;
+        case "offers":
+          return <Offers />;
         default:
           return <DefaultCase />;
       }
@@ -82,18 +90,6 @@ export default function Page() {
         return <DefaultCase />;
     }
   };
-
-  // Modules verisi yoksa loading göster
-  if (!modules || modules.length === 0) {
-    return (
-      <div className="min-h-screen bg-cream flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Modüller yükleniyor...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-cream">

@@ -156,7 +156,7 @@ export default function AddSupportModal() {
             </div>
 
             <div className="space-y-2">
-              <Label>Atanan Kişi</Label>
+              <Label>Atanan Temsilci</Label>
               <Controller
                 name="assignedTo"
                 control={control}
@@ -166,14 +166,12 @@ export default function AddSupportModal() {
                       <SelectValue placeholder="Kişi seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="teknik-ekip">Teknik Ekip</SelectItem>
-                      <SelectItem value="geliştirme-ekibi">
-                        Geliştirme Ekibi
+                      <SelectItem value="mehmet-yilmaz">
+                        Mehmet Yılmaz
                       </SelectItem>
-                      <SelectItem value="müşteri-hizmetleri">
-                        Müşteri Hizmetleri
-                      </SelectItem>
-                      <SelectItem value="satış-ekibi">Satış Ekibi</SelectItem>
+                      <SelectItem value="ahmet-yalcin">Ahmet Yalçın</SelectItem>
+                      <SelectItem value="yeliz-biri">Yeliz Biri</SelectItem>
+                      <SelectItem value="sadik-turan">Sadık Turan</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

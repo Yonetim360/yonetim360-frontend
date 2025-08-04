@@ -32,10 +32,10 @@ const supportSchema = z.object({
   priority: z.enum(["düşük", "orta", "yüksek", "kritik"]),
   status: z.enum(["acik", "çözüldü", "bekliyor"]),
   assignedTo: z.enum([
-    "Teknik Ekip",
-    "Geliştirme Ekibi",
-    "Müşteri Hizmetleri",
-    "Satış Ekibi",
+    "Mehmet Yılmaz",
+    "Ahmet Yalçın",
+    "Yeliz Biri",
+    "Sadık Turan",
   ]),
   createdDate: z
     .string()
@@ -196,7 +196,7 @@ export default function SupportDetailsModal() {
             </div>
 
             <div className="space-y-2">
-              <Label>Atanan Ekip</Label>
+              <Label>Atanan Temsilci</Label>
               <Controller
                 {...register("assignedTo")}
                 name="assignedTo"
@@ -207,14 +207,12 @@ export default function SupportDetailsModal() {
                       <SelectValue placeholder="Kişi seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="teknik ekip">Teknik Ekip</SelectItem>
-                      <SelectItem value="geliştirme ekibi">
-                        Geliştirme Ekibi
+                      <SelectItem value="mehmet-yilmaz">
+                        Mehmet Yılmaz
                       </SelectItem>
-                      <SelectItem value="müşteri hizmetleri">
-                        Müşteri Hizmetleri
-                      </SelectItem>
-                      <SelectItem value="satiş ekibi">Satış Ekibi</SelectItem>
+                      <SelectItem value="ahmet-yalcin">Ahmet Yalçın</SelectItem>
+                      <SelectItem value="yeliz-biri">Yeliz Biri</SelectItem>
+                      <SelectItem value="sadik-turan">Sadık Turan</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

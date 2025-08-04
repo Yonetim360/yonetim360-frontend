@@ -45,156 +45,16 @@ import {
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
+import AddOfferModal from "../../modals/offer/AddOfferModal";
 
 export default function FutureCommunications() {
-  const { communications } = useCRMStore();
+  const { communications, setIsCommunicationModalOpen } = useCRMStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newCommunication, setNewCommunication] = useState({
-    customer: "",
-    company: "",
-    subject: "",
-    type: "",
-    date: "",
-    time: "",
-    duration: "",
-    notes: "",
-    priority: "medium",
-    location: "",
-    reminder: "15",
-  });
   const itemsPerPage = 5;
-
-  // Mock data for future communications
-  const mockFutureCommunications = [
-    {
-      id: 1,
-      customer: "Mehmet Özkan",
-      company: "Tech Solutions Ltd.",
-      subject: "Yeni Proje Sunumu",
-      type: "Toplantı",
-      status: "Planlandı",
-      date: "2024-01-25",
-      time: "14:00",
-      duration: "60 dk",
-      notes:
-        "Yeni yazılım projesi için sunum yapılacak. Teknik ekip de katılacak.",
-      priority: "high",
-      location: "Ofis - Toplantı Salonu A",
-      reminder: "30",
-      attendees: ["Ahmet Yılmaz", "Fatma Demir"],
-      preparation: "Sunum hazırla, demo ortamını kontrol et",
-    },
-    {
-      id: 2,
-      customer: "Ayşe Kara",
-      company: "Digital Marketing Co.",
-      subject: "Pazarlama Stratejisi Görüşmesi",
-      type: "Video Konferans",
-      status: "Planlandı",
-      date: "2024-01-26",
-      time: "10:30",
-      duration: "45 dk",
-      notes: "Q1 pazarlama stratejileri ve bütçe planlaması konuşulacak.",
-      priority: "medium",
-      location: "Online - Zoom",
-      reminder: "15",
-      attendees: ["Selin Yıldız"],
-      preparation: "Pazarlama raporlarını hazırla",
-    },
-    {
-      id: 3,
-      customer: "Can Demir",
-      company: "Innovation Hub",
-      subject: "Ürün Geliştirme Toplantısı",
-      type: "Yüz Yüze",
-      status: "Planlandı",
-      date: "2024-01-27",
-      time: "16:00",
-      duration: "90 dk",
-      notes:
-        "Yeni ürün özelliklerinin detaylı incelenmesi ve roadmap planlaması.",
-      priority: "high",
-      location: "Müşteri Ofisi - İstanbul",
-      reminder: "60",
-      attendees: ["Kemal Özkan", "Deniz Acar"],
-      preparation: "Ürün dokümantasyonunu gözden geçir",
-    },
-    {
-      id: 4,
-      customer: "Zeynep Yıldırım",
-      company: "Finance Corp",
-      subject: "Finansal Analiz Sunumu",
-      type: "Telefon",
-      status: "Planlandı",
-      date: "2024-01-28",
-      time: "11:15",
-      duration: "30 dk",
-      notes:
-        "Aylık finansal performans analizi ve gelecek dönem projeksiyonları.",
-      priority: "medium",
-      location: "Telefon Görüşmesi",
-      reminder: "15",
-      attendees: ["Cem Yılmaz"],
-      preparation: "Finansal raporları hazırla",
-    },
-    {
-      id: 5,
-      customer: "Oğuz Şahin",
-      company: "Logistics Plus",
-      subject: "Lojistik Çözümleri Değerlendirmesi",
-      type: "E-posta",
-      status: "Planlandı",
-      date: "2024-01-29",
-      time: "09:00",
-      duration: null,
-      notes: "Lojistik süreçlerinin optimizasyonu için öneriler gönderilecek.",
-      priority: "low",
-      location: "E-posta Yazışması",
-      reminder: "0",
-      attendees: ["Pınar Demir"],
-      preparation: "Lojistik analiz raporunu tamamla",
-    },
-    {
-      id: 6,
-      customer: "Elif Koç",
-      company: "Healthcare Systems",
-      subject: "Sistem Entegrasyonu Planlaması",
-      type: "Toplantı",
-      status: "Planlandı",
-      date: "2024-01-30",
-      time: "13:30",
-      duration: "75 dk",
-      notes: "Mevcut sistemlerle yeni yazılımın entegrasyonu planlanacak.",
-      priority: "high",
-      location: "Ofis - Teknik Toplantı Odası",
-      reminder: "45",
-      attendees: ["Tuna Kara", "Gül Arslan"],
-      preparation: "Sistem mimarisini gözden geçir",
-    },
-    {
-      id: 7,
-      customer: "Hasan Özdemir",
-      company: "Retail Chain",
-      subject: "Satış Performansı İncelemesi",
-      type: "Video Konferans",
-      status: "Planlandı",
-      date: "2024-01-31",
-      time: "15:45",
-      duration: "50 dk",
-      notes:
-        "Mağaza satış performansları ve iyileştirme önerileri değerlendirilecek.",
-      priority: "medium",
-      location: "Online - Teams",
-      reminder: "30",
-      attendees: ["Seda Yıldırım"],
-      preparation: "Satış raporlarını analiz et",
-    },
-  ];
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -253,40 +113,10 @@ export default function FutureCommunications() {
     }
   };
 
-  // Filtreleme ve sıralama
-  const filteredCommunications = mockFutureCommunications
-    .filter((comm) => {
-      const matchesSearch =
-        comm.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        comm.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        comm.company.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = filterType === "all" || comm.type === filterType;
-      const matchesPriority =
-        filterPriority === "all" || comm.priority === filterPriority;
-      return matchesSearch && matchesType && matchesPriority;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "date":
-          return new Date(a.date) - new Date(b.date);
-        case "customer":
-          return a.customer.localeCompare(b.customer);
-        case "priority":
-          const priorityOrder = { high: 3, medium: 2, low: 1 };
-          return priorityOrder[b.priority] - priorityOrder[a.priority];
-        default:
-          return 0;
-      }
-    });
-
   // Pagination hesaplamaları
-  const totalPages = Math.ceil(filteredCommunications.length / itemsPerPage);
+  const totalPages = Math.ceil(communications.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentCommunications = filteredCommunications.slice(
-    startIndex,
-    endIndex
-  );
 
   // Sayfa değiştirme fonksiyonları
   const goToPage = (page) => {
@@ -303,26 +133,6 @@ export default function FutureCommunications() {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
-  };
-
-  // Yeni iletişim ekleme
-  const handleAddCommunication = () => {
-    // Burada API çağrısı yapılacak
-    console.log("Yeni iletişim:", newCommunication);
-    setIsAddModalOpen(false);
-    setNewCommunication({
-      customer: "",
-      company: "",
-      subject: "",
-      type: "",
-      date: "",
-      time: "",
-      duration: "",
-      notes: "",
-      priority: "medium",
-      location: "",
-      reminder: "15",
-    });
   };
 
   // Tarihe göre kalan gün hesaplama
@@ -347,7 +157,10 @@ export default function FutureCommunications() {
           </p>
         </div>
         <div className="flex space-x-2">
-          <Button className="bg-orange hover:bg-orange/90">
+          <Button
+            className="bg-orange hover:bg-orange/90"
+            onClick={() => setIsCommunicationModalOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Yeni İletişim
           </Button>
@@ -439,7 +252,7 @@ export default function FutureCommunications() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-dark-gray">
-                {filteredCommunications.length}
+                {communications.length}
               </p>
               <p className="text-sm text-gray-600">Toplam Planlanan</p>
             </div>
@@ -449,10 +262,7 @@ export default function FutureCommunications() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-red">
-                {
-                  filteredCommunications.filter((c) => c.priority === "high")
-                    .length
-                }
+                {communications.filter((c) => c.priority === "high").length}
               </p>
               <p className="text-sm text-gray-600">Yüksek Öncelik</p>
             </div>
@@ -462,11 +272,7 @@ export default function FutureCommunications() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-2xl font-bold text-orange">
-                {
-                  filteredCommunications.filter(
-                    (c) => getDaysUntil(c.date) <= 3
-                  ).length
-                }
+                {communications.filter((c) => getDaysUntil(c.date) <= 3).length}
               </p>
               <p className="text-sm text-gray-600">Bu Hafta</p>
             </div>
@@ -477,9 +283,8 @@ export default function FutureCommunications() {
             <div className="text-center">
               <p className="text-2xl font-bold text-primary-green">
                 {
-                  filteredCommunications.filter(
-                    (c) => getDaysUntil(c.date) === 1
-                  ).length
+                  communications.filter((c) => getDaysUntil(c.date) === 1)
+                    .length
                 }
               </p>
               <p className="text-sm text-gray-600">Yarın</p>
@@ -492,7 +297,7 @@ export default function FutureCommunications() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Planlanan İletişimler ({filteredCommunications.length})</span>
+            <span>Planlanan İletişimler {/*({communications.length})*/}</span>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
               <Filter className="h-4 w-4" />
               <span>
@@ -503,7 +308,7 @@ export default function FutureCommunications() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {currentCommunications.length === 0 ? (
+            {communications.length === 0 ? (
               <div className="text-center py-8">
                 <CalendarDays className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -515,164 +320,127 @@ export default function FutureCommunications() {
                 </p>
               </div>
             ) : (
-              currentCommunications.map((comm) => {
+              communications.map((comm) => {
                 const daysUntil = getDaysUntil(comm.date);
-                return (
-                  <div
-                    key={comm.id}
-                    className={`p-4 border rounded-lg hover:shadow-md transition-shadow ${
-                      daysUntil <= 1
-                        ? "border-red bg-red/5"
-                        : daysUntil <= 3
-                        ? "border-orange bg-orange/5"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-start space-x-3">
-                        <div className="p-2 rounded-full bg-gray-100">
-                          {getTypeIcon(comm.type)}
-                        </div>
-                        <div>
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h4 className="font-semibold text-dark-gray">
-                              {comm.customer}
-                            </h4>
-                            {getPriorityIcon(comm.priority)}
-                            {daysUntil <= 1 && (
-                              <Bell className="h-4 w-4 text-red animate-pulse" />
-                            )}
+                if (daysUntil > 0) {
+                  return (
+                    <div
+                      key={comm.id}
+                      className={`p-4 border rounded-lg hover:shadow-md transition-shadow ${
+                        daysUntil <= 1
+                          ? "border-red bg-red/5"
+                          : daysUntil <= 3
+                          ? "border-orange bg-orange/5"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-start space-x-3">
+                          <div className="p-2 rounded-full bg-gray-100">
+                            {getTypeIcon(comm.type)}
                           </div>
-                          <p className="text-sm text-gray-600 mb-1">
-                            {comm.company}
+                          <div>
+                            <div className="flex items-center space-x-2 mb-1">
+                              <h4 className="font-semibold text-dark-gray">
+                                {comm.customer}
+                              </h4>
+                              {getPriorityIcon(comm.priority)}
+                              {daysUntil <= 1 && (
+                                <Bell className="h-4 w-4 text-red animate-pulse" />
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              {comm.company}
+                            </p>
+                            <p className="text-sm font-medium text-dark-gray">
+                              {comm.subject}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge className={getStatusColor(comm.status)}>
+                            {comm.status}
+                          </Badge>
+                          <div
+                            className={`text-xs px-2 py-1 rounded border ${getPriorityColor(
+                              comm.priority
+                            )}`}
+                          >
+                            {daysUntil === 0
+                              ? "Bugün"
+                              : daysUntil === 1
+                              ? "Yarın"
+                              : daysUntil > 0 && `${daysUntil} gün`}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                        <div className="flex items-center space-x-2 text-sm text-gray-500">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            {comm.date} - {comm.time}
+                          </span>
+                          {comm.duration && (
+                            <>
+                              <Clock className="h-4 w-4 ml-2" />
+                              <span>{comm.duration}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-700 mb-3 bg-gray-50 p-3 rounded">
+                        {comm.notes}
+                      </p>
+
+                      {/* {comm.preparation && (
+                        <div className="mb-3 p-2 bg-blue-50 rounded border-l-4 border-blue-500">
+                          <p className="text-sm text-blue-700">
+                            <strong>Hazırlık:</strong> {comm.preparation}
                           </p>
-                          <p className="text-sm font-medium text-dark-gray">
-                            {comm.subject}
-                          </p>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={getStatusColor(comm.status)}>
-                          {comm.status}
-                        </Badge>
-                        <div
-                          className={`text-xs px-2 py-1 rounded border ${getPriorityColor(
-                            comm.priority
-                          )}`}
-                        >
-                          {daysUntil === 0
-                            ? "Bugün"
-                            : daysUntil === 1
-                            ? "Yarın"
-                            : daysUntil > 0
-                            ? `${daysUntil} gün`
-                            : "Geçmiş"}
+                      )} */}
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-primary-green hover:text-primary-green/80"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Tamamla
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-orange hover:text-orange/80"
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Düzenle
+                          </Button>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-500 hover:text-blue-500/80"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red hover:text-red/80"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <Calendar className="h-4 w-4" />
-                        <span>
-                          {comm.date} - {comm.time}
-                        </span>
-                        {comm.duration && (
-                          <>
-                            <Clock className="h-4 w-4 ml-2" />
-                            <span>{comm.duration}</span>
-                          </>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <MapPin className="h-4 w-4" />
-                        <span>{comm.location}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <Bell className="h-4 w-4" />
-                        <span>
-                          {comm.reminder === "0"
-                            ? "Hatırlatma yok"
-                            : comm.reminder === "15"
-                            ? "15 dk önce"
-                            : comm.reminder === "30"
-                            ? "30 dk önce"
-                            : comm.reminder === "60"
-                            ? "1 saat önce"
-                            : "1 gün önce"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="text-sm text-gray-700 mb-3 bg-gray-50 p-3 rounded">
-                      {comm.notes}
-                    </p>
-
-                    {comm.preparation && (
-                      <div className="mb-3 p-2 bg-blue-50 rounded border-l-4 border-blue-500">
-                        <p className="text-sm text-blue-700">
-                          <strong>Hazırlık:</strong> {comm.preparation}
-                        </p>
-                      </div>
-                    )}
-
-                    {comm.attendees && comm.attendees.length > 0 && (
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-500 mb-1">
-                          Katılımcılar:
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {comm.attendees.map((attendee, index) => (
-                            <Badge
-                              key={index}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {attendee}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-primary-green hover:text-primary-green/80"
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Tamamla
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-orange hover:text-orange/80"
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Düzenle
-                        </Button>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-500 hover:text-blue-500/80"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red hover:text-red/80"
-                        >
-                          <XCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
+                  );
+                }
               })
             )}
           </div>
@@ -757,6 +525,9 @@ export default function FutureCommunications() {
           </CardContent>
         </Card>
       )}
+
+      {/* Modals */}
+      <AddOfferModal />
     </div>
   );
 }

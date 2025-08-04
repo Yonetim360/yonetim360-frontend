@@ -72,23 +72,6 @@ export default function OfferDetailsModal() {
     },
   });
 
-  const selectedCurrency = watch("currency");
-
-  const getCurrencySymbol = (currency) => {
-    switch (currency) {
-      case "TRY":
-        return "₺";
-      case "USD":
-        return "$";
-      case "EUR":
-        return "€";
-      case "GBP":
-        return "£";
-      default:
-        return "₺";
-    }
-  };
-
   useEffect(() => {
     if (selectedOffer) {
       reset({
@@ -127,14 +110,6 @@ export default function OfferDetailsModal() {
     >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-0 top-0 h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
-            onClick={handleClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
           <DialogTitle className="text-xl font-semibold text-dark-gray">
             Teklif Detayları
           </DialogTitle>

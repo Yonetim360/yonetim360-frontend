@@ -19,21 +19,35 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCRMStore } from "@/stores/useCRMStore";
-
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 // Zod şeması
-const communicationSchema = z.object({
-  customer: z.string().min(1, "Müşteri seçimi zorunludur"),
-  type: z.enum(["telefon", "email", "toplanti", "whatsapp"]),
-  subject: z.string().min(1, "Konu zorunludur"),
-  date: z.string().min(1, "Tarih zorunludur"),
-  time: z.string().min(1, "Saat zorunludur"),
-  duration: z.string().optional(),
-  notes: z.string().optional(),
-});
+const communicationSchema = z
+  .object({
+    customer: z.string().min(1, "Müşteri seçimi zorunludur"),
+    type: z.enum(["telefon", "email", "toplanti", "whatsapp"]),
+    subject: z.string().min(1, "Konu zorunludur"),
+    date: z.string().min(1, "Tarih zorunludur"),
+    time: z.string().min(1, "Saat zorunludur"),
+    duration: z.string().optional(),
+    notes: z.string().optional(),
+    meetingType: z.string().optional(), // Başlangıçta isteğe bağlı yapıldı
+  })
+  .refine(
+    (data) => {
+      // Eğer iletişim türü 'toplanti' ise ve meetingType boşsa hata döndür
+      if (data.type === "toplanti") {
+        return data.meetingType && data.meetingType.length > 0;
+      }
+      return true; // 'toplanti' değilse meetingType kontrolüne gerek yok
+    },
+    {
+      message: "Toplantı türü seçimi zorunludur",
+      path: ["meetingType"], // Hatanın hangi alana ait olduğunu belirtir
+    }
+  );
 
 export default function AddContactModal() {
   const {
@@ -49,6 +63,7 @@ export default function AddContactModal() {
     handleSubmit,
     reset,
     control,
+    watch, // watch hook'unu ekle
     formState: { errors },
   } = useForm({
     resolver: zodResolver(communicationSchema),
@@ -60,8 +75,11 @@ export default function AddContactModal() {
       time: "",
       duration: "",
       notes: "",
+      meetingType: "", // Yeni alanı varsayılan değerlere ekle
     },
   });
+
+  const selectedCommunicationType = watch("type"); // 'type' alanını izle
 
   const onSubmit = (data) => {
     handleCommunicationSubmit(data);
@@ -88,7 +106,7 @@ export default function AddContactModal() {
           className="space-y-4"
           noValidate
         >
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Müşteri *</Label>
               <Controller
@@ -138,27 +156,35 @@ export default function AddContactModal() {
                 <p className="text-sm text-red-500">{errors.type.message}</p>
               )}
             </div>
+          </div>
+          {selectedCommunicationType === "toplanti" && (
             <div className="space-y-2">
-              <Label>Toplantı Yöntemi</Label>
+              <Label>Toplantı Türü *</Label>
               <Controller
-                name="method"
+                name="meetingType"
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Tür seçin" />
+                      <SelectValue placeholder="Toplantı platformu seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="telefon">Telefon</SelectItem>
-                      <SelectItem value="email">E-posta</SelectItem>
-                      <SelectItem value="toplanti">Toplantı</SelectItem>
-                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                      <SelectItem value="teams">Microsoft Teams</SelectItem>
+                      <SelectItem value="zoom">Zoom</SelectItem>
+                      <SelectItem value="google-meet">Google Meet</SelectItem>
+                      <SelectItem value="skype">Skype</SelectItem>
+                      <SelectItem value="other">Diğer</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
+              {errors.meetingType && (
+                <p className="text-sm text-red-500">
+                  {errors.meetingType.message}
+                </p>
+              )}
             </div>
-          </div>
+          )}
           <div className="space-y-2">
             <Label>Konu *</Label>
             <Input {...register("subject")} placeholder="İletişim konusu" />
