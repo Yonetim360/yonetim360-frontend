@@ -42,19 +42,13 @@ const offerSchema = z.object({
 });
 
 export default function SalesDetailsModal() {
-  const {
-    isSalesDetailsModalOpen,
-    setIsSalesDetailsModalOpen,
-    customers,
-    selectedSale,
-  } = useCRMStore();
+  const { isSalesDetailsModalOpen, setIsSalesDetailsModalOpen, selectedSale } =
+    useCRMStore();
 
   const {
-    register,
     handleSubmit,
     reset,
     control,
-    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(offerSchema),
@@ -129,7 +123,7 @@ export default function SalesDetailsModal() {
               <Label className="text-sm font-medium text-dark-gray">
                 Müşteri <span className="text-red">*</span>
               </Label>
-              <p>{selectedSale.customer}</p>
+              <p>{selectedSale?.customer}</p>
             </div>
 
             <div className="space-y-2">
