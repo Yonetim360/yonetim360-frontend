@@ -45,7 +45,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
-import AddOfferModal from "../../modals/offer/AddOfferModal";
+import AddOfferModal from "../../modals/offerSales/AddOfferModal";
 
 export default function FutureCommunications() {
   const { communications, setIsCommunicationModalOpen } = useCRMStore();

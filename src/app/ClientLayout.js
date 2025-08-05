@@ -1,7 +1,7 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 // CustomThemeProvider'ı kullanıyorsanız yorum satırını kaldırın
 // import CustomThemeProvider from "@/providers/themeProvider";
 import { usePathname } from "next/navigation";

@@ -2,14 +2,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCRMStore } from "@/stores/useCRMStore";
-import { Plus } from "lucide-react";
+import { Edit, Eye, Plus } from "lucide-react";
 import SupportDetailsModal from "../../modals/support/SupportDetailsModal";
+import ViewSupportModal from "../../modals/support/ViewSupportModal";
 
 export default function Support() {
   const {
     supportTickets,
     setIsSupportModalOpen,
     setIsSupportDetailsModalOpen,
+    setIsViewSupportModalOpen,
     setSelectedSupport,
   } = useCRMStore();
   return (
@@ -72,14 +74,11 @@ export default function Support() {
           <CardTitle>Destek Talepleri</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {supportTickets.map((ticket) => (
               <div
                 key={ticket.id}
                 className="p-4 border border-gray-200 rounded-lg"
-                onClick={() => (
-                  setIsSupportDetailsModalOpen(true), setSelectedSupport(ticket)
-                )}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -93,7 +92,7 @@ export default function Support() {
                       Atanan: {ticket.assignedTo}
                     </p>
                   </div>
-                  <div className="text-right space-y-2">
+                  <div className="space-y-4">
                     <Badge
                       variant={
                         ticket.priority === "Yüksek"
@@ -120,9 +119,35 @@ export default function Support() {
                     </Badge>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500">
-                  Oluşturulma: {ticket.createdDate}
-                </p>
+                <div className="flex justify-between align-center">
+                  <p className="text-sm text-gray-500">
+                    Oluşturulma: {ticket.createdDate}
+                  </p>
+                  <div>
+                    <Button
+                      onClick={() => (
+                        setIsViewSupportModalOpen(true),
+                        setSelectedSupport(ticket)
+                      )}
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary-green hover:text-primary-green/80"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => (
+                        setIsSupportDetailsModalOpen(true),
+                        setSelectedSupport(ticket)
+                      )}
+                      variant="ghost"
+                      size="sm"
+                      className="text-orange hover:text-orange/80"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -130,6 +155,7 @@ export default function Support() {
       </Card>
       {/* Modals*/}
       <SupportDetailsModal />
+      <ViewSupportModal />
     </div>
   );
 }

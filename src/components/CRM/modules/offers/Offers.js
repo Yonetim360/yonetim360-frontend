@@ -2,14 +2,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCRMStore } from "@/stores/useCRMStore";
-import { Plus } from "lucide-react";
-import OfferDetailsModal from "../../modals/offer/OfferDetailsModal";
+import { Edit, Eye, Plus } from "lucide-react";
+import OfferDetailsModal from "../../modals/offerSales/OfferDetailsModal";
+import ViewOfferModal from "../../modals/offerSales/ViewOfferModal";
+import CurrencyFormatter from "@/components/common/CurrencyFormatter";
 
 export default function Offers() {
   const {
     offers,
     setIsOfferModalOpen,
     setIsOfferDetailsModalOpen,
+    setIsViewOfferModalOpen,
     setSelectedOffer,
   } = useCRMStore();
   return (
@@ -70,14 +73,11 @@ export default function Offers() {
           <CardTitle>Teklifler</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {offers.map((offer) => (
               <div
                 key={offer.id}
                 className="p-4 border border-gray-200 rounded-lg"
-                onClick={() => (
-                  setIsOfferDetailsModalOpen(true), setSelectedOffer(offer)
-                )}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
@@ -90,7 +90,12 @@ export default function Offers() {
                     <p className="text-sm text-gray-600">{offer.products}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-dark-gray">{offer.amount}</p>
+                    <p className="font-bold text-dark-gray">
+                      <CurrencyFormatter
+                        amount={offer.amount}
+                        currency={offer.currency}
+                      />
+                    </p>
                     <Badge
                       variant={
                         offer.status === "Onaylandı" ? "default" : "secondary"
@@ -103,6 +108,29 @@ export default function Offers() {
                     >
                       {offer.status}
                     </Badge>
+                    <div className="mt-2">
+                      <Button
+                        onClick={() => (
+                          setIsViewOfferModalOpen(true), setSelectedOffer(offer)
+                        )}
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary-green hover:text-primary-green/80"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => (
+                          setIsOfferDetailsModalOpen(true),
+                          setSelectedOffer(offer)
+                        )}
+                        variant="ghost"
+                        size="sm"
+                        className="text-orange hover:text-orange/80"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm text-gray-500">
@@ -115,6 +143,7 @@ export default function Offers() {
         </CardContent>
       </Card>
       <OfferDetailsModal />
+      <ViewOfferModal />
     </div>
   );
 }

@@ -19,6 +19,8 @@ export const useCRMStore = create((set) => ({
   selectedOffer: null,
   selectedCustomer: null,
   selectedSupport: null,
+  selectedOffer: null,
+  selectedSale: null,
   activeSubModule: "",
 
   /*Initial datas*/
@@ -181,22 +183,61 @@ export const useCRMStore = create((set) => ({
       customer: "ABC Teknoloji A.Ş.",
       offerNo: "TKL-2024-001",
       date: "2024-01-10",
-      amount: "₺125,000",
+      amount: "125000",
       status: "Onaylandı",
       validUntil: "2024-02-10",
       products: "Web Sitesi + Mobil Uygulama",
       discountValue: "1500",
       discountType: "fixed",
+      currency: "TRY",
+      vatIncluded: true,
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     },
     {
       id: 2,
       customer: "XYZ İnşaat Ltd.",
       offerNo: "TKL-2024-002",
       date: "2024-01-12",
-      amount: "₺85,000",
+      amount: "85000",
       status: "Beklemede",
       validUntil: "2024-02-12",
       products: "ERP Sistemi",
+      currency: "USD",
+      vatIncluded: false,
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    },
+  ],
+
+  sales: [
+    {
+      id: 1,
+      customer: "ABC Teknoloji A.Ş.",
+      offerNo: "TKL-2024-001",
+      date: "2024-01-10",
+      amount: "125000",
+      status: "Onaylandı",
+      validUntil: "2024-02-10",
+      products: "Web Sitesi + Mobil Uygulama",
+      discountValue: "1500",
+      discountType: "fixed",
+      currency: "TRY",
+      vatIncluded: true,
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    },
+    {
+      id: 2,
+      customer: "BCA Teknoloji A.Ş.",
+      offerNo: "TKL-2024-002",
+      date: "2024-01-10",
+      amount: "155000",
+      status: "İmzalandı",
+      validUntil: "2024-02-10",
+      products: "Web Sitesi + Mobil Uygulama",
+      discountValue: "1500",
+      discountType: "fixed",
+      currency: "TRY",
+      vatIncluded: true,
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     },
   ],
 
@@ -234,6 +275,9 @@ export const useCRMStore = create((set) => ({
   isCustomerDetailsModalOpen: false,
   isViewCustomerModalOpen: false,
   isSupportDetailsModalOpen: false,
+  isViewSupportModalOpen: false,
+  isViewOfferModalOpen: false,
+  isViewOfferDetailsModalOpen: false,
 
   // Formlar
   supportForm: {
@@ -305,6 +349,14 @@ export const useCRMStore = create((set) => ({
   setIsOfferModalOpen: (val) => set({ isOfferModalOpen: val }),
   setIsSupportModalOpen: (val) => set({ isSupportModalOpen: val }),
 
+  setIsViewSupportModalOpen: (val) => set({ isViewSupportModalOpen: val }),
+  setIsViewOfferModalOpen: (val) => set({ isViewOfferModalOpen: val }),
+  setIsViewOfferDetailsModalOpen: (val) =>
+    set({ isViewOfferDetailsModalOpen: val }),
+
+  setIsViewSalesModalOpen: (val) => set({ isViewSalesModalOpen: val }),
+  setIsSalesDetailsModalOpen: (val) => set({ isSalesDetailsModalOpen: val }),
+
   setIsOfferDetailsModalOpen: (val) => set({ isOfferDetailsModalOpen: val }),
   setIsViewCustomerModalOpen: (val) => set({ isViewCustomerModalOpen: val }),
   setIsCustomerDetailsModalOpen: (val) =>
@@ -315,6 +367,7 @@ export const useCRMStore = create((set) => ({
   setSelectedOffer: (offer) => set({ selectedOffer: offer }),
   setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
   setSelectedSupport: (support) => set({ selectedSupport: support }),
+  setSelectedSale: (sale) => set({ selectedSale: sale }),
 
   // Handlers
   handleCustomerSubmit: async (formdata) => {

@@ -17,13 +17,14 @@ import Support from "@/components/CRM/modules/support/Support";
 import DefaultCase from "@/components/CRM/modules/DefaultCase";
 import AddCustomerModal from "@/components/CRM/modals/customer/AddCustomerModal";
 import AddContactModal from "@/components/CRM/modals/contact/AddContactModal";
-import AddOfferModal from "@/components/CRM/modals/offer/AddOfferModal";
+import AddOfferModal from "@/components/CRM/modals/offerSales/AddOfferModal";
 import AddSupportModal from "@/components/CRM/modals/support/AddSupportModal";
 import { useCRMStore } from "../../stores/useCRMStore";
 import { useState } from "react";
 import PastCommunications from "@/components/CRM/modules/communication/PastCommunications";
 import FutureCommunications from "@/components/CRM/modules/communication/FutureCommunications";
 import Offers from "@/components/CRM/modules/offers/Offers";
+import Sales from "@/components/CRM/modules/offers/Sales";
 
 export default function Page() {
   const {
@@ -67,6 +68,8 @@ export default function Page() {
           return <FutureCommunications />;
         case "offers":
           return <Offers />;
+        case "sales":
+          return <Sales />;
         default:
           return <DefaultCase />;
       }
