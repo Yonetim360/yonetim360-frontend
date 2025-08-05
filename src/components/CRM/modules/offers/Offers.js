@@ -6,6 +6,7 @@ import { Edit, Eye, Plus } from "lucide-react";
 import OfferDetailsModal from "../../modals/offerSales/OfferDetailsModal";
 import ViewOfferModal from "../../modals/offerSales/ViewOfferModal";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
+import EndingOfferModal from "../../modals/offerSales/EndingOfferModal";
 
 export default function Offers() {
   const {
@@ -14,6 +15,7 @@ export default function Offers() {
     setIsOfferDetailsModalOpen,
     setIsViewOfferModalOpen,
     setSelectedOffer,
+    setIsEndingOfferModalOpen,
   } = useCRMStore();
   return (
     <div className="space-y-6">
@@ -130,6 +132,17 @@ export default function Offers() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={"ml-1"}
+                        onClick={() => (
+                          setIsEndingOfferModalOpen(true),
+                          setSelectedOffer(offer)
+                        )}
+                      >
+                        Sonuçlandır
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -144,6 +157,7 @@ export default function Offers() {
       </Card>
       <OfferDetailsModal />
       <ViewOfferModal />
+      <EndingOfferModal />
     </div>
   );
 }

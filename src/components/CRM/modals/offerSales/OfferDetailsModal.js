@@ -26,6 +26,7 @@ import { useCRMStore } from "@/stores/useCRMStore";
 import * as z from "zod";
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import CurrencyFormatter from "@/components/common/CurrencyFormatter";
 
 // Zod şeması
 const offerSchema = z.object({
@@ -35,6 +36,8 @@ const offerSchema = z.object({
   currency: z.string().min(1, "Para birimi seçimi zorunludur"),
   offer: z.string().min(1, "Tutar bilgisi zorunludur"),
   validityDate: z.string().min(1, "Geçerlilik tarihi zorunludur"),
+  isDiscounted: z.boolean(),
+  total: z.number().optional(),
   discountType: z.string().optional(),
   discountValue: z.string().optional(),
   vatIncluded: z.boolean().optional(),
@@ -91,6 +94,49 @@ export default function OfferDetailsModal() {
       });
     }
   }, [selectedOffer, reset]);
+
+  const isDiscounted = watch("isDiscounted");
+
+  /* Total ücret hesapla*/
+  const currency = watch("currency");
+  const offer = watch("offer");
+  const discountValue = watch("discountValue");
+  const discountType = watch("discountType");
+  const vatIncluded = watch("vatIncluded");
+
+  useEffect(() => {
+    let total = parseFloat(offer) || 0;
+
+    const discount = parseFloat(discountValue);
+
+    if (isDiscounted && discountValue && !isNaN(discount)) {
+      if (discountType === "percentage") {
+        total -= total * (discount / 100);
+      } else if (discountType === "fixed") {
+        total -= discount;
+      }
+    }
+
+    if (!vatIncluded) {
+      total *= 1.2; // Sadece dahil değilse KDV ekle
+    }
+
+    if (total < 0) total = 0;
+
+    // form alanına düz sayı olarak yaz
+    reset((prev) => ({
+      ...prev,
+      total: CurrencyFormatter(total, currency), // örneğin: 108000
+    }));
+  }, [
+    offer,
+    discountValue,
+    discountType,
+    vatIncluded,
+    isDiscounted,
+    reset,
+    currency,
+  ]);
 
   const onSubmit = (data) => {
     console.log(data);
@@ -256,11 +302,27 @@ export default function OfferDetailsModal() {
             </Label>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
+                {" "}
+                <Controller
+                  name="isDiscounted"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isDiscounted"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
                 <Controller
                   name="discountType"
                   control={control}
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!isDiscounted}
+                    >
                       <SelectTrigger className="w-32">
                         <SelectValue placeholder="Tür" />
                       </SelectTrigger>
@@ -275,9 +337,11 @@ export default function OfferDetailsModal() {
                   {...register("discountValue")}
                   placeholder="10"
                   className="w-20"
+                  disabled={!isDiscounted}
                 />
               </div>
-              <div className="flex items-center space-x-2">
+
+              <div className="flex items-center justify-center gap-2">
                 <Controller
                   name="vatIncluded"
                   control={control}
@@ -297,6 +361,21 @@ export default function OfferDetailsModal() {
                 </Label>
               </div>
             </div>
+          </div>
+
+          <div className="space-y-2 flex flex-row gap-5">
+            <Label
+              htmlFor="total"
+              className="text-sm font-medium text-dark-gray cursor-pointer"
+            >
+              Toplam Tutar
+            </Label>
+            <Input
+              {...register("total")}
+              placeholder=""
+              className="w-50"
+              disabled={true}
+            />
           </div>
 
           {/* Notlar */}
