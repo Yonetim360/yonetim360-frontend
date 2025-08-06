@@ -26,14 +26,14 @@ import { useCRMStore } from "@/stores/useCRMStore";
 
 // 1. Zod şeması
 const customerSchema = z.object({
-  name: z.string().min(1, "Şirket adı zorunludur"),
-  contact: z.string().min(1, "İletişim kişisi zorunludur"),
+  companyName: z.string().min(1, "Şirket adı zorunludur"),
+  contactPerson: z.string().min(1, "İletişim kişisi zorunludur"),
   email: z.email("Geçerli bir e-posta girin"),
-  phone: z.string().min(5, "Telefon numarası zorunludur"),
-  segment: z.enum(["kurumsal", "kobi", "bireysel"]),
-  status: z.enum(["aktif", "potansiyel", "pasif"]),
+  phoneNumber: z.string().min(5, "Telefon numarası zorunludur"),
+  segment: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  state: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   address: z.string().optional(),
-  notes: z.string().optional(),
+  note: z.string().optional(),
 });
 
 export default function AddCustomerModal() {
@@ -41,7 +41,7 @@ export default function AddCustomerModal() {
     isCustomerModalOpen,
     setIsCustomerModalOpen,
     isLoading,
-    handleCustomerSubmit: onSubmit,
+    addCustomer,
   } = useCRMStore();
 
   const {
@@ -53,19 +53,19 @@ export default function AddCustomerModal() {
   } = useForm({
     resolver: zodResolver(customerSchema),
     defaultValues: {
-      name: "",
-      contact: "",
+      companyName: "",
+      contactPerson: "",
       email: "",
-      phone: "",
+      phoneNumber: "",
       segment: "",
       status: "",
       address: "",
-      notes: "",
+      note: "",
     },
   });
 
-  const handleCustomerSubmit = (data) => {
-    onSubmit(data);
+  const onSubmit = (data) => {
+    addCustomer(data);
     reset(); // formu sıfırla
     setIsCustomerModalOpen(false); // modal kapat
   };
@@ -83,18 +83,24 @@ export default function AddCustomerModal() {
         </DialogHeader>
 
         <form
-          onSubmit={handleSubmit(handleCustomerSubmit)}
+          onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
           noValidate
         >
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Şirket Adı *</Label>
-              <Input {...register("name")} placeholder="ABC Teknoloji A.Ş." />
+              <Input
+                {...register("companyName")}
+                placeholder="ABC Teknoloji A.Ş."
+              />
             </div>
             <div className="space-y-2">
               <Label>İletişim Kişisi *</Label>
-              <Input {...register("contact")} placeholder="Ahmet Yılmaz" />
+              <Input
+                {...register("contactPerson")}
+                placeholder="Ahmet Yılmaz"
+              />
             </div>
           </div>
 
@@ -109,7 +115,10 @@ export default function AddCustomerModal() {
             </div>
             <div className="space-y-2">
               <Label>Telefon *</Label>
-              <Input {...register("phone")} placeholder="+90 555 555 55 55" />
+              <Input
+                {...register("phoneNumber")}
+                placeholder="+90 555 555 55 55"
+              />
             </div>
           </div>
 
@@ -120,14 +129,17 @@ export default function AddCustomerModal() {
                 control={control}
                 name="segment"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Segment seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="kurumsal">Kurumsal</SelectItem>
-                      <SelectItem value="kobi">KOBİ</SelectItem>
-                      <SelectItem value="bireysel">Bireysel</SelectItem>
+                      <SelectItem value="1">Kurumsal</SelectItem>
+                      <SelectItem value="2">KOBİ</SelectItem>
+                      <SelectItem value="3">Bireysel</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -138,16 +150,19 @@ export default function AddCustomerModal() {
               <Label>Durum</Label>
               <Controller
                 control={control}
-                name="status"
+                name="state"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Durum seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aktif">Aktif</SelectItem>
-                      <SelectItem value="potansiyel">Potansiyel</SelectItem>
-                      <SelectItem value="pasif">Pasif</SelectItem>
+                      <SelectItem value="1">Aktif</SelectItem>
+                      <SelectItem value="2">Potansiyel</SelectItem>
+                      <SelectItem value="3">Pasif</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -166,7 +181,7 @@ export default function AddCustomerModal() {
 
           <div className="space-y-2">
             <Label>Notlar</Label>
-            <Textarea {...register("notes")} placeholder="Notlar..." rows={3} />
+            <Textarea {...register("note")} placeholder="Notlar..." rows={3} />
           </div>
 
           <DialogFooter>

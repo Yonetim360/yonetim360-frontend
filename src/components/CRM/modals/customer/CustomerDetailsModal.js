@@ -35,10 +35,6 @@ const customerSchema = z.object({
   status: z.enum(["aktif", "potansiyel", "pasif"]),
   address: z.string().optional(),
   notes: z.string().optional(),
-  lastContact: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
 });
 
 export default function CustomerDetailsModal() {
@@ -46,7 +42,6 @@ export default function CustomerDetailsModal() {
     isCustomerDetailsModalOpen,
     setIsCustomerDetailsModalOpen,
     isLoading,
-
     selectedCustomer,
   } = useCRMStore();
 
@@ -67,7 +62,6 @@ export default function CustomerDetailsModal() {
       status: "",
       address: "",
       notes: "",
-      lastContact: "",
     },
   });
 
@@ -81,14 +75,14 @@ export default function CustomerDetailsModal() {
   useEffect(() => {
     if (selectedCustomer) {
       reset({
-        name: selectedCustomer.name || "",
-        contact: selectedCustomer.contact || "",
+        name: selectedCustomer.companyName || "",
+        contact: selectedCustomer.contactPerson || "",
         email: selectedCustomer.email || "",
-        phone: selectedCustomer.phone || "",
-        segment: selectedCustomer.segment.toLowerCase().replace("ı", "i") || "",
-        status: selectedCustomer.status?.toLowerCase().replace("ı", "i") || "",
+        phone: selectedCustomer.phoneNumber || "",
+        segment: selectedCustomer.segment || "",
+        status: selectedCustomer.state || "",
         address: selectedCustomer.address || "",
-        notes: selectedCustomer.notes || "",
+        notes: selectedCustomer.note || "",
         lastContact: selectedCustomer.lastContact || "",
       });
     }
@@ -152,9 +146,9 @@ export default function CustomerDetailsModal() {
                       <SelectValue placeholder="Segment seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="kurumsal">Kurumsal</SelectItem>
-                      <SelectItem value="kobi">KOBİ</SelectItem>
-                      <SelectItem value="bireysel">Bireysel</SelectItem>
+                      <SelectItem value={0}>Kurumsal</SelectItem>
+                      <SelectItem value={1}>KOBİ</SelectItem>
+                      <SelectItem value={2}>Bireysel</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -172,9 +166,9 @@ export default function CustomerDetailsModal() {
                       <SelectValue placeholder="Durum seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aktif">Aktif</SelectItem>
-                      <SelectItem value="potansiyel">Potansiyel</SelectItem>
-                      <SelectItem value="pasif">Pasif</SelectItem>
+                      <SelectItem value={0}>Aktif</SelectItem>
+                      <SelectItem value={1}>Potansiyel</SelectItem>
+                      <SelectItem value={2}>Pasif</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -194,11 +188,6 @@ export default function CustomerDetailsModal() {
           <div className="space-y-2">
             <Label>Notlar</Label>
             <Textarea {...register("notes")} placeholder="Notlar..." rows={3} />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Son iletişim tarihi</Label>
-            <Input {...register("lastContact")} type="date" />
           </div>
 
           <DialogFooter>

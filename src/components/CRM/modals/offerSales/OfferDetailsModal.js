@@ -25,7 +25,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCRMStore } from "@/stores/useCRMStore";
 import * as z from "zod";
 import { useEffect } from "react";
-import { X } from "lucide-react";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
 
 // Zod şeması

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Phone } from "lucide-react";
 import MyCalendar from "@/components/CRM/modules/calendar/MyCalendar";
 import Overview from "@/components/CRM/modules/overview/Overview";
 import CustomerInfo from "@/components/CRM/modules/customer/CustomerInfo";
@@ -20,11 +20,12 @@ import AddContactModal from "@/components/CRM/modals/contact/AddContactModal";
 import AddOfferModal from "@/components/CRM/modals/offerSales/AddOfferModal";
 import AddSupportModal from "@/components/CRM/modals/support/AddSupportModal";
 import { useCRMStore } from "../../stores/useCRMStore";
-import { useState } from "react";
+import { use, useState } from "react";
 import PastCommunications from "@/components/CRM/modules/communication/PastCommunications";
 import FutureCommunications from "@/components/CRM/modules/communication/FutureCommunications";
 import Offers from "@/components/CRM/modules/offers/Offers";
 import Sales from "@/components/CRM/modules/offers/Sales";
+import axios from "axios";
 
 export default function Page() {
   const {
@@ -93,6 +94,50 @@ export default function Page() {
         return <DefaultCase />;
     }
   };
+
+  // const tenantId = "D425F85C-D0DD-4524-BF12-A1AC57E07C4D";
+
+  // axios
+  //   .get("https://localhost:7278/api/Customer", {
+  //     headers: {
+  //       "X-Tenant-Id": tenantId,
+  //     },
+  //   })
+  //   .then((response) => {
+  //     console.log(response.data);
+  //   })
+  //   .catch((error) => {
+  //     console.error(error);
+  //   });
+
+  // axios
+  //   .post(
+  //     "https://localhost:7278/api/Customer",
+  //     {
+  //       // Örnek gönderi (request body)
+  //       userId: "9BA54F0B-B936-4716-A03C-9E8A86B213C2",
+  //       CompanyName: "ABC Company",
+  //       ContactPerson: "John Doe",
+  //       email: "FtKo6@example.com",
+  //       PhoneNumber: "1234567890",
+  //       Segment: 1,
+  //       State: 1,
+  //       Address: "123 Main Street",
+  //       Note: "This is a note",
+  //     },
+  //     {
+  //       headers: {
+  //         "X-Tenant-Id": tenantId,
+  //         "Content-Type": "application/json",
+  //       },
+  //     }
+  //   )
+  //   .then((response) => {
+  //     console.log("POST cevabı:", response.data);
+  //   })
+  //   .catch((error) => {
+  //     console.error("POST hatası:", error);
+  //   });
 
   return (
     <div className="min-h-screen bg-cream">

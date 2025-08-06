@@ -55,14 +55,14 @@ export default function ViewCustomerModal() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
-                {selectedCustomer.name}
+                {selectedCustomer.companyName}
               </h3>
               <div className="flex gap-2">
                 <Badge
                   className={
-                    selectedCustomer.status === "Aktif"
+                    selectedCustomer.status === 0
                       ? "bg-green-500"
-                      : selectedCustomer.status === "Pasif"
+                      : selectedCustomer.status === 1
                       ? "bg-red-500"
                       : "bg-yellow-500"
                   }
@@ -88,7 +88,7 @@ export default function ViewCustomerModal() {
                     İletişim Kişisi
                   </p>
                   <p className="text-sm text-gray-900">
-                    {selectedCustomer.contact}
+                    {selectedCustomer.contactPerson}
                   </p>
                 </div>
               </div>
@@ -108,7 +108,7 @@ export default function ViewCustomerModal() {
                 <div>
                   <p className="text-sm font-medium text-gray-700">Telefon</p>
                   <p className="text-sm text-gray-900">
-                    {selectedCustomer.phone}
+                    {selectedCustomer.phoneNumber}
                   </p>
                 </div>
               </div>
@@ -141,14 +141,14 @@ export default function ViewCustomerModal() {
           )}
 
           {/* Notlar */}
-          {selectedCustomer.notes && (
+          {selectedCustomer.note && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-gray-500" />
                 <h4 className="text-sm font-medium text-gray-700">Notlar</h4>
               </div>
               <p className="text-sm text-gray-900 ml-6 bg-gray-50 p-3 rounded-md">
-                {selectedCustomer.notes}
+                {selectedCustomer.note}
               </p>
             </div>
           )}

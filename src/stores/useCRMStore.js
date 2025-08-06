@@ -1,3 +1,4 @@
+import { customerService } from "@/services/CRM/CustomerService";
 import {
   BarChart3,
   CalendarDays,
@@ -13,7 +14,7 @@ import {
 import { toast } from "sonner";
 import { create } from "zustand";
 
-export const useCRMStore = create((set) => ({
+export const useCRMStore = create((set, get) => ({
   activeModule: "overview",
   isLoading: false,
   selectedOffer: null,
@@ -22,8 +23,6 @@ export const useCRMStore = create((set) => ({
   selectedOffer: null,
   selectedSale: null,
   activeSubModule: "",
-
-  /*Initial datas*/
 
   modules: [
     {
@@ -114,44 +113,150 @@ export const useCRMStore = create((set) => ({
     },
   ],
 
-  customers: [
-    {
-      id: 1,
-      name: "ABC Teknoloji A.Ş.",
-      contact: "Ahmet Yılmaz",
-      email: "ahmet@abcteknoloji.com",
-      phone: "+90 212 555 0123",
-      segment: "Kurumsal",
-      status: "Aktif",
-      address: "123 Main St, City, Country",
-      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      lastContact: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "XYZ İnşaat Ltd.",
-      contact: "Fatma Demir",
-      email: "fatma@xyzinsaat.com",
-      phone: "+90 216 555 0456",
-      segment: "kobi",
-      status: "Potansiyel",
-      address: "456 Elm St, City, Country",
-      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      lastContact: "2024-01-12",
-    },
-    {
-      id: 3,
-      name: "DEF Danışmanlık",
-      contact: "Mehmet Kaya",
-      email: "mehmet@defdanismanlik.com",
-      phone: "+90 312 555 0789",
-      segment: "Bireysel",
-      status: "Aktif",
-      address: "789 Oak St, City, Country",
-      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      lastContact: "2024-01-10",
-    },
-  ],
+  // CUSTOMER DATA STATES
+  customers: [],
+  customersLoading: false,
+  customersError: null,
+  customersLoaded: false, // Veri daha önce yüklendi mi?
+
+  // Müşterileri yükle
+  fetchCustomers: async (forceRefresh = false) => {
+    const { customersLoaded, customersLoading } = get();
+
+    // Eğer zaten yüklenmişse ve force refresh yoksa, çık
+    if (customersLoaded && !forceRefresh) {
+      return;
+    }
+
+    // Zaten yükleniyorsa, çık
+    if (customersLoading) {
+      return;
+    }
+
+    set({ customersLoading: true, customersError: null });
+
+    try {
+      const customers = await customerService.getCustomers(forceRefresh);
+
+      set({
+        customers: customers,
+        customersLoaded: true,
+        customersLoading: false,
+        customersError: null,
+      });
+    } catch (error) {
+      set({
+        customersError: error.message || "Müşteri verileri yüklenemedi",
+        customersLoading: false,
+      });
+    }
+  },
+
+  // Yeni müşteri ekle
+  addCustomer: async (customerData) => {
+    set({ customersLoading: true, customersError: null });
+
+    try {
+      const newCustomer = await customerService.createCustomer(customerData);
+
+      // Store'daki müşteri listesine ekle
+      set((state) => ({
+        customers: [...state.customers, newCustomer],
+        customersLoading: false,
+      }));
+
+      return newCustomer;
+    } catch (error) {
+      set({
+        customersError: error.message || "Müşteri eklenemedi",
+        customersLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  // Müşteri güncelle
+  updateCustomer: async (id, customerData) => {
+    set({ customersLoading: true, customersError: null });
+
+    try {
+      const updatedCustomer = await customerService.updateCustomer(
+        id,
+        customerData
+      );
+
+      // Store'da ilgili müşteriyi güncelle
+      set((state) => ({
+        customers: state.customers.map((customer) =>
+          customer.id === id ? updatedCustomer : customer
+        ),
+        customersLoading: false,
+      }));
+
+      return updatedCustomer;
+    } catch (error) {
+      set({
+        customersError: error.message || "Müşteri güncellenemedi",
+        customersLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  // Müşteri sil
+  deleteCustomer: async (id) => {
+    set({ customersLoading: true, customersError: null });
+
+    try {
+      await customerService.deleteCustomer(id);
+
+      // Store'dan müşteriyi kaldır
+      set((state) => ({
+        customers: state.customers.filter((customer) => customer.id !== id),
+        customersLoading: false,
+      }));
+    } catch (error) {
+      set({
+        customersError: error.message || "Müşteri silinemedi",
+        customersLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  // Müşteri verilerini yenile
+  refreshCustomers: async () => {
+    const { fetchCustomers } = get();
+    await fetchCustomers(true); // Force refresh
+  },
+
+  // Error'ı temizle
+  clearCustomersError: () => {
+    set({ customersError: null });
+  },
+
+  isCustomerModalOpen: false,
+  isCustomerDetailsModalOpen: false,
+  isViewCustomerModalOpen: false,
+
+  setCustomerForm: (form) => set({ customerForm: form }),
+  setCustomerModalOpen: (val) => set({ isCustomerModalOpen: val }),
+  setIsCustomerModalOpen: (val) => set({ isCustomerModalOpen: val }),
+  setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
+
+  customerForm: {
+    name: "",
+    contact: "",
+    email: "",
+    phone: "",
+    segment: "",
+    status: "",
+    address: "",
+    notes: "",
+    lastContact: "",
+  },
+
+  //************************************* */
 
   communications: [
     {
@@ -267,13 +372,10 @@ export const useCRMStore = create((set) => ({
   ],
 
   // Modallar
-  isCustomerModalOpen: false,
   isCommunicationModalOpen: false,
   isOfferModalOpen: false,
   isSupportModalOpen: false,
   isOfferDetailsModalOpen: false,
-  isCustomerDetailsModalOpen: false,
-  isViewCustomerModalOpen: false,
   isSupportDetailsModalOpen: false,
   isViewSupportModalOpen: false,
   isViewOfferModalOpen: false,
@@ -288,17 +390,7 @@ export const useCRMStore = create((set) => ({
     priority: "",
     assignedTo: "",
   },
-  customerForm: {
-    name: "",
-    contact: "",
-    email: "",
-    phone: "",
-    segment: "",
-    status: "",
-    address: "",
-    notes: "",
-    lastContact: "",
-  },
+
   communicationForm: {
     customer: "",
     type: "",
@@ -318,34 +410,19 @@ export const useCRMStore = create((set) => ({
     products: "",
   },
 
-  //   // 2. Fonksiyonlar
-  //   fetchCustomers: async () => {
-  //     set({ isLoading: true, error: null })
-  //     try {
-  //       const res = await fetch('/api/customers')
-  //       const data = await res.json()
-  //       set({ customers: data, isLoading: false })
-  //     } catch (err) {
-  //       set({ error: err.message, isLoading: false })
-  //     }
-  //   },
-
   // State Güncelleyiciler
   setActiveModule: (module) => set({ activeModule: module }),
   setActiveSubModule: (module) => set({ activeSubModule: module }),
   setIsLoading: (isLoading) => set({ isLoading }),
 
   setSupportForm: (form) => set({ supportForm: form }),
-  setCustomerForm: (form) => set({ customerForm: form }),
   setCommunicationForm: (form) => set({ communicationForm: form }),
   setOfferForm: (form) => set({ offerForm: form }),
 
-  setCustomerModalOpen: (val) => set({ isCustomerModalOpen: val }),
   setCommunicationModalOpen: (val) => set({ isCommunicationModalOpen: val }),
   setOfferModalOpen: (val) => set({ isOfferModalOpen: val }),
   setSupportModalOpen: (val) => set({ isSupportModalOpen: val }),
 
-  setIsCustomerModalOpen: (val) => set({ isCustomerModalOpen: val }),
   setIsCommunicationModalOpen: (val) => set({ isCommunicationModalOpen: val }),
   setIsOfferModalOpen: (val) => set({ isOfferModalOpen: val }),
   setIsSupportModalOpen: (val) => set({ isSupportModalOpen: val }),
@@ -368,50 +445,6 @@ export const useCRMStore = create((set) => ({
   setIsEndingOfferModalOpen: (val) => set({ isEndingOfferModalOpen: val }),
 
   setSelectedOffer: (offer) => set({ selectedOffer: offer }),
-  setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
   setSelectedSupport: (support) => set({ selectedSupport: support }),
   setSelectedSale: (sale) => set({ selectedSale: sale }),
-
-  // Handlers
-  handleCustomerSubmit: async (formdata) => {
-    try {
-      set({ isLoading: true });
-      console.log(formdata);
-      toast.success("Müşteri başarıyla oluşturuldu.");
-    } catch (error) {
-      toast.error(error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-  handleCommunicationSubmit: async (formdata) => {
-    try {
-      set({ isLoading: true });
-      console.log(formdata);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-  handleOfferSubmit: async (formdata) => {
-    try {
-      set({ isLoading: true });
-      console.log(formdata);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-  handleSupportSubmit: async (formdata) => {
-    try {
-      set({ isLoading: true });
-      console.log(formdata);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
 }));
