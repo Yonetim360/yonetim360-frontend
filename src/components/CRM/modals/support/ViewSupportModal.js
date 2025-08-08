@@ -2,32 +2,19 @@
 
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useCRMStore } from "@/stores/useCRMStore";
-import {
-  Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  FileText,
-  User,
-  Headphones,
-  Users,
-  Tag,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar, FileText, Headphones, Users, Tag } from "lucide-react";
+import { SupportStore } from "@/stores/crm/domains/SupportStore";
 
 export default function ViewSupportModal() {
   const { isViewSupportModalOpen, setIsViewSupportModalOpen, selectedSupport } =
-    useCRMStore();
+    SupportStore();
 
   if (!selectedSupport) return null;
 

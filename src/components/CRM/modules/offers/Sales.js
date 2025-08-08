@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCRMStore } from "@/stores/useCRMStore";
 import { Edit, Eye } from "lucide-react";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
 import ViewSalesModal from "../../modals/offerSales/ViewSalesModal";
 import SalesDetailsModal from "../../modals/offerSales/SalesDetailsModal";
+import { SaleStore } from "@/stores/crm/domains/SaleStore";
 
 export default function Sales() {
   const {
@@ -13,7 +13,7 @@ export default function Sales() {
     setIsSalesDetailsModalOpen,
     setIsViewSalesModalOpen,
     setSelectedSale,
-  } = useCRMStore();
+  } = SaleStore();
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

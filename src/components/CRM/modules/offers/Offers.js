@@ -1,12 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCRMStore } from "@/stores/useCRMStore";
 import { Edit, Eye, Plus } from "lucide-react";
 import OfferDetailsModal from "../../modals/offerSales/OfferDetailsModal";
 import ViewOfferModal from "../../modals/offerSales/ViewOfferModal";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
 import EndingOfferModal from "../../modals/offerSales/EndingOfferModal";
+import { OfferStore } from "@/stores/crm/domains/OfferStore";
 
 export default function Offers() {
   const {
@@ -16,7 +16,7 @@ export default function Offers() {
     setIsViewOfferModalOpen,
     setSelectedOffer,
     setIsEndingOfferModalOpen,
-  } = useCRMStore();
+  } = OfferStore();
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

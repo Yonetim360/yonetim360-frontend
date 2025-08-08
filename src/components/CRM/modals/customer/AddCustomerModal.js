@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useCRMStore } from "@/stores/useCRMStore";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 
 // 1. Zod şeması
 const customerSchema = z.object({
@@ -40,9 +40,9 @@ export default function AddCustomerModal() {
   const {
     isCustomerModalOpen,
     setIsCustomerModalOpen,
-    isLoading,
     addCustomer,
-  } = useCRMStore();
+    customersLoading,
+  } = CustomerStore();
 
   const {
     register,
@@ -195,9 +195,9 @@ export default function AddCustomerModal() {
             <Button
               type="submit"
               className="bg-primary-green hover:bg-primary-green/90"
-              disabled={isLoading}
+              disabled={customersLoading}
             >
-              {isLoading ? "Ekleniyor..." : "Müşteri Ekle"}
+              {customersLoading ? "Ekleniyor..." : "Müşteri Ekle"}
             </Button>
           </DialogFooter>
         </form>

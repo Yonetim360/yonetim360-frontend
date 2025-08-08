@@ -16,11 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useCRMStore } from "@/stores/useCRMStore";
 import { useCustomers } from "@/hooks/useCustomers";
 import CustomerDetailsModal from "../../modals/customer/CustomerDetailsModal";
 import ViewCustomerModal from "../../modals/customer/ViewCustomerModal";
 import { useState } from "react";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 
 export default function CustomerInfo() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,7 +33,7 @@ export default function CustomerInfo() {
     setIsCustomerDetailsModalOpen,
     setSelectedCustomer,
     setIsViewCustomerModalOpen,
-  } = useCRMStore();
+  } = CustomerStore();
 
   // Arama filtresi
   const filteredCustomers =

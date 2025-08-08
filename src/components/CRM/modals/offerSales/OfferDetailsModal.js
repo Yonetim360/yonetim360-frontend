@@ -22,10 +22,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCRMStore } from "@/stores/useCRMStore";
 import * as z from "zod";
 import { useEffect } from "react";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
+import { OfferStore } from "@/stores/crm/domains/OfferStore";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 
 // Zod şeması
 const offerSchema = z.object({
@@ -44,12 +45,10 @@ const offerSchema = z.object({
 });
 
 export default function OfferDetailsModal() {
-  const {
-    isOfferDetailsModalOpen,
-    setIsOfferDetailsModalOpen,
-    customers,
-    selectedOffer,
-  } = useCRMStore();
+  const { isOfferDetailsModalOpen, setIsOfferDetailsModalOpen, selectedOffer } =
+    OfferStore();
+
+  const { customers } = CustomerStore();
 
   const {
     register,

@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useCRMStore } from "@/stores/useCRMStore";
 import {
   FileText,
   TrendingUp,
@@ -8,9 +7,12 @@ import {
   Users,
   ArrowRight,
 } from "lucide-react";
+import { OfferStore } from "@/stores/crm/domains/OfferStore";
+import { ModalStore } from "@/stores/crm/shared/ModalStore";
 
 export default function SalesOffers() {
-  const { offers, setActiveSubModule } = useCRMStore();
+  const { offers } = OfferStore();
+  const { setActiveSubModule } = ModalStore();
 
   // Basit istatistikler
   const totalOffers = offers.length;

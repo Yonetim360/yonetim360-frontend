@@ -3,8 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CommunicationStore } from "@/stores/crm/domains/CommunicationStore";
 // import { Progress } from "@/components/ui/progress";
-import { useCRMStore } from "@/stores/useCRMStore";
 import {
   AlertCircle,
   Clock,
@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export default function Communication() {
-  const { communications, setIsCommunicationModalOpen } = useCRMStore();
+  const { communications, setIsCommunicationModalOpen } = CommunicationStore();
 
   // Mock data for demonstration
   const communicationStats = {

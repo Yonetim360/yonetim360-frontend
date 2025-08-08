@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCRMStore } from "@/stores/useCRMStore";
 import { Edit, Eye, Plus } from "lucide-react";
 import SupportDetailsModal from "../../modals/support/SupportDetailsModal";
 import ViewSupportModal from "../../modals/support/ViewSupportModal";
+import { SupportStore } from "@/stores/crm/domains/SupportStore";
 
 export default function Support() {
   const {
@@ -13,7 +13,7 @@ export default function Support() {
     setIsSupportDetailsModalOpen,
     setIsViewSupportModalOpen,
     setSelectedSupport,
-  } = useCRMStore();
+  } = SupportStore();
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

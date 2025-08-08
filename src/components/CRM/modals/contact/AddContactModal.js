@@ -18,10 +18,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useCRMStore } from "@/stores/useCRMStore";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
+import { CommunicationStore } from "@/stores/crm/domains/CommunicationStore";
 
 // Zod şeması
 const communicationSchema = z
@@ -53,10 +54,11 @@ export default function AddContactModal() {
   const {
     isCommunicationModalOpen,
     setIsCommunicationModalOpen,
-    customers,
+    communicationsLoading,
     handleCommunicationSubmit,
-    isLoading,
-  } = useCRMStore();
+  } = CommunicationStore();
+
+  const { customers } = CustomerStore();
 
   const {
     register,
@@ -234,9 +236,9 @@ export default function AddContactModal() {
             <Button
               type="submit"
               className="bg-orange hover:bg-orange/90"
-              disabled={isLoading}
+              disabled={communicationsLoading}
             >
-              {isLoading ? "Ekleniyor..." : "İletişim Ekle"}
+              {communicationsLoading ? "Ekleniyor..." : "İletişim Ekle"}
             </Button>
           </DialogFooter>
         </form>

@@ -12,16 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useCRMStore } from "@/stores/useCRMStore";
-import {
   Phone,
   Mail,
   Calendar,
@@ -46,9 +36,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import AddOfferModal from "../../modals/offerSales/AddOfferModal";
+import { CommunicationStore } from "@/stores/crm/domains/CommunicationStore";
 
 export default function FutureCommunications() {
-  const { communications, setIsCommunicationModalOpen } = useCRMStore();
+  const { communications, setIsCommunicationModalOpen } = CommunicationStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");

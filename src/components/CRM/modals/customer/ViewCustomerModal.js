@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useCRMStore } from "@/stores/useCRMStore";
 import {
   Calendar,
   Mail,
@@ -19,13 +18,14 @@ import {
   Building,
   User,
 } from "lucide-react";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 
 export default function ViewCustomerModal() {
   const {
     isViewCustomerModalOpen,
     setIsViewCustomerModalOpen,
     selectedCustomer,
-  } = useCRMStore();
+  } = CustomerStore();
 
   if (!selectedCustomer) return null;
 

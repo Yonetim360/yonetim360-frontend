@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useCRMStore } from "@/stores/useCRMStore";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 
 export const useCustomers = () => {
   const {
@@ -13,7 +13,7 @@ export const useCustomers = () => {
     deleteCustomer,
     refreshCustomers,
     clearCustomersError,
-  } = useCRMStore();
+  } = CustomerStore();
 
   // Component mount olduğunda müşteri verilerini yükle
   useEffect(() => {

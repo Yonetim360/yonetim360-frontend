@@ -20,11 +20,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCRMStore } from "@/stores/useCRMStore";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { X } from "lucide-react";
+import { OfferStore } from "@/stores/crm/domains/OfferStore";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 
 // Zod şeması
 const offerSchema = z.object({
@@ -44,10 +44,10 @@ export default function AddOfferModal() {
   const {
     isOfferModalOpen,
     setIsOfferModalOpen,
-    customers,
     handleOfferSubmit,
-    isLoading,
-  } = useCRMStore();
+    offersLoading,
+  } = OfferStore();
+  const { customers } = CustomerStore();
 
   const {
     register,
@@ -295,9 +295,9 @@ export default function AddOfferModal() {
             <Button
               type="submit"
               className="bg-red hover:bg-red/90 text-white px-6"
-              disabled={isLoading}
+              disabled={offersLoading}
             >
-              {isLoading ? "Oluşturuluyor..." : "Teklif Oluştur"}
+              {offersLoading ? "Oluşturuluyor..." : "Teklif Oluştur"}
             </Button>
           </DialogFooter>
         </form>

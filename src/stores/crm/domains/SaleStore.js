@@ -1,0 +1,41 @@
+import { create } from "zustand";
+
+export const SaleStore = create((set, get) => ({
+  selectedSale: null,
+  salesLoading: false,
+  sales: [
+    {
+      id: 1,
+      customer: "ABC Teknoloji A.Ş.",
+      offerNo: "TKL-2024-001",
+      date: "2024-01-10",
+      amount: "125000",
+      status: "Onaylandı",
+      validUntil: "2024-02-10",
+      products: "Web Sitesi + Mobil Uygulama",
+      discountValue: "1500",
+      discountType: "fixed",
+      currency: "TRY",
+      vatIncluded: true,
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    },
+    {
+      id: 2,
+      customer: "BCA Teknoloji A.Ş.",
+      offerNo: "TKL-2024-002",
+      date: "2024-01-10",
+      amount: "155000",
+      status: "İmzalandı",
+      validUntil: "2024-02-10",
+      products: "Web Sitesi + Mobil Uygulama",
+      discountValue: "1500",
+      discountType: "fixed",
+      currency: "TRY",
+      vatIncluded: true,
+      notes: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    },
+  ],
+  setIsViewSalesModalOpen: (val) => set({ isViewSalesModalOpen: val }),
+  setIsSalesDetailsModalOpen: (val) => set({ isSalesDetailsModalOpen: val }),
+  setSelectedSale: (sale) => set({ selectedSale: sale }),
+}));

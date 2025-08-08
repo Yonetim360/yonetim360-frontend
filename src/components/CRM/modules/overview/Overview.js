@@ -7,7 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useCRMStore } from "@/stores/useCRMStore";
+import { CommunicationStore } from "@/stores/crm/domains/CommunicationStore";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
+import { OfferStore } from "@/stores/crm/domains/OfferStore";
+import { SupportStore } from "@/stores/crm/domains/SupportStore";
 import {
   AlertCircle,
   BarChart3,
@@ -19,12 +22,12 @@ import {
 } from "lucide-react";
 
 export default function Overview() {
-  const {
-    setIsCustomerModalOpen,
-    setIsCommunicationModalOpen,
-    setIsOfferModalOpen,
-    setIsSupportModalOpen,
-  } = useCRMStore();
+  const { setIsSupportModalOpen } = SupportStore();
+
+  const { setIsCustomerModalOpen } = CustomerStore();
+  const { setIsCommunicationModalOpen } = CommunicationStore();
+  const { setIsOfferModalOpen } = OfferStore();
+
   return (
     <div className="space-y-6">
       <div>

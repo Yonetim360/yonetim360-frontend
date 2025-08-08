@@ -9,12 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useCRMStore } from "@/stores/useCRMStore";
 import {
   Calendar,
-  Mail,
-  Phone,
-  MapPin,
   FileText,
   Building,
   User,
@@ -23,10 +19,11 @@ import {
   Receipt,
 } from "lucide-react";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
+import { OfferStore } from "@/stores/crm/domains/OfferStore";
 
 export default function ViewOfferModal() {
   const { isViewOfferModalOpen, setIsViewOfferModalOpen, selectedOffer } =
-    useCRMStore();
+    OfferStore();
 
   if (!selectedOffer) return null;
   else console.log(selectedOffer);

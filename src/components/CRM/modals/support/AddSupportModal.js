@@ -18,11 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useCRMStore } from "@/stores/useCRMStore";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
+import { SupportStore } from "@/stores/crm/domains/SupportStore";
 
 // Zod schema for support ticket validation
 const supportSchema = z.object({
@@ -37,10 +38,11 @@ export default function AddSupportModal() {
   const {
     isSupportModalOpen,
     setIsSupportModalOpen,
-    customers,
-    isLoading,
     handleSupportSubmit,
-  } = useCRMStore();
+    supportsLoading,
+  } = SupportStore();
+
+  const { customers } = CustomerStore();
 
   const {
     register,
@@ -184,16 +186,16 @@ export default function AddSupportModal() {
               type="button"
               variant="outline"
               onClick={() => setIsSupportModalOpen(false)}
-              disabled={isLoading}
+              disabled={supportsLoading}
             >
               İptal
             </Button>
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading}
+              disabled={supportsLoading}
             >
-              {isLoading ? "Talep Oluşturuluyor..." : "Talep Oluştur"}
+              {supportsLoading ? "Talep Oluşturuluyor..." : "Talep Oluştur"}
             </Button>
           </DialogFooter>
         </form>

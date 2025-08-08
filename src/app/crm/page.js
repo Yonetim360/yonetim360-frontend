@@ -19,23 +19,22 @@ import AddCustomerModal from "@/components/CRM/modals/customer/AddCustomerModal"
 import AddContactModal from "@/components/CRM/modals/contact/AddContactModal";
 import AddOfferModal from "@/components/CRM/modals/offerSales/AddOfferModal";
 import AddSupportModal from "@/components/CRM/modals/support/AddSupportModal";
-import { useCRMStore } from "../../stores/useCRMStore";
-import { use, useState } from "react";
+
+import { useState } from "react";
 import PastCommunications from "@/components/CRM/modules/communication/PastCommunications";
 import FutureCommunications from "@/components/CRM/modules/communication/FutureCommunications";
 import Offers from "@/components/CRM/modules/offers/Offers";
 import Sales from "@/components/CRM/modules/offers/Sales";
-import axios from "axios";
+import { ModalStore } from "@/stores/crm/shared/ModalStore";
 
 export default function Page() {
   const {
     activeModule,
     setActiveModule,
-    setIsLoading,
     modules,
     activeSubModule,
     setActiveSubModule,
-  } = useCRMStore();
+  } = ModalStore();
 
   // Genişletilmiş modülleri takip etmek için state
   const [expandedModules, setExpandedModules] = useState(["overview"]);

@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { useCRMStore } from "@/stores/useCRMStore";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
+import { OfferStore } from "@/stores/crm/domains/OfferStore";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 export default function EndingOfferModal() {
   const { isEndingOfferModalOpen, setIsEndingOfferModalOpen, selectedOffer } =
-    useCRMStore();
+    OfferStore();
   return (
     <Dialog
       open={isEndingOfferModalOpen}

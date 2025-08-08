@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCRMStore } from "@/stores/useCRMStore";
+import { CommunicationStore } from "@/stores/crm/domains/CommunicationStore";
 import {
   Phone,
   Mail,
@@ -35,7 +35,7 @@ import {
 import { useState } from "react";
 
 export default function PastCommunications() {
-  const { communications, setIsCommunicationModalOpen } = useCRMStore();
+  const { communications, setIsCommunicationModalOpen } = CommunicationStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");

@@ -18,12 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useCRMStore } from "@/stores/useCRMStore";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useEffect } from "react";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
+import { SupportStore } from "@/stores/crm/domains/SupportStore";
 
 const supportSchema = z.object({
   customer: z.string().min(1, "Müşteri seçimi zorunludur"),
@@ -45,13 +46,14 @@ const supportSchema = z.object({
 
 export default function SupportDetailsModal() {
   const {
-    customers,
     isSupportDetailsModalOpen,
     setIsSupportDetailsModalOpen,
     selectedSupport,
-    isLoading,
     handleSupportSubmit,
-  } = useCRMStore();
+    supportsLoading,
+  } = SupportStore();
+
+  const { customers } = CustomerStore();
 
   const {
     register,
@@ -251,16 +253,16 @@ export default function SupportDetailsModal() {
               type="button"
               variant="outline"
               onClick={() => setIsSupportDetailsModalOpen(false)}
-              disabled={isLoading}
+              disabled={supportsLoading}
             >
               İptal
             </Button>
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700"
-              disabled={isLoading}
+              disabled={supportsLoading}
             >
-              {isLoading ? "Talep Oluşturuluyor..." : "Talep Oluştur"}
+              {supportsLoading ? "Talep Oluşturuluyor..." : "Talep Oluştur"}
             </Button>
           </DialogFooter>
         </form>

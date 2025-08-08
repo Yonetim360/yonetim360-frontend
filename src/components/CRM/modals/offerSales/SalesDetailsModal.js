@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -18,14 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCRMStore } from "@/stores/useCRMStore";
 import * as z from "zod";
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import { SaleStore } from "@/stores/crm/domains/SaleStore";
 
 // Zod şeması
 const offerSchema = z.object({
@@ -43,7 +39,7 @@ const offerSchema = z.object({
 
 export default function SalesDetailsModal() {
   const { isSalesDetailsModalOpen, setIsSalesDetailsModalOpen, selectedSale } =
-    useCRMStore();
+    SaleStore();
 
   const {
     handleSubmit,
