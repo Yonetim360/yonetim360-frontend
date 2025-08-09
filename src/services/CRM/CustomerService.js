@@ -57,6 +57,35 @@ class CustomerService {
     }
   }
 
+  // Müşteri bilgilerini getir
+
+  getCustomerById = async (id) => {
+    try {
+      const response = await fetch(`/api/customers/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const customer = await response.json();
+
+      // Validate the response structure
+      if (!customer || !customer.id) {
+        throw new Error("Invalid customer data received");
+      }
+
+      return customer;
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      throw error;
+    }
+  };
+
   // Yeni müşteri oluştur
   async createCustomer(customerData) {
     try {
@@ -84,10 +113,19 @@ class CustomerService {
 
   // Müşteri güncelle
   async updateCustomer(id, customerData) {
+    const sendToData = { ...customerData, id: id };
+
     try {
-      const response = await axios.put(
-        `${this.baseURL}/api/customer/${id}`,
-        customerData
+      const response = await fetch(
+        `${this.baseURL}/customers/${id}`,
+        sendToData,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(customerData),
+        }
       );
 
       // Cache'i temizle
@@ -103,12 +141,18 @@ class CustomerService {
   // Müşteri sil
   async deleteCustomer(id) {
     try {
-      const response = await axios.delete(`${this.baseURL}/customers/${id}`);
+      const response = await fetch(`${this.baseURL}/customers/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       // Cache'i temizle
       this.clearCache();
 
-      return response.data;
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error("Müşteri silinemedi:", error);
       throw error;

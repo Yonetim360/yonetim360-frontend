@@ -24,17 +24,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useEffect } from "react";
 import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
+import { toast } from "sonner";
 
 // 1. Zod şeması
 const customerSchema = z.object({
-  name: z.string().min(1, "Şirket adı zorunludur"),
-  contact: z.string().min(1, "İletişim kişisi zorunludur"),
+  companyName: z.string().min(1, "Şirket adı zorunludur"),
+  contactPerson: z.string().min(1, "İletişim kişisi zorunludur"),
   email: z.email("Geçerli bir e-posta girin"),
-  phone: z.string().min(5, "Telefon numarası zorunludur"),
-  segment: z.enum(["kurumsal", "kobi", "bireysel"]),
-  status: z.enum(["aktif", "potansiyel", "pasif"]),
+  phoneNumber: z.string().min(5, "Telefon numarası zorunludur"),
+  segment: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  state: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   address: z.string().optional(),
-  notes: z.string().optional(),
+  note: z.string().optional(),
 });
 
 export default function CustomerDetailsModal() {
@@ -43,6 +44,7 @@ export default function CustomerDetailsModal() {
     setIsCustomerDetailsModalOpen,
     selectedCustomer,
     customersLoading,
+    updateCustomer,
   } = CustomerStore();
 
   const {
@@ -54,19 +56,34 @@ export default function CustomerDetailsModal() {
   } = useForm({
     resolver: zodResolver(customerSchema),
     defaultValues: {
-      name: "",
-      contact: "",
+      companyName: "",
+      contactPerson: "",
       email: "",
-      phone: "",
+      phoneNumber: "",
       segment: "",
-      status: "",
+      state: "",
       address: "",
-      notes: "",
+      note: "",
     },
   });
-
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    if (!selectedCustomer.id) {
+      toast.error("Müşteri bilgileri alınamadı");
+    } else {
+      const dataToSend = {
+        ...data,
+        id: selectedCustomer.id,
+        companyName: data.companyName || selectedCustomer.companyName,
+        contactPerson: data.contactPerson || selectedCustomer.contactPerson,
+        email: data.email || selectedCustomer.email,
+        phoneNumber: data.phoneNumber || selectedCustomer.phoneNumber,
+        segment: data.segment || selectedCustomer.segment,
+        state: data.state || selectedCustomer.state,
+        address: data.address || selectedCustomer.address,
+        note: data.note || selectedCustomer.note,
+      };
+      await updateCustomer(selectedCustomer.id, dataToSend);
+    }
 
     reset(); // formu sıfırla
     setIsCustomerDetailsModalOpen(false); // modal kapat
@@ -75,15 +92,14 @@ export default function CustomerDetailsModal() {
   useEffect(() => {
     if (selectedCustomer) {
       reset({
-        name: selectedCustomer.companyName || "",
-        contact: selectedCustomer.contactPerson || "",
+        companyName: selectedCustomer.companyName || "",
+        contactPerson: selectedCustomer.contactPerson || "",
         email: selectedCustomer.email || "",
-        phone: selectedCustomer.phoneNumber || "",
+        phoneNumber: selectedCustomer.phoneNumber || "",
         segment: selectedCustomer.segment || "",
-        status: selectedCustomer.state || "",
+        state: selectedCustomer.state || "",
         address: selectedCustomer.address || "",
-        notes: selectedCustomer.note || "",
-        lastContact: selectedCustomer.lastContact || "",
+        note: selectedCustomer.note || "",
       });
     }
   }, [reset, selectedCustomer]);
@@ -111,11 +127,17 @@ export default function CustomerDetailsModal() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Şirket Adı *</Label>
-              <Input {...register("name")} placeholder="ABC Teknoloji A.Ş." />
+              <Input
+                {...register("companyName")}
+                placeholder="ABC Teknoloji A.Ş."
+              />
             </div>
             <div className="space-y-2">
               <Label>İletişim Kişisi *</Label>
-              <Input {...register("contact")} placeholder="Ahmet Yılmaz" />
+              <Input
+                {...register("contactPerson")}
+                placeholder="Ahmet Yılmaz"
+              />
             </div>
           </div>
 
@@ -130,7 +152,10 @@ export default function CustomerDetailsModal() {
             </div>
             <div className="space-y-2">
               <Label>Telefon *</Label>
-              <Input {...register("phone")} placeholder="+90 555 555 55 55" />
+              <Input
+                {...register("phoneNumber")}
+                placeholder="+90 555 555 55 55"
+              />
             </div>
           </div>
 
@@ -141,14 +166,17 @@ export default function CustomerDetailsModal() {
                 control={control}
                 name="segment"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Segment seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={0}>Kurumsal</SelectItem>
-                      <SelectItem value={1}>KOBİ</SelectItem>
-                      <SelectItem value={2}>Bireysel</SelectItem>
+                      <SelectItem value="1">Kurumsal</SelectItem>
+                      <SelectItem value="2">KOBİ</SelectItem>
+                      <SelectItem value="3">Bireysel</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -159,16 +187,19 @@ export default function CustomerDetailsModal() {
               <Label>Durum</Label>
               <Controller
                 control={control}
-                name="status"
+                name="state"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value?.toString()}
+                    onValueChange={(val) => field.onChange(Number(val))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Durum seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={0}>Aktif</SelectItem>
-                      <SelectItem value={1}>Potansiyel</SelectItem>
-                      <SelectItem value={2}>Pasif</SelectItem>
+                      <SelectItem value="1">Aktif</SelectItem>
+                      <SelectItem value="2">Potansiyel</SelectItem>
+                      <SelectItem value="3">Pasif</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -187,7 +218,7 @@ export default function CustomerDetailsModal() {
 
           <div className="space-y-2">
             <Label>Notlar</Label>
-            <Textarea {...register("notes")} placeholder="Notlar..." rows={3} />
+            <Textarea {...register("note")} placeholder="Notlar..." rows={3} />
           </div>
 
           <DialogFooter>
@@ -203,7 +234,7 @@ export default function CustomerDetailsModal() {
               className="bg-primary-green hover:bg-primary-green/90"
               disabled={customersLoading}
             >
-              {customersLoading ? "Ekleniyor..." : "Müşteri Ekle"}
+              {customersLoading ? "Ekleniyor..." : "Müşteriyi Düzenle"}
             </Button>
           </DialogFooter>
         </form>

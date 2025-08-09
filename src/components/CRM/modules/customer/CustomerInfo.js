@@ -12,6 +12,7 @@ import {
   RefreshCw,
   AlertCircle,
   HelpCircle,
+  Trash2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ import CustomerDetailsModal from "../../modals/customer/CustomerDetailsModal";
 import ViewCustomerModal from "../../modals/customer/ViewCustomerModal";
 import { useState } from "react";
 import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
+import DeleteCustomerModal from "../../modals/customer/DeleteCustomerModal";
 
 export default function CustomerInfo() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,6 +35,7 @@ export default function CustomerInfo() {
     setIsCustomerDetailsModalOpen,
     setSelectedCustomer,
     setIsViewCustomerModalOpen,
+    setIsDeleteCustomerModalOpen,
   } = CustomerStore();
 
   // Arama filtresi
@@ -79,7 +82,9 @@ export default function CustomerInfo() {
     );
   }
 
-  if (customers.length > 0) {
+  if (customers && customers.length > 0) {
+    console.log(customers);
+
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -193,20 +198,38 @@ export default function CustomerInfo() {
                       <div className="flex justify-start sm:justify-center">
                         <Badge
                           variant={
-                            customer.status === 0 ? "default" : "secondary"
+                            customer.state === 0 ? "default" : "secondary"
                           }
                           className={`text-xs ${
-                            customer.status === 0
+                            customer.state === 1
                               ? "bg-primary-green hover:bg-primary-green/90"
-                              : "bg-orange hover:bg-orange/90"
+                              : customer.status === 2
+                              ? "bg-orange hover:bg-orange/90"
+                              : "bg-red hover:bg-red/90"
                           }`}
                         >
-                          {customer.status === 0 ? "Aktif" : "Potansiyel"}
+                          {customer.state === 1
+                            ? "Aktif"
+                            : customer.state === 2
+                            ? "Beklemede"
+                            : "Pasif"}
                         </Badge>
                       </div>
 
                       {/* Aksiyon butonları */}
                       <div className="flex space-x-2 justify-end sm:justify-start">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 bg-transparent"
+                          onClick={() => (
+                            setSelectedCustomer(customer),
+                            setIsDeleteCustomerModalOpen(true)
+                          )}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Sil</span>
+                        </Button>
                         <Button
                           onClick={() => (
                             setSelectedCustomer(customer),
@@ -221,8 +244,9 @@ export default function CustomerInfo() {
                         </Button>
                         <Button
                           onClick={() => (
-                            setIsCustomerDetailsModalOpen(true),
-                            setSelectedCustomer(customer)
+                            console.log("selected customer: ", customer),
+                            setSelectedCustomer(customer),
+                            setIsCustomerDetailsModalOpen(true)
                           )}
                           variant="outline"
                           size="sm"
@@ -270,6 +294,7 @@ export default function CustomerInfo() {
         {/* Modals */}
         <CustomerDetailsModal />
         <ViewCustomerModal />
+        <DeleteCustomerModal />
       </div>
     );
   } else {

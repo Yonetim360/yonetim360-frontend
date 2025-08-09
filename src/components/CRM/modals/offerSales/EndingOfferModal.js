@@ -1,8 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { OfferStore } from "@/stores/crm/domains/OfferStore";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 export default function EndingOfferModal() {
   const { isEndingOfferModalOpen, setIsEndingOfferModalOpen, selectedOffer } =
@@ -13,13 +18,13 @@ export default function EndingOfferModal() {
       onOpenChange={setIsEndingOfferModalOpen}
     >
       <DialogContent>
-        Teklifi Sonuçlandır
-        <Separator />
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle>Teklifi Sonuçlandır</DialogTitle>
+          <DialogDescription>
             <span className="font-semibold">{selectedOffer?.customer}</span>{" "}
             firmasına yapılan teklifi sonuçlandır
-          </DialogTitle>
+          </DialogDescription>
+          <Separator />
 
           <div className="flex gap-2 justify-start items-center">
             <Button className={"bg-yellow-600 hover:bg-yellow-600/180"}>

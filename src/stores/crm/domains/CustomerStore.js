@@ -8,6 +8,7 @@ export const CustomerStore = create((set, get) => ({
   customersError: null,
   customersLoaded: false, // Veri daha önce yüklendi mi?
 
+  isDeleteCustomerModalOpen: false,
   isCustomerModalOpen: false,
   isCustomerDetailsModalOpen: false,
   isViewCustomerModalOpen: false,
@@ -20,6 +21,9 @@ export const CustomerStore = create((set, get) => ({
   setIsViewCustomerModalOpen: (val) => set({ isViewCustomerModalOpen: val }),
   setIsCustomerDetailsModalOpen: (val) =>
     set({ isCustomerDetailsModalOpen: val }),
+
+  setIsDeleteCustomerModalOpen: (val) =>
+    set({ isDeleteCustomerModalOpen: val }),
 
   customerForm: {
     name: "",
@@ -99,10 +103,18 @@ export const CustomerStore = create((set, get) => ({
         customerData
       );
 
+      // 2. Güncellenmiş veriyi tekrar çek
+      const refreshedCustomer = await customerService.getCustomerById(id);
+      console.log("refreshedCustomer", refreshedCustomer);
+
+      if (!refreshedCustomer) {
+        throw new Error("Müşteri bilgileri alınamadı");
+      }
+
       // Store'da ilgili müşteriyi güncelle
       set((state) => ({
         customers: state.customers.map((customer) =>
-          customer.id === id ? updatedCustomer : customer
+          customer.id === id ? { ...refreshedCustomer } : customer
         ),
         customersLoading: false,
       }));
