@@ -34,7 +34,7 @@ export const ModalStore = create((set, get) => ({
       subModules: [],
     },
     {
-      id: "agents",
+      id: "representatives",
       name: "Temsilci Takibi",
       icon: IdCardLanyard,
       color: "text-[#02d1a1]",
@@ -101,7 +101,10 @@ export const ModalStore = create((set, get) => ({
       icon: HelpCircle,
       color: "text-indigo-600",
       bgColor: "bg-indigo-100",
-      subModules: [],
+      subModules: [
+        { id: "newRequest", name: "Yeni Talep" },
+        { id: "knowledgeBase", name: "Bilgi Bankası" },
+      ],
     },
   ],
 

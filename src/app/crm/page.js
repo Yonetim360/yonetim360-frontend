@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChevronDown, ChevronRight, Phone } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import MyCalendar from "@/components/CRM/modules/calendar/MyCalendar";
 import Overview from "@/components/CRM/modules/overview/Overview";
 import CustomerInfo from "@/components/CRM/modules/customer/CustomerInfo";
@@ -26,6 +26,10 @@ import FutureCommunications from "@/components/CRM/modules/communication/FutureC
 import Offers from "@/components/CRM/modules/offers/Offers";
 import Sales from "@/components/CRM/modules/offers/Sales";
 import { ModalStore } from "@/stores/crm/shared/ModalStore";
+import Representatives from "@/components/CRM/modules/representative/Representatives";
+import SolutionCenter from "@/components/CRM/modules/solution/SolutionCenter";
+import NewRequest from "@/components/CRM/modules/solution/NewRequest";
+import { KnowledgeBase } from "@/components/CRM/modules/solution/KnowledgeBase";
 
 export default function Page() {
   const {
@@ -70,6 +74,10 @@ export default function Page() {
           return <Offers />;
         case "sales":
           return <Sales />;
+        case "newRequest":
+          return <NewRequest />;
+        case "knowledgeBase":
+          return <KnowledgeBase />;
         default:
           return <DefaultCase />;
       }
@@ -81,6 +89,8 @@ export default function Page() {
         return <Overview />;
       case "customer-info":
         return <CustomerInfo />;
+      case "representatives":
+        return <Representatives />;
       case "communication":
         return <Communication />;
       case "sales-offers":
@@ -89,54 +99,12 @@ export default function Page() {
         return <Support />;
       case "calendar":
         return <MyCalendar />;
+      case "solution-center":
+        return <SolutionCenter />;
       default:
         return <DefaultCase />;
     }
   };
-
-  // const tenantId = "D425F85C-D0DD-4524-BF12-A1AC57E07C4D";
-
-  // axios
-  //   .get("https://localhost:7278/api/Customer", {
-  //     headers: {
-  //       "X-Tenant-Id": tenantId,
-  //     },
-  //   })
-  //   .then((response) => {
-  //     console.log(response.data);
-  //   })
-  //   .catch((error) => {
-  //     console.error(error);
-  //   });
-
-  // axios
-  //   .post(
-  //     "https://localhost:7278/api/Customer",
-  //     {
-  //       // Örnek gönderi (request body)
-  //       userId: "9BA54F0B-B936-4716-A03C-9E8A86B213C2",
-  //       CompanyName: "ABC Company",
-  //       ContactPerson: "John Doe",
-  //       email: "FtKo6@example.com",
-  //       PhoneNumber: "1234567890",
-  //       Segment: 1,
-  //       State: 1,
-  //       Address: "123 Main Street",
-  //       Note: "This is a note",
-  //     },
-  //     {
-  //       headers: {
-  //         "X-Tenant-Id": tenantId,
-  //         "Content-Type": "application/json",
-  //       },
-  //     }
-  //   )
-  //   .then((response) => {
-  //     console.log("POST cevabı:", response.data);
-  //   })
-  //   .catch((error) => {
-  //     console.error("POST hatası:", error);
-  //   });
 
   return (
     <div className="min-h-screen bg-cream">

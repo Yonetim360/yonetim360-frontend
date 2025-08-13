@@ -1,0 +1,45 @@
+import { create } from "zustand";
+
+export const RepresentativeStore = create((set, get) => ({
+  representatives: [
+    {
+      id: 1,
+      fullName: "Ahmet Yılmaz",
+      email: "ahmet.yilmaz@sirket.com",
+      phoneNumber: "0532 123 4567",
+      department: "Bilgi İşlem",
+      position: "Yazılım Geliştirici",
+      isActive: true,
+      signDate: "2023-01-15",
+      updatedDate: "2023-02-20",
+      note: "Lorem ipsum dolor sit amet.",
+      picture: "https://via.placeholder.com/150",
+    },
+    {
+      id: 2,
+      fullName: "Ayşe Demir",
+      email: "ayse.demir@sirket.com",
+      phoneNumber: "0533 234 5678",
+      department: "İnsan Kaynakları",
+      position: "İK Uzmanı",
+      isActive: false,
+      signDate: "2023-01-15",
+      updatedDate: "2023-02-20",
+      note: "Lorem ipsum dolor sit amet.",
+      picture: "https://via.placeholder.com/150",
+    },
+    {
+      id: 3,
+      fullName: "Mehmet Kaya",
+      email: "mehmet.kaya@sirket.com",
+      phoneNumber: "0534 345 6789",
+      department: "İnsan Kaynakları",
+      position: "İK Uzmanı",
+      isActive: true,
+      signDate: "2023-01-15",
+      updatedDate: "2023-02-20",
+      note: "Lorem ipsum dolor sit amet.",
+      picture: "https://via.placeholder.com/150",
+    },
+  ],
+}));
