@@ -30,8 +30,11 @@ import Representatives from "@/components/CRM/modules/representative/Representat
 import SolutionCenter from "@/components/CRM/modules/solution/SolutionCenter";
 import NewRequest from "@/components/CRM/modules/solution/NewRequest";
 import { KnowledgeBase } from "@/components/CRM/modules/solution/KnowledgeBase";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
+
   const {
     activeModule,
     setActiveModule,
@@ -54,6 +57,10 @@ export default function Page() {
 
   // Modül tıklama işlemi
   const handleModuleClick = (moduleId, subModuleId = "") => {
+    if (moduleId === "whatsapp") {
+      router.push("/crm/whatsapp-service");
+      return;
+    }
     setActiveModule(moduleId);
     setActiveSubModule(subModuleId);
     if (!expandedModules.includes(moduleId)) {
