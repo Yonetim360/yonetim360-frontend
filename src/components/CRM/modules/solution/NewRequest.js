@@ -30,7 +30,15 @@ export default function NewRequest() {
     priority: "",
     module: "",
     stepsToReproduce: "",
+    email: "",
+    phone: "",
+    preferedContact: "",
   });
+  const [file, setFile] = useState(null);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
   const { setActiveSubModule } = ModalStore();
 
   const requestTypes = [
@@ -61,6 +69,10 @@ export default function NewRequest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    // Dosya ile birlikte form verisi hazırlama örneği:
+    // const formDataToSend = new FormData();
+    // Object.entries(formData).forEach(([key, value]) => formDataToSend.append(key, value));
+    // if (file) formDataToSend.append("file", file);
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
@@ -182,6 +194,76 @@ export default function NewRequest() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">E-posta</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="E-posta adresinizi girin"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Telefon (Opsiyonel)</Label>
+                <Input
+                  id="phone"
+                  type="number"
+                  placeholder="Telefon numaranızı girin"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, phone: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="preferedContact">
+                Tercih Edilen İletişim Yöntemi
+              </Label>
+              <Select
+                id="preferedContact"
+                value={formData.preferedContact || ""}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, preferedContact: value }))
+                }
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="İletişim yöntemi seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">E-posta</SelectItem>
+                  <SelectItem value="phone">Telefon</SelectItem>
+                  <SelectItem value="online">Online Görüşme</SelectItem>
+                  <SelectItem value="sms">SMS</SelectItem>
+                  <SelectItem value="notification">
+                    Uygulama İçi Bildirim
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Dosya ekleme alanı */}
+            <div className="space-y-2">
+              <Label htmlFor="file">Dosya Ekle (Opsiyonel)</Label>
+              <Input
+                id="file"
+                type="file"
+                onChange={handleFileChange}
+                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+              />
+              {file && (
+                <div className="text-sm text-gray-600">
+                  Seçilen dosya:{" "}
+                  <span className="font-medium">{file.name}</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
