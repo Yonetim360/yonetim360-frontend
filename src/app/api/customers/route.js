@@ -10,6 +10,7 @@ export async function GET() {
     const response = await axios.get(`${BACKEND_BASE_URL}/api/customer`, {
       headers: {
         "X-Tenant-Id": TENANT_ID,
+        Authorization: `Bearer YakarsaDünyayıGariplerYakarTalatVeSelimBaşıÇeker7752!!!`,
       },
     });
 

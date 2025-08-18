@@ -15,30 +15,79 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Building2 } from "lucide-react";
 import LoginLeftSide from "@/components/account/LoginLeftSide";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import InputError from "@/components/common/InputError";
+
+const registerSchema = z
+  .object({
+    firstName: z.string().min(3, "Adınızı Giriniz"),
+    lastName: z.string().min(3, "Soyadınızı Giriniz"),
+    email: z.email("Geçerli bir e-posta adresi giriniz"),
+    password: z
+      .string()
+      .min(8, "Şifreniz en az 8 karakterden oluşmalıdır")
+      .regex(/[A-Z]/, "En az 1 büyük harf içermelidir")
+      .regex(/[0-9]/, "En az 1 sayı içermelidir")
+      .regex(/[^A-Za-z0-9]/, "En az 1 özel karakter (sembol) içermelidir"),
+    confirmPassword: z.string(),
+    agreeTerms: z.boolean().refine((value) => value, {
+      message:
+        "Kullanım şartlarını ve gizlilik politikasını kabul etmelisiniz.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Şifreler eşleşmiyor",
+    path: ["confirmPassword"],
+  });
 
 export default function RegisterPage() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      agreeTerms: false,
+    },
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Şifreler eşleşmiyor!");
-      return;
+  const onSubmit = async (data) => {
+    const { firstName, lastName, email, password } = data;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            password,
+          }),
+        }
+      );
+      const result = await response.json();
+      console.log(result);
+    } catch (error) {
+      console.error("API Error:", error);
     }
-    if (!agreeTerms) {
-      alert("Kullanım şartlarını ve gizlilik politikasını kabul etmelisiniz.");
-      return;
-    }
-    // Handle registration logic here
-    console.log("Registration attempt:", { name, email, password, agreeTerms });
-    alert("Kayıt başarılı! Lütfen giriş yapın.");
-    // Redirect to login page or dashboard
     // router.push('/login');
   };
 
@@ -66,20 +115,50 @@ export default function RegisterPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-dark-gray font-medium">
-                    Adınız Soyadınız
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Adınız Soyadınız"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="h-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
-                    required
-                  />
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-6"
+                noValidate
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="name"
+                      className="text-dark-gray font-medium"
+                    >
+                      Adınız
+                    </Label>
+                    <Input
+                      {...register("firstName")}
+                      id="firstName"
+                      type="text"
+                      placeholder="Adınız"
+                      className="h-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
+                    />
+                    {errors.firstName && (
+                      <InputError message={errors.firstName.message} />
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="name"
+                      className="text-dark-gray font-medium"
+                    >
+                      Soyadınız
+                    </Label>
+                    <Input
+                      {...register("lastName")}
+                      id="lastName"
+                      type="text"
+                      placeholder="Adınız"
+                      className="h-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
+                      error={errors.lastName?.message}
+                    />
+                    {errors.lastName && (
+                      <InputError message={errors.lastName.message} />
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -87,14 +166,16 @@ export default function RegisterPage() {
                     E-posta Adresi
                   </Label>
                   <Input
+                    {...register("email")}
                     id="email"
                     type="email"
                     placeholder="ornek@sirket.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     className="h-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
-                    required
+                    error={errors.email?.message}
                   />
+                  {errors.email && (
+                    <InputError message={errors.email.message} />
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -106,14 +187,16 @@ export default function RegisterPage() {
                   </Label>
                   <div className="relative">
                     <Input
+                      {...register("password")}
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Şifrenizi girin"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
                       className="h-12 pr-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
-                      required
+                      error={errors.password?.message}
                     />
+                    {errors.password && (
+                      <InputError message={errors.password.message} />
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
@@ -132,21 +215,23 @@ export default function RegisterPage() {
 
                 <div className="space-y-2">
                   <Label
-                    htmlFor="confirm-password"
+                    htmlFor="confirmPassword"
                     className="text-dark-gray font-medium"
                   >
                     Şifreyi Onayla
                   </Label>
                   <div className="relative">
                     <Input
-                      id="confirm-password"
+                      {...register("confirmPassword")}
+                      id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Şifrenizi tekrar girin"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
                       className="h-12 pr-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
-                      required
+                      error={errors.confirmPassword?.message}
                     />
+                    {errors.confirmPassword && (
+                      <InputError message={errors.confirmPassword.message} />
+                    )}
                     <Button
                       type="button"
                       variant="ghost"
@@ -166,11 +251,17 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={agreeTerms}
-                    onCheckedChange={setAgreeTerms}
-                    className="border-gray-300 data-[state=checked]:bg-primary-green data-[state=checked]:border-primary-green"
+                  <Controller
+                    name="agreeTerms"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="agreeTerms"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="border-gray-300 data-[state=checked]:bg-primary-green data-[state=checked]:border-primary-green"
+                      />
+                    )}
                   />
                   <Label htmlFor="terms" className="text-sm text-gray-600">
                     <Link
@@ -189,6 +280,9 @@ export default function RegisterPage() {
                     &apos;nı okudum ve kabul ediyorum.
                   </Label>
                 </div>
+                {errors.agreeTerms && (
+                  <InputError message={errors.agreeTerms.message} />
+                )}
 
                 <Button
                   type="submit"

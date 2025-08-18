@@ -15,17 +15,58 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Building2 } from "lucide-react";
 import LoginLeftSide from "@/components/account/LoginLeftSide";
+import InputError from "@/components/common/InputError";
+import { Controller, useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const loginSchema = z.object({
+  email: z.email("Geçerli bir e-posta adresi giriniz"),
+  password: z
+    .string()
+    .min(8, "Şifreniz en az 8 karakterden oluşmalıdır")
+    .regex(/[A-Z]/, "En az 1 büyük harf içermelidir")
+    .regex(/[0-9]/, "En az 1 sayı içermelidir")
+    .regex(/[^A-Za-z0-9]/, "En az 1 özel karakter (sembol) içermelidir"),
+  rememberMe: z.boolean().optional(),
+});
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log("Login attempt:", { email, password, rememberMe });
+  const [showPassword, setShowPassword] = useState(false);
+
+  const onSubmit = async (data) => {
+    console.log(data);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+      const result = await response.json();
+      console.log(result);
+    } catch (error) {
+      console.error("API Error:", error);
+    }
   };
 
   return (
@@ -52,20 +93,21 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-dark-gray font-medium">
                     E-posta Adresi
                   </Label>
                   <Input
+                    {...register("email")}
                     id="email"
                     type="email"
                     placeholder="ornek@sirket.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     className="h-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
-                    required
                   />
+                  {errors.email && (
+                    <InputError message={errors.email.message} />
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -77,14 +119,13 @@ export default function LoginPage() {
                   </Label>
                   <div className="relative">
                     <Input
+                      {...register("password")}
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Şifrenizi girin"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
                       className="h-12 pr-12 border-gray-300 focus:border-primary-green focus:ring-primary-green"
-                      required
                     />
+
                     <Button
                       type="button"
                       variant="ghost"
@@ -98,17 +139,28 @@ export default function LoginPage() {
                         <Eye className="h-4 w-4" />
                       )}
                     </Button>
+
+                    {errors.password && (
+                      <InputError message={errors.password.message} />
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="remember"
-                      checked={rememberMe}
-                      onCheckedChange={setRememberMe}
-                      className="border-gray-300 data-[state=checked]:bg-primary-green data-[state=checked]:border-primary-green"
+                    <Controller
+                      name="rememberMe"
+                      control={control}
+                      render={({ field }) => (
+                        <Checkbox
+                          id="remember"
+                          className="border-gray-300 data-[state=checked]:bg-primary-green data-[state=checked]:border-primary-green"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      )}
                     />
+
                     <Label htmlFor="remember" className="text-sm text-gray-600">
                       Beni hatırla
                     </Label>

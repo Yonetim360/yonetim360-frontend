@@ -35,6 +35,30 @@ import { useRouter } from "next/navigation";
 export default function Page() {
   const router = useRouter();
 
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/auth/get-user`,
+  //         {
+  //           method: "GET",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //         }
+  //       );
+  //       const result = await response.json();
+  //       console.log(result);
+  //     } catch (error) {
+  //       console.error("API Error:", error);
+  //     }
+  //   };
+  //   getUser();
+  //   return () => {
+  //     getUser();
+  //   };
+  // }, []);
+
   const {
     activeModule,
     setActiveModule,
