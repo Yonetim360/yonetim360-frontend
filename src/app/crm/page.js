@@ -31,6 +31,7 @@ import SolutionCenter from "@/components/CRM/modules/solution/SolutionCenter";
 import NewRequest from "@/components/CRM/modules/solution/NewRequest";
 import { KnowledgeBase } from "@/components/CRM/modules/solution/KnowledgeBase";
 import { useRouter } from "next/navigation";
+import Announcements from "@/components/CRM/modules/announcement/Announcements";
 
 export default function Page() {
   const router = useRouter();
@@ -130,6 +131,8 @@ export default function Page() {
         return <Support />;
       case "calendar":
         return <MyCalendar />;
+      case "announcements":
+        return <Announcements />;
       case "solution-center":
         return <SolutionCenter />;
       default:
