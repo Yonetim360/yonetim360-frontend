@@ -1,9 +1,14 @@
+import { useAuth } from "@/hooks/useAuth";
+import useAuthStore from "@/stores/shared/AuthStore";
+
 class CustomerService {
   constructor() {
     this.baseURL = `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api`;
     this.cache = null;
     this.cacheTime = null;
     this.isLoading = false;
+
+    this.authenticatedFetch = useAuthStore.getState().authenticatedFetch;
   }
 
   // Cache kontrolü
@@ -17,14 +22,11 @@ class CustomerService {
 
   // Müşterileri getir
   async getCustomers(forceRefresh = false) {
-    // Cache'den döndür (eğer geçerliyse ve force refresh yoksa)
     if (!forceRefresh && this.isCacheValid()) {
       return this.cache;
     }
 
-    // Zaten yükleniyor mu?
     if (this.isLoading) {
-      // Yüklenene kadar bekle
       await new Promise((resolve) => {
         const checkLoading = () => {
           if (!this.isLoading) {
@@ -41,9 +43,12 @@ class CustomerService {
     try {
       this.isLoading = true;
 
-      const response = await fetch(`${this.baseURL}/customers`);
+      const response = await this.authenticatedFetch(
+        `${this.baseURL}/customers`
+      );
 
-      // Cache'e kaydet
+      if (!response.ok) throw new Error("Failed to fetch customers");
+
       const data = await response.json();
       this.cache = data;
       this.cacheTime = Date.now();

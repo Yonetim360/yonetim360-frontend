@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, rememberMe } = await request.json();
 
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/auth/login`,
@@ -20,9 +20,17 @@ export async function POST(request) {
     );
 
     // Backend'den gelen token'ı al (response.data.token veya response.data.accessToken gibi)
-    const token = response.data.access_token;
+    console.log(response.data);
 
-    if (!token) {
+    const accessToken = response.data.accessToken;
+    const refreshToken = response.data.refreshToken;
+    const userData = {
+      id: response.data.id,
+      fullName: response.data.fullName,
+      email: response.data.email,
+    };
+
+    if (!accessToken || !refreshToken) {
       return NextResponse.json({ error: "Token alınamadı" }, { status: 500 });
     }
 
@@ -30,17 +38,18 @@ export async function POST(request) {
     const nextResponse = NextResponse.json({
       success: true,
       message: "Giriş başarılı",
-      user: response.data.user, // Kullanıcı bilgilerini döndür (token hariç)
+      user: userData,
+      accessToken: accessToken,
     });
 
     // HttpOnly cookie ayarla
     nextResponse.cookies.set({
-      name: "session-token", // Cookie adı
-      value: token,
+      name: "refresh-token", // Cookie adı
+      value: refreshToken,
       httpOnly: true, // XSS saldırılarını önler
       secure: process.env.NODE_ENV === "production", // Production'da HTTPS zorunlu
       sameSite: "strict", // CSRF saldırılarını önler
-      maxAge: 60 * 60 * 24 * 7, // 7 gün (saniye cinsinden)
+      maxAge: rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 24,
       path: "/", // Tüm site için geçerli
     });
 

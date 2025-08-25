@@ -65,11 +65,11 @@ export default function Page() {
       description:
         "Personel yönetimi, bordro, izin takibi ve performans değerlendirmelerini kolayca yapın.",
       icon: UserCheck,
-      color: "text-red",
-      bgColor: "bg-red",
-      hoverColor: "hover:bg-red/90",
-      borderColor: "border-red/20",
-      iconBgColor: "bg-red/10",
+      color: "text-customRed",
+      bgColor: "bg-customRed",
+      hoverColor: "hover:bg-customRed/90",
+      borderColor: "border-customRed/20",
+      iconBgColor: "bg-customRed/10",
       href: "/hr",
       stats: [
         { label: "Toplam Personel", value: "47" },
@@ -186,12 +186,12 @@ export default function Page() {
                 <span className="text-xs text-orange">+18%</span>
               </div>
             </div>
-            <div className="text-center p-4 bg-red/5 rounded-xl">
-              <div className="text-3xl font-bold text-red mb-2">47</div>
+            <div className="text-center p-4 bg-customRed/5 rounded-xl">
+              <div className="text-3xl font-bold text-customRed mb-2">47</div>
               <div className="text-sm text-gray-600">Toplam Personel</div>
               <div className="flex items-center justify-center mt-2">
-                <TrendingUp className="h-4 w-4 text-red mr-1" />
-                <span className="text-xs text-red">+2</span>
+                <TrendingUp className="h-4 w-4 text-customRed mr-1" />
+                <span className="text-xs text-customRed">+2</span>
               </div>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-xl">
@@ -233,8 +233,8 @@ export default function Page() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4 p-4 bg-red/5 rounded-lg">
-              <div className="w-3 h-3 bg-red rounded-full"></div>
+            <div className="flex items-center space-x-4 p-4 bg-customRed/5 rounded-lg">
+              <div className="w-3 h-3 bg-customRed rounded-full"></div>
               <div className="flex-1">
                 <p className="font-medium text-dark-gray">
                   Yeni personel kaydı: Mehmet Kaya - Yazılım Geliştirici

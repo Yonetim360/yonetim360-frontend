@@ -9,20 +9,11 @@ import {
   Plus,
   Search,
   Users,
-  RefreshCw,
-  AlertCircle,
-  HelpCircle,
   Trash2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useCustomers } from "@/hooks/useCustomers";
-import CustomerDetailsModal from "../../modals/customer/CustomerDetailsModal";
-import ViewCustomerModal from "../../modals/customer/ViewCustomerModal";
 import { useState } from "react";
-import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
-import DeleteCustomerModal from "../../modals/customer/DeleteCustomerModal";
 import { RepresentativeStore } from "@/stores/crm/domains/RepresentativeStore";
 
 export default function Representatives() {

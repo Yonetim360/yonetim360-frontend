@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,8 @@ import InputError from "@/components/common/InputError";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.email("Geçerli bir e-posta adresi giriniz"),
@@ -48,25 +50,16 @@ export default function LoginPage() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const onSubmit = async (data) => {
-    console.log(data);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-      const result = await response.json();
-      console.log(result);
-    } catch (error) {
-      console.error("API Error:", error);
+  const { login, isAuthenticated, error, loading } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
     }
+  });
+
+  const onSubmit = async (data) => {
+    login(data.email, data.password, data.rememberMe);
   };
 
   return (
