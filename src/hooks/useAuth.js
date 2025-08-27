@@ -22,18 +22,42 @@ export function useAuth() {
     loading,
     error,
     isAuthenticated,
+    isRefreshing,
     login,
     logout,
     refreshToken,
     initializeAuth,
     authenticatedFetch,
+    ensureValidToken,
   } = useAuthStore();
 
   // Uygulama başlangıcında auth durumunu kontrol et
   useEffect(() => {
+    // Eğer zaten token ve user varsa, initialize etmeye gerek yok
+    if (accessToken && user) {
+      return;
+    }
+
     console.log("[v0] Initializing auth on component mount");
     initializeAuth();
-  }, [initializeAuth]);
+  }, []); // sadece mountta çalışacak
+
+  // Auth durumunu izle ve gerekirse user bilgisini al
+  useEffect(() => {
+    const handleAuthState = async () => {
+      // Eğer token var ama user yok ve refresh işlemi devam etmiyorsa
+      if (accessToken && !user && !isRefreshing && !loading) {
+        console.log("[v0] Token var ama user yok, token yeniliyor...");
+        try {
+          await ensureValidToken();
+        } catch (error) {
+          console.error("[v0] Token yenileme hatası:", error);
+        }
+      }
+    };
+
+    handleAuthState();
+  }, [accessToken, user, isRefreshing, loading, ensureValidToken]);
 
   return {
     // State
@@ -42,6 +66,7 @@ export function useAuth() {
     isAuthenticated,
     loading,
     error,
+    isRefreshing, // Token yenileme durumu
 
     // Actions
     login,
@@ -51,5 +76,6 @@ export function useAuth() {
 
     // Utility
     initializeAuth,
+    ensureValidToken,
   };
 }

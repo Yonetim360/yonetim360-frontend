@@ -1,4 +1,3 @@
-import { useAuth } from "@/hooks/useAuth";
 import useAuthStore from "@/stores/shared/AuthStore";
 
 class CustomerService {
@@ -7,8 +6,36 @@ class CustomerService {
     this.cache = null;
     this.cacheTime = null;
     this.isLoading = false;
+  }
 
-    this.authenticatedFetch = useAuthStore.getState().authenticatedFetch;
+  getAuthenticatedFetch() {
+    return useAuthStore.getState().authenticatedFetch;
+  }
+
+  getUserId() {
+    console.log(useAuthStore.getState().accessToken);
+
+    return useAuthStore.getState().user.userId;
+  }
+
+  // Token'ın geçerli olduğundan emin ol
+  async ensureAuth() {
+    const { ensureValidToken, isAuthenticated, user } = useAuthStore.getState();
+
+    // Eğer user yoksa, token'ı yenilemeye çalış
+    if (!user || !isAuthenticated) {
+      try {
+        await ensureValidToken();
+
+        // Token yenilendikten sonra user kontrolü
+        const updatedState = useAuthStore.getState();
+        if (!updatedState.user || !updatedState.isAuthenticated) {
+          throw new Error("Authentication required");
+        }
+      } catch (error) {
+        throw new Error("Authentication failed: " + error.message);
+      }
+    }
   }
 
   // Cache kontrolü
@@ -22,6 +49,9 @@ class CustomerService {
 
   // Müşterileri getir
   async getCustomers(forceRefresh = false) {
+    // Önce authentication'ı kontrol et
+    await this.ensureAuth();
+
     if (!forceRefresh && this.isCacheValid()) {
       return this.cache;
     }
@@ -43,9 +73,8 @@ class CustomerService {
     try {
       this.isLoading = true;
 
-      const response = await this.authenticatedFetch(
-        `${this.baseURL}/customers`
-      );
+      const authenticatedFetch = this.getAuthenticatedFetch();
+      const response = await authenticatedFetch(`${this.baseURL}/customers`);
 
       if (!response.ok) throw new Error("Failed to fetch customers");
 
@@ -63,15 +92,20 @@ class CustomerService {
   }
 
   // Müşteri bilgilerini getir
-
   getCustomerById = async (id) => {
+    await this.ensureAuth();
+
     try {
-      const response = await fetch(`/api/customers/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const authenticatedFetch = this.getAuthenticatedFetch();
+      const response = await authenticatedFetch(
+        `${this.baseURL}/customers/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -93,10 +127,28 @@ class CustomerService {
 
   // Yeni müşteri oluştur
   async createCustomer(customerData) {
+    await this.ensureAuth();
+
     try {
-      const response = await fetch(`${this.baseURL}/customers`, {
+      const authenticatedFetch = this.getAuthenticatedFetch();
+
+      const userId = this.getUserId();
+
+      if (!userId) {
+        throw new Error("You are not authorized to create a new customer.");
+      }
+
+      const dataToSend = {
+        ...customerData,
+        userId,
+      };
+
+      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
         method: "POST",
-        body: JSON.stringify(customerData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {
@@ -117,26 +169,41 @@ class CustomerService {
   }
 
   // Müşteri güncelle
-  async updateCustomer(id, customerData) {
-    const sendToData = { ...customerData, id: id };
+  async updateCustomer(customerData) {
+    await this.ensureAuth();
 
     try {
-      const response = await fetch(
-        `${this.baseURL}/customers/${id}`,
-        sendToData,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(customerData),
-        }
-      );
+      const authenticatedFetch = this.getAuthenticatedFetch();
+
+      const userId = this.getUserId();
+
+      if (!userId) {
+        throw new Error("You are not authorized to update this customer.");
+      }
+
+      const dataToSend = {
+        ...customerData,
+        userId,
+      };
+
+      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Sunucu hatası: ${response.status}`);
+      }
+
+      const data = await response.json();
 
       // Cache'i temizle
       this.clearCache();
 
-      return response.data;
+      return data;
     } catch (error) {
       console.error("Müşteri güncellenemedi:", error);
       throw error;
@@ -145,18 +212,29 @@ class CustomerService {
 
   // Müşteri sil
   async deleteCustomer(id) {
+    await this.ensureAuth();
+
     try {
-      const response = await fetch(`${this.baseURL}/customers/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const authenticatedFetch = this.getAuthenticatedFetch();
+      const response = await authenticatedFetch(
+        `${this.baseURL}/customers/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Sunucu hatası: ${response.status}`);
+      }
+
+      const data = await response.json();
 
       // Cache'i temizle
       this.clearCache();
 
-      const data = await response.json();
       return data;
     } catch (error) {
       console.error("Müşteri silinemedi:", error);

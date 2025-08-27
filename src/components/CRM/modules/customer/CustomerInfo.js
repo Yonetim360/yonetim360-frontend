@@ -26,8 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function CustomerInfo() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { user } = useAuth();
-  console.log(user);
+  const { user, loading: authLoading } = useAuth();
 
   // CustomerStore'dan state ve actions
   const {
@@ -57,7 +56,7 @@ export default function CustomerInfo() {
       : customers;
 
   // Loading durumu
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

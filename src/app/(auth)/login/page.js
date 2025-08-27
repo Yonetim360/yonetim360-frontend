@@ -50,13 +50,14 @@ export default function LoginPage() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, isAuthenticated, error, loading } = useAuth();
+  const { login, isAuthenticated, error, loading, user } = useAuth();
   const router = useRouter();
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/");
     }
   });
+  console.log(user);
 
   const onSubmit = async (data) => {
     login(data.email, data.password, data.rememberMe);

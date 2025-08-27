@@ -7,6 +7,7 @@ const useAuthStore = create((set, get) => ({
   user: null,
   loading: false,
   error: null,
+  isRefreshing: false, // Token yenileme durumunu takip et
 
   //actions
   login: async (email, password, rememberMe) => {
@@ -49,6 +50,29 @@ const useAuthStore = create((set, get) => ({
   },
 
   refreshToken: async () => {
+    const { isRefreshing } = get();
+
+    // Eğer zaten refresh işlemi devam ediyorsa, bekle
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        const checkRefresh = () => {
+          const state = get();
+          if (!state.isRefreshing) {
+            if (state.accessToken) {
+              resolve(state.accessToken);
+            } else {
+              reject(new Error("Refresh failed"));
+            }
+          } else {
+            setTimeout(checkRefresh, 100);
+          }
+        };
+        checkRefresh();
+      });
+    }
+
+    set({ isRefreshing: true });
+
     try {
       const response = await fetch("/api/auth/refresh", {
         method: "POST",
@@ -57,61 +81,118 @@ const useAuthStore = create((set, get) => ({
 
       if (response.ok) {
         const { accessToken, user } = await response.json();
-        set({ accessToken, user, isAuthenticated: true });
+        set({
+          accessToken,
+          user,
+          isAuthenticated: true,
+          isRefreshing: false,
+        });
         return accessToken;
       } else {
         // RefreshToken geçersiz, logout yap
-        set({ isAuthenticated: false, user: null, accessToken: null });
+        set({
+          isAuthenticated: false,
+          user: null,
+          accessToken: null,
+          isRefreshing: false,
+        });
         throw new Error("Refresh failed");
       }
     } catch (error) {
-      set({ isAuthenticated: false, user: null, accessToken: null });
+      set({
+        isAuthenticated: false,
+        user: null,
+        accessToken: null,
+        isRefreshing: false,
+      });
       throw error;
     }
   },
+
   authenticatedFetch: async (url, options = {}) => {
-    const { accessToken } = get();
+    let { accessToken } = get();
+    const { refreshToken } = get();
 
-    const headers = {
-      "Content-Type": "application/json",
-      ...options.headers,
-    };
+    const makeRequest = async (token) => {
+      const headers = {
+        "Content-Type": "application/json",
+        ...options.headers,
+      };
 
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    let response = await fetch(url, {
-      ...options,
-      headers,
-      credentials: "include",
-    });
-
-    // Token expired ise refresh et ve tekrar dene
-    if (response.status === 401 && accessToken) {
-      const refreshSuccess = await refreshToken();
-      if (!refreshSuccess) {
-        // Token yenilenemedi, kullanıcıyı logout edebilirsin veya hata throw et
-        throw new Error("Access token expired and refresh failed");
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
-      const newToken = get().accessToken;
-      headers.Authorization = `Bearer ${newToken}`;
-      response = await fetch(url, {
+
+      return await fetch(url, {
         ...options,
         headers,
         credentials: "include",
       });
+    };
+
+    // İlk deneme - mevcut token ile
+    if (accessToken) {
+      const response = await makeRequest(accessToken);
+
+      // Eğer token geçerliyse, response'u döndür
+      if (response.status !== 401) {
+        return response;
+      }
     }
 
-    return response;
+    // Token yoksa veya 401 geldiyse, refresh token ile yenile
+    try {
+      console.log("Token yenileniyor...");
+      const newToken = await refreshToken();
+      console.log("Yeni token alındı:", !!newToken);
+
+      // Yeni token ile tekrar dene
+      return await makeRequest(newToken);
+    } catch (refreshError) {
+      console.error("Token yenileme başarısız:", refreshError);
+      throw new Error("Access token expired and refresh failed");
+    }
   },
 
   // Sayfa yüklendiğinde auth durumunu kontrol et
   initializeAuth: async () => {
-    const success = await get().refreshToken();
-    if (!success) {
-      console.log("[v0] No valid refresh token found");
+    const { accessToken, user, isRefreshing } = get();
+
+    // Eğer zaten token ve user varsa, initialize etmeye gerek yok
+    if (accessToken && user) {
+      set({ isAuthenticated: true });
+      return;
     }
+
+    // Eğer refresh işlemi devam ediyorsa, bekle
+    if (isRefreshing) {
+      return;
+    }
+
+    try {
+      set({ loading: true });
+      const newToken = await get().refreshToken();
+      if (newToken) {
+        console.log("[v0] Auth initialized successfully");
+      }
+    } catch (error) {
+      console.log("[v0] Auth initialization failed:", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // Token'ın geçerli olup olmadığını kontrol et
+  ensureValidToken: async () => {
+    const { accessToken, user } = get();
+
+    // Token ve user varsa, geçerli kabul et
+    if (accessToken && user) {
+      return accessToken;
+    }
+
+    // Token yoksa veya user yoksa, refresh et
+    return await get().refreshToken();
   },
 }));
 

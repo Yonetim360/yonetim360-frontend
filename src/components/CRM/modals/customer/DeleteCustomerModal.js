@@ -36,30 +36,34 @@ export default function DeleteCustomerModal() {
               <Trash2 className="w-6 h-6" />
               Tehlikeli İşlem
             </DialogTitle>
-            <DialogDescription className="text-gray-700 text-base leading-relaxed">
-              <div className="bg-red-50 p-4 rounded-lg border border-red-200 mb-4">
-                <p className="font-semibold text-red-800 mb-2">
-                  ⚠️ Bu işlem geri alınamaz!
-                </p>
-                <p>
-                  <span className="font-bold text-red-900">
-                    &quot;{selectedCustomer.companyName}&quot;
-                  </span>{" "}
-                  firmasını ve tüm ilişkili verilerini kalıcı olarak
-                  sileceksiniz.
-                </p>
-              </div>
-              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded border-l-4 border-gray-400">
-                <p>Bu işlem şunları siler:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Müşteri bilgileri</li>
-                  <li>Geçmiş işlemler</li>
-                  <li>İletişim kayıtları</li>
-                  <li>İlişkili dökümanlar</li>
-                </ul>
-              </div>
+            <DialogDescription className="sr-only">
+              Müşteri silme onay diyalogu
             </DialogDescription>
           </DialogHeader>
+
+          {/* Warning Details */}
+          <div className="space-y-4">
+            <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+              <p className="font-semibold text-red-800 mb-2">
+                ⚠️ Bu işlem geri alınamaz!
+              </p>
+              <p className="text-red-700">
+                <span className="font-bold text-red-900">
+                  &quot;{selectedCustomer.companyName}&quot;
+                </span>{" "}
+                firmasını ve tüm ilişkili verilerini kalıcı olarak sileceksiniz.
+              </p>
+            </div>
+            <div className="text-sm text-gray-700 bg-gray-200 p-3 rounded border-l-4 border-gray-400">
+              <p>Bu işlem şunları siler:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Müşteri bilgileri</li>
+                <li>Geçmiş işlemler</li>
+                <li>İletişim kayıtları</li>
+                <li>İlişkili dökümanlar</li>
+              </ul>
+            </div>
+          </div>
 
           <Separator className="bg-red-200" />
 
@@ -68,18 +72,19 @@ export default function DeleteCustomerModal() {
             <Button
               variant="outline"
               className="flex-1 border-gray-300 hover:bg-gray-50 font-medium"
-              onClick={() => (
-                setSelectedCustomer(null), setIsDeleteCustomerModalOpen(false)
-              )}
+              onClick={() => {
+                setSelectedCustomer(null);
+                setIsDeleteCustomerModalOpen(false);
+              }}
             >
               İptal Et
             </Button>
             <Button
-              className="flex-1 bg-red hover:bg-red/180 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
-              onClick={() => (
-                deleteCustomer(selectedCustomer.id),
-                setIsDeleteCustomerModalOpen(false)
-              )}
+              className="flex-1 bg-customRed hover:bg-customRed/90 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+              onClick={() => {
+                deleteCustomer(selectedCustomer.id);
+                setIsDeleteCustomerModalOpen(false);
+              }}
             >
               <Trash2 className="w-4 h-4" />
               Kalıcı Olarak Sil

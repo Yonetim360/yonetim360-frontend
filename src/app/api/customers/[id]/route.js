@@ -13,6 +13,7 @@ export async function GET(request, { params }) {
   try {
     const response = await axios.get(`${BACKEND_BASE_URL}/api/customer/${id}`, {
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
     });
@@ -29,23 +30,19 @@ export async function GET(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const customerData = await request.json();
-
-  const dataToSend = {
-    ...customerData,
-    userId,
-  };
+  const accessToken = request.headers
+    .get("Authorization")
+    ?.replace("Bearer ", "");
   try {
     const { id } = await params;
 
     // Backend'e DELETE isteği gönder
     const response = await axios.delete(
-      `${process.env.BACKEND_BASE_URL}/api/customer/${id}`,
-      dataToSend,
+      `${BACKEND_BASE_URL}/api/customer/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
-          "X-Tenant-Id": TENANT_ID,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -63,49 +60,6 @@ export async function DELETE(request, { params }) {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request, { params }) {
-  const resolvedParams = await params;
-  const { id } = resolvedParams;
-  const accessToken = request.headers
-    .get("Authorization")
-    ?.replace("Bearer ", "");
-
-  try {
-    const customerData = await request.json();
-    console.log("*--**--*-**-*-*-*-*-*-*-*--*-*-*-**-*-*-*-");
-
-    console.log(customerData);
-    console.log("*--**--*-**-*-*-*-*-*-*-*--*-*-*-**-*-*-*-");
-    console.log(request.headers.get("userId"));
-
-    const dataToSend = {
-      ...customerData,
-      UserId: request.headers.get("userId"),
-    };
-
-    const response = await axios.put(
-      `${BACKEND_BASE_URL}/api/customer/${id}`,
-      dataToSend,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-
-    return NextResponse.json(response.data);
-  } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json(
-      { error: "Müşteri verileri güncellenemedi" },
-      {
-        status: 500,
-      }
     );
   }
 }

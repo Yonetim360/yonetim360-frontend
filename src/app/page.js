@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +18,12 @@ import {
   Globe,
   HeadphonesIcon,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HomePage() {
+  const { user } = useAuth();
+  if (!user) console.log("no user");
+  else console.log(user.fullName);
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero Section */}

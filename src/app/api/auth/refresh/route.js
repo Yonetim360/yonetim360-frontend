@@ -31,6 +31,16 @@ export async function POST(request) {
       accessToken: response.data.accessToken,
     });
 
+    // Önceki refresh token'ı sil
+    nextResponse.cookies.set({
+      name: "refresh-token",
+      value: "",
+      expires: new Date(0),
+    });
+
+    // 1 saniye delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Yeni refresh token'ı cookie'ye kaydet (eğer backend gönderdiyse)
     if (response.data.refreshToken) {
       nextResponse.cookies.set({

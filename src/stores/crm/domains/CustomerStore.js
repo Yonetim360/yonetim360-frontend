@@ -99,7 +99,6 @@ export const CustomerStore = create((set, get) => ({
 
     try {
       const updatedCustomer = await customerService.updateCustomer(
-        id,
         customerData
       );
 
