@@ -30,7 +30,7 @@ export default function EndingOfferModal() {
             <Button className={"bg-yellow-600 hover:bg-yellow-600/180"}>
               Reddedildi
             </Button>
-            <Button className={"bg-red hover:bg-red/180"}>
+            <Button className={"bg-customRed hover:bg-customRed/180"}>
               Görüşmeler Durduruldu
             </Button>
             <Button className={"bg-primary-green hover:bg-primary-green/180"}>

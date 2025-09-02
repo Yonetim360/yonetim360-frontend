@@ -21,9 +21,10 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   if (!user) console.log("no user");
-  else console.log(user.fullName);
+  else console.log(user.fullName, accessToken);
+
   return (
     <div className="min-h-screen bg-cream">
       {/* Hero Section */}

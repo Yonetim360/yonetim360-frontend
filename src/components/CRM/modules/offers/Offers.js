@@ -1,12 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Edit, Eye, Plus } from "lucide-react";
+import { Edit, Eye, Handshake, Plus } from "lucide-react";
 import OfferDetailsModal from "../../modals/offerSales/OfferDetailsModal";
 import ViewOfferModal from "../../modals/offerSales/ViewOfferModal";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
 import EndingOfferModal from "../../modals/offerSales/EndingOfferModal";
 import { OfferStore } from "@/stores/crm/domains/OfferStore";
+import { useEffect } from "react";
 
 export default function Offers() {
   const {
@@ -16,7 +17,13 @@ export default function Offers() {
     setIsViewOfferModalOpen,
     setSelectedOffer,
     setIsEndingOfferModalOpen,
+    fetchOffers,
   } = OfferStore();
+
+  useEffect(() => {
+    fetchOffers();
+  }, [fetchOffers]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -76,82 +83,92 @@ export default function Offers() {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {offers.map((offer) => (
-              <div
-                key={offer.id}
-                className="p-4 border border-gray-200 rounded-lg"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h4 className="font-semibold text-dark-gray">
-                      {offer.customer}
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Teklif No: {offer.offerNo}
-                    </p>
-                    <p className="text-sm text-gray-600">{offer.products}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-dark-gray">
-                      <CurrencyFormatter
-                        amount={offer.amount}
-                        currency={offer.currency}
-                      />
-                    </p>
-                    <Badge
-                      variant={
-                        offer.status === "Onaylandı" ? "default" : "secondary"
-                      }
-                      className={
-                        offer.status === "Onaylandı"
-                          ? "bg-primary-green"
-                          : "bg-orange"
-                      }
-                    >
-                      {offer.status}
-                    </Badge>
-                    <div className="mt-2">
-                      <Button
-                        onClick={() => (
-                          setIsViewOfferModalOpen(true), setSelectedOffer(offer)
-                        )}
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary-green hover:text-primary-green/80"
+            {offers.length === 0 ? (
+              <div className="text-center py-8">
+                <Handshake className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">
+                  Henüz bir teklif bulunmamaktadır
+                </p>
+              </div>
+            ) : (
+              offers.map((offer) => (
+                <div
+                  key={offer.id}
+                  className="p-4 border border-gray-200 rounded-lg"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 className="font-semibold text-dark-gray">
+                        {offer.customer}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Teklif No: {offer.offerNo}
+                      </p>
+                      <p className="text-sm text-gray-600">{offer.products}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-dark-gray">
+                        <CurrencyFormatter
+                          amount={offer.amount}
+                          currency={offer.currency}
+                        />
+                      </p>
+                      <Badge
+                        variant={
+                          offer.status === "Onaylandı" ? "default" : "secondary"
+                        }
+                        className={
+                          offer.status === "Onaylandı"
+                            ? "bg-primary-green"
+                            : "bg-orange"
+                        }
                       >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => (
-                          setIsOfferDetailsModalOpen(true),
-                          setSelectedOffer(offer)
-                        )}
-                        variant="ghost"
-                        size="sm"
-                        className="text-orange hover:text-orange/80"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={"ml-1"}
-                        onClick={() => (
-                          setIsEndingOfferModalOpen(true),
-                          setSelectedOffer(offer)
-                        )}
-                      >
-                        Sonuçlandır
-                      </Button>
+                        {offer.status}
+                      </Badge>
+                      <div className="mt-2">
+                        <Button
+                          onClick={() => (
+                            setIsViewOfferModalOpen(true),
+                            setSelectedOffer(offer)
+                          )}
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary-green hover:text-primary-green/80"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          onClick={() => (
+                            setIsOfferDetailsModalOpen(true),
+                            setSelectedOffer(offer)
+                          )}
+                          variant="ghost"
+                          size="sm"
+                          className="text-orange hover:text-orange/80"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={"ml-1"}
+                          onClick={() => (
+                            setIsEndingOfferModalOpen(true),
+                            setSelectedOffer(offer)
+                          )}
+                        >
+                          Sonuçlandır
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span>Tarih: {offer.date}</span>
+                    <span>Geçerlilik: {offer.validUntil}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>Tarih: {offer.date}</span>
-                  <span>Geçerlilik: {offer.validUntil}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

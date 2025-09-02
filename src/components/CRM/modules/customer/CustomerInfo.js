@@ -21,20 +21,18 @@ import ViewCustomerModal from "../../modals/customer/ViewCustomerModal";
 import { useState, useEffect } from "react";
 import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 import DeleteCustomerModal from "../../modals/customer/DeleteCustomerModal";
-import { useAuth } from "@/hooks/useAuth";
+import LoadingModule from "@/components/common/LoadingModule";
 
 export default function CustomerInfo() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { user, loading: authLoading } = useAuth();
-
   // CustomerStore'dan state ve actions
   const {
     customers,
-    loading,
-    error,
+    customersLoading,
+    customerLoaded,
+    customersError,
     fetchCustomers,
-    clearError,
     setIsCustomerModalOpen,
     setIsCustomerDetailsModalOpen,
     setSelectedCustomer,
@@ -56,39 +54,8 @@ export default function CustomerInfo() {
       : customers;
 
   // Loading durumu
-  if (loading || authLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-48 mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-64"></div>
-          </div>
-          <div className="h-10 bg-gray-300 rounded w-32 animate-pulse"></div>
-        </div>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={i}
-                  className="animate-pulse p-4 border border-gray-200 rounded-lg"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gray-300 rounded w-32 mb-2"></div>
-                      <div className="h-3 bg-gray-300 rounded w-48"></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (customersLoading || customerLoaded) {
+    return <LoadingModule />;
   }
 
   return (
@@ -106,10 +73,12 @@ export default function CustomerInfo() {
           <Button
             variant="outline"
             onClick={fetchCustomers}
-            disabled={loading}
+            disabled={customersLoading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${customersLoading ? "animate-spin" : ""}`}
+            />
             Yenile
           </Button>
           <Button
@@ -123,11 +92,11 @@ export default function CustomerInfo() {
       </div>
 
       {/* Error durumu */}
-      {error && (
+      {customersError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
-            {error}
+            {customersError}
             <Button
               variant="ghost"
               size="sm"

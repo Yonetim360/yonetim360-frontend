@@ -1,12 +1,11 @@
-import BaseService from "../BaseService";
+const { default: BaseService } = require("../BaseService");
 
-class CustomerService extends BaseService {
+class RepresentativeService extends BaseService {
   constructor() {
-    super("customers");
+    super("representatives");
   }
 
-  // Müşterileri getir
-  async getCustomers(forceRefresh = false) {
+  async getRepresentatives(forceRefresh = false) {
     // Önce authentication'ı kontrol et
     await this.ensureAuth();
 
@@ -32,9 +31,11 @@ class CustomerService extends BaseService {
       this.isLoading = true;
 
       const authenticatedFetch = this.getAuthenticatedFetch();
-      const response = await authenticatedFetch(`${this.baseURL}/customers`);
+      const response = await authenticatedFetch(
+        `${this.baseURL}/representatives`
+      );
 
-      if (!response.ok) throw new Error("Failed to fetch customers");
+      if (!response.ok) throw new Error("Failed to fetch representatives");
 
       const data = await response.json();
       this.cache = data;
@@ -42,140 +43,110 @@ class CustomerService extends BaseService {
 
       return data;
     } catch (error) {
-      console.error("Müşteri verileri yüklenemedi:", error);
+      console.error("Temsilci verileri yüklenemedi:", error);
       throw error;
     } finally {
       this.isLoading = false;
     }
   }
 
-  // Müşteri bilgilerini getir
-  async getCustomerById(id) {
+  async getRepresentativeById(id) {
     await this.ensureAuth();
 
     try {
       const authenticatedFetch = this.getAuthenticatedFetch();
       const response = await authenticatedFetch(
-        `${this.baseURL}/customers/${id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        `${this.baseURL}/representative/${id}`
       );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const customer = await response.json();
-
-      // Validate the response structure
-      if (!customer || !customer.id) {
-        throw new Error("Invalid customer data received");
-      }
-
-      return customer;
+      const representative = await response.json();
+      return representative;
     } catch (error) {
-      console.error("Error fetching customer:", error);
+      console.error("Temsilci verileri yüklenemedi:", error);
       throw error;
     }
   }
 
-  // Yeni müşteri oluştur
-  async createCustomer(customerData) {
+  async createRepresentative(representativeData) {
     await this.ensureAuth();
 
     try {
       const authenticatedFetch = this.getAuthenticatedFetch();
-
       const userId = this.getUserId();
 
       if (!userId) {
-        throw new Error("You are not authorized to create a new customer.");
+        throw new Error(
+          "You are not authorized to create a new representative."
+        );
       }
 
       const dataToSend = {
-        ...customerData,
+        ...representativeData,
         userId,
       };
 
-      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSend),
-      });
+      const response = await authenticatedFetch(
+        `${this.baseURL}/representatives`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSend),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Sunucu hatası: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log(data);
-
-      // Cache'i temizle (yeni veri var)
-      this.clearCache();
-
       return data;
     } catch (error) {
-      console.error("Müşteri oluşturulamadı:", error);
+      console.error("Temsilci oluşturulamadı:", error);
       throw error;
     }
   }
 
-  // Müşteri güncelle
-  async updateCustomer(customerData) {
-    await this.ensureAuth();
-
-    try {
-      const authenticatedFetch = this.getAuthenticatedFetch();
-
-      const userId = this.getUserId();
-
-      if (!userId) {
-        throw new Error("You are not authorized to update this customer.");
-      }
-
-      const dataToSend = {
-        ...customerData,
-        userId,
-      };
-
-      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSend),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Sunucu hatası: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Cache'i temizle
-      this.clearCache();
-
-      return data;
-    } catch (error) {
-      console.error("Müşteri güncellenemedi:", error);
-      throw error;
-    }
-  }
-
-  // Müşteri sil
-  async deleteCustomer(id) {
+  async updateRepresentative(representativeData) {
     await this.ensureAuth();
 
     try {
       const authenticatedFetch = this.getAuthenticatedFetch();
       const response = await authenticatedFetch(
-        `${this.baseURL}/customers/${id}`,
+        `${this.baseURL}/representative`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(representativeData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Sunucu hatası: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Temsilci güncellenemedi:", error);
+      throw error;
+    }
+  }
+
+  async deleteRepresentative(id) {
+    await this.ensureAuth();
+
+    try {
+      const authenticatedFetch = this.getAuthenticatedFetch();
+      const response = await authenticatedFetch(
+        `${this.baseURL}/representatives/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -189,17 +160,12 @@ class CustomerService extends BaseService {
       }
 
       const data = await response.json();
-
-      // Cache'i temizle
-      this.clearCache();
-
       return data;
     } catch (error) {
-      console.error("Müşteri silinemedi:", error);
+      console.error("Temsilci silinemedi:", error);
       throw error;
     }
   }
 }
 
-// Singleton instance
-export const customerService = new CustomerService();
+export const representativeService = new RepresentativeService();

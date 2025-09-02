@@ -10,60 +10,79 @@ import {
   Search,
   Users,
   Trash2,
+  AlertCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { RepresentativeStore } from "@/stores/crm/domains/RepresentativeStore";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import LoadingModule from "@/components/common/LoadingModule";
+import AddRepresentativeModal from "../../modals/representatives/AddRepresentativeModal";
+import useDebounce from "@/hooks/useDebounce";
+import DeleteRepresentativeModal from "../../modals/representatives/DeleteRepresentativeModal";
 
 export default function Representatives() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { representatives } = RepresentativeStore();
+  const {
+    representatives,
+    fetchRepresentatives,
+    representativesLoading,
+    representativesLoaded,
+    representativesError,
+    setIsRepresentativesModalOpen,
+    setIsDeleteRepresentativeModalOpen,
+    setSelectedRepresentative,
+    setIsViewRepresentativeModalOpen,
+    setIsRepresentativeDetailsModalOpen,
+  } = RepresentativeStore();
+
+  useEffect(() => {
+    fetchRepresentatives();
+  }, [fetchRepresentatives]);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Arama filtresi
-  const filteredRepresentatives =
-    searchTerm.length > 0
-      ? representatives.filter((representative) =>
-          representative.fullName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        )
-      : representatives;
+  const filteredRepresentatives = useMemo(() => {
+    if (!debouncedSearchTerm || debouncedSearchTerm.length === 0) {
+      return representatives;
+    }
+
+    return representatives.filter((representative) => {
+      const fullName = `${representative.firstName || ""} ${
+        representative.lastName || ""
+      }`.trim();
+      return fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+    });
+  }, [representatives, debouncedSearchTerm]);
+
+  const handleDelete = useCallback(
+    (rep) => {
+      setSelectedRepresentative(rep), setIsDeleteRepresentativeModalOpen(true);
+    },
+    [setIsDeleteRepresentativeModalOpen, setSelectedRepresentative]
+  );
+
+  const handleView = useCallback(
+    (rep) => {
+      setSelectedRepresentative(rep), setIsViewRepresentativeModalOpen(true);
+    },
+    [setIsViewRepresentativeModalOpen, setSelectedRepresentative]
+  );
+
+  const handleEdit = useCallback(
+    (rep) => {
+      setSelectedRepresentative(rep), setIsRepresentativeDetailsModalOpen(true);
+    },
+    [setIsRepresentativeDetailsModalOpen, setSelectedRepresentative]
+  );
 
   //   // Loading durumu
 
-  //     return (
-  //       <div className="space-y-6">
-  //         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-  //           <div className="animate-pulse">
-  //             <div className="h-8 bg-gray-300 rounded w-48 mb-2"></div>
-  //             <div className="h-4 bg-gray-300 rounded w-64"></div>
-  //           </div>
-  //           <div className="h-10 bg-gray-300 rounded w-32 animate-pulse"></div>
-  //         </div>
-
-  //         <Card>
-  //           <CardContent className="pt-6">
-  //             <div className="space-y-4">
-  //               {[...Array(3)].map((_, i) => (
-  //                 <div
-  //                   key={i}
-  //                   className="animate-pulse p-4 border border-gray-200 rounded-lg"
-  //                 >
-  //                   <div className="flex items-center space-x-4">
-  //                     <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
-  //                     <div className="flex-1">
-  //                       <div className="h-4 bg-gray-300 rounded w-32 mb-2"></div>
-  //                       <div className="h-3 bg-gray-300 rounded w-48"></div>
-  //                     </div>
-  //                   </div>
-  //                 </div>
-  //               ))}
-  //             </div>
-  //           </CardContent>
-  //         </Card>
-  //       </div>
-  //     );
+  if (representativesLoading || !representativesLoaded) {
+    return <LoadingModule />;
+  }
 
   return (
     <div className="space-y-6">
@@ -88,7 +107,7 @@ export default function Representatives() {
           </Button> */}
           <Button
             className="bg-[#02d1a1] hover:bg-[#02d1a1]/180 w-full sm:w-auto"
-            // onClick={() => setIsCustomerModalOpen(true)}
+            onClick={() => setIsRepresentativesModalOpen(true)}
           >
             <Plus className="mr-2 h-4 w-4" />
             Yeni Temsilci
@@ -97,22 +116,17 @@ export default function Representatives() {
       </div>
 
       {/* Error durumu */}
-      {/* {error && (
+      {representativesError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
-            {error}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearError}
-              className="ml-2"
-            >
+            {representativesError}
+            <Button variant="ghost" size="sm" className="ml-2">
               Kapat
             </Button>
           </AlertDescription>
         </Alert>
-      )} */}
+      )}
 
       <Card>
         <CardContent className="pt-6">
@@ -120,7 +134,8 @@ export default function Representatives() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Müşteri ara..."
+                id="search"
+                placeholder="Temsilci ara..."
                 className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -128,21 +143,21 @@ export default function Representatives() {
             </div>
           </div>
 
-          {/* Müşteri listesi */}
+          {/* representative listesi */}
           <div className="space-y-4">
             {filteredRepresentatives?.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500">
                   {searchTerm
-                    ? "Arama kriterlerine uygun müşteri bulunamadı"
-                    : "Henüz müşteri eklenmemiş"}
+                    ? "Arama kriterlerine uygun temsilci bulunamadı"
+                    : "Henüz temsilci eklenmemiş"}
                 </p>
               </div>
             ) : (
-              filteredRepresentatives?.map((representative, index) => (
+              filteredRepresentatives?.map((representative) => (
                 <div
-                  key={index}
+                  key={representative.id}
                   className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors gap-4"
                 >
                   {/* Sol taraf - Müşteri bilgileri */}
@@ -152,11 +167,8 @@ export default function Representatives() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-dark-gray text-sm sm:text-base truncate">
-                        {representative.fullName}
+                        {representative.firstName} {representative.lastName}
                       </h4>
-                      {/* <p className="text-sm text-gray-600 truncate">
-                        {representative.contactPerson}
-                      </p> */}
                       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mt-2 gap-1 sm:gap-0">
                         <div className="flex items-center text-xs text-gray-500 truncate">
                           <Mail className="h-3 w-3 mr-1 flex-shrink-0" />
@@ -172,72 +184,35 @@ export default function Representatives() {
                     </div>
                   </div>
 
-                  {/* Sağ taraf - Değer, durum ve aksiyonlar */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
-                    {/* Durum badge'i */}
-                    <div className="flex justify-start sm:justify-center">
-                      <Badge
-                        variant={
-                          representative.isActive === 0
-                            ? "default"
-                            : "secondary"
-                        }
-                        className={`text-xs ${
-                          filteredRepresentatives.state === 1
-                            ? "bg-primary-green hover:bg-primary-green/90"
-                            : filteredRepresentatives.status === 2
-                            ? "bg-orange hover:bg-orange/90"
-                            : "bg-red hover:bg-red/90"
-                        }`}
-                      >
-                        {representative.isActive === 1
-                          ? "Aktif"
-                          : filteredRepresentatives.state === 2
-                          ? "Beklemede"
-                          : "Pasif"}
-                      </Badge>
-                    </div>
-
-                    {/* Aksiyon butonları */}
-                    <div className="flex space-x-2 justify-end sm:justify-start">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0 bg-transparent"
-                        onClick={() => (
-                          setSelectedCustomer(customer),
-                          setIsDeleteCustomerModalOpen(true)
-                        )}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Sil</span>
-                      </Button>
-                      <Button
-                        onClick={() => (
-                          setSelectedCustomer(customer),
-                          setIsViewCustomerModalOpen(true)
-                        )}
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0 bg-transparent"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">Görüntüle</span>
-                      </Button>
-                      <Button
-                        onClick={() => (
-                          console.log("selected customer: ", customer),
-                          setSelectedCustomer(customer),
-                          setIsCustomerDetailsModalOpen(true)
-                        )}
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0 bg-transparent"
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Düzenle</span>
-                      </Button>
-                    </div>
+                  {/* Aksiyon butonları */}
+                  <div className="flex space-x-2 justify-end sm:justify-start">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0 bg-transparent"
+                      onClick={() => handleDelete(representative)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Sil</span>
+                    </Button>
+                    <Button
+                      onClick={() => handleView(representative)}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0 bg-transparent"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">Görüntüle</span>
+                    </Button>
+                    <Button
+                      onClick={() => handleEdit(representative)}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0 bg-transparent"
+                    >
+                      <Edit className="h-4 w-4" />
+                      <span className="sr-only">Düzenle</span>
+                    </Button>
                   </div>
                 </div>
               ))
@@ -272,6 +247,8 @@ export default function Representatives() {
           )}
         </CardContent>
       </Card>
+      <AddRepresentativeModal />
+      <DeleteRepresentativeModal />
     </div>
   );
 }

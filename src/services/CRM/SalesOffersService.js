@@ -1,12 +1,15 @@
-class SalesOffersService {
+import BaseService from "../BaseService";
+
+class SalesOffersService extends BaseService {
   constructor() {
-    this.baseURL = `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/api`;
-    this.cache = null;
-    this.cacheTime = null;
-    this.isLoading = false;
+    super("sales-offers");
   }
 
-  async getSalesOffers(forceRefresh = false) {
+  // Müşterileri getir
+  async getOffers(forceRefresh = false) {
+    // Önce authentication'ı kontrol et
+    await this.ensureAuth();
+
     if (!forceRefresh && this.isCacheValid()) {
       return this.cache;
     }
@@ -28,16 +31,175 @@ class SalesOffersService {
     try {
       this.isLoading = true;
 
-      const response = await fetch(`${this.baseURL}/sales-offers`);
+      const authenticatedFetch = this.getAuthenticatedFetch();
+      const response = await authenticatedFetch(`${this.baseURL}/offer`);
+
+      if (!response.ok) throw new Error("Failed to fetch offers");
 
       const data = await response.json();
       this.cache = data;
       this.cacheTime = Date.now();
-      this.isLoading = false;
+
       return data;
     } catch (error) {
-      console.error("Sales Offers verileri alınamadı:", error);
+      console.error("Teklif verileri yüklenemedi:", error);
+      throw error;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // Müşteri bilgilerini getir
+  getOfferById = async (id) => {
+    await this.ensureAuth();
+
+    try {
+      const authenticatedFetch = this.getAuthenticatedFetch();
+      const response = await authenticatedFetch(
+        `${this.baseURL}/customers/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const customer = await response.json();
+
+      // Validate the response structure
+      if (!customer || !customer.id) {
+        throw new Error("Invalid customer data received");
+      }
+
+      return customer;
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      throw error;
+    }
+  };
+
+  // Yeni müşteri oluştur
+  async createOffer(customerData) {
+    await this.ensureAuth();
+
+    try {
+      const authenticatedFetch = this.getAuthenticatedFetch();
+
+      const userId = this.getUserId();
+
+      if (!userId) {
+        throw new Error("You are not authorized to create a new customer.");
+      }
+
+      const dataToSend = {
+        ...customerData,
+        userId,
+      };
+
+      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Sunucu hatası: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      // Cache'i temizle (yeni veri var)
+      this.clearCache();
+
+      return data;
+    } catch (error) {
+      console.error("Müşteri oluşturulamadı:", error);
+      throw error;
+    }
+  }
+
+  // Müşteri güncelle
+  async updateOffer(customerData) {
+    await this.ensureAuth();
+
+    try {
+      const authenticatedFetch = this.getAuthenticatedFetch();
+
+      const userId = this.getUserId();
+
+      if (!userId) {
+        throw new Error("You are not authorized to update this customer.");
+      }
+
+      const dataToSend = {
+        ...customerData,
+        userId,
+      };
+
+      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Sunucu hatası: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Cache'i temizle
+      this.clearCache();
+
+      return data;
+    } catch (error) {
+      console.error("Müşteri güncellenemedi:", error);
+      throw error;
+    }
+  }
+
+  // Müşteri sil
+  async deleteOffer(id) {
+    await this.ensureAuth();
+
+    try {
+      const authenticatedFetch = this.getAuthenticatedFetch();
+      const response = await authenticatedFetch(
+        `${this.baseURL}/customers/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Sunucu hatası: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Cache'i temizle
+      this.clearCache();
+
+      return data;
+    } catch (error) {
+      console.error("Müşteri silinemedi:", error);
       throw error;
     }
   }
 }
+
+// Singleton instance
+export const salesOffersService = new SalesOffersService();

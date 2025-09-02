@@ -1,45 +1,156 @@
+import { representativeService } from "@/services/CRM/RepresentativeService";
 import { create } from "zustand";
 
 export const RepresentativeStore = create((set, get) => ({
-  representatives: [
-    {
-      id: 1,
-      fullName: "Ahmet Yılmaz",
-      email: "ahmet.yilmaz@sirket.com",
-      phoneNumber: "0532 123 4567",
-      department: "Bilgi İşlem",
-      position: "Yazılım Geliştirici",
-      isActive: true,
-      signDate: "2023-01-15",
-      updatedDate: "2023-02-20",
-      note: "Lorem ipsum dolor sit amet.",
-      picture: "https://via.placeholder.com/150",
-    },
-    {
-      id: 2,
-      fullName: "Ayşe Demir",
-      email: "ayse.demir@sirket.com",
-      phoneNumber: "0533 234 5678",
-      department: "İnsan Kaynakları",
-      position: "İK Uzmanı",
-      isActive: false,
-      signDate: "2023-01-15",
-      updatedDate: "2023-02-20",
-      note: "Lorem ipsum dolor sit amet.",
-      picture: "https://via.placeholder.com/150",
-    },
-    {
-      id: 3,
-      fullName: "Mehmet Kaya",
-      email: "mehmet.kaya@sirket.com",
-      phoneNumber: "0534 345 6789",
-      department: "İnsan Kaynakları",
-      position: "İK Uzmanı",
-      isActive: true,
-      signDate: "2023-01-15",
-      updatedDate: "2023-02-20",
-      note: "Lorem ipsum dolor sit amet.",
-      picture: "https://via.placeholder.com/150",
-    },
-  ],
+  selectedRespresentative: null,
+  representatives: [],
+  representativesLoading: false,
+  representativesError: null,
+  representativesLoaded: false,
+
+  isRepresentativesModalOpen: false,
+
+  isAddRepresentativeModalOpen: false,
+  isDeleteRepresentativeModalOpen: false,
+  isRepresentativeDetailsModalOpen: false,
+  isViewRepresentativeModalOpen: false,
+
+  representativeForm: {
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    notes: "",
+  },
+
+  setRepresentativeForm: (form) => set({ representativeForm: form }),
+
+  setIsRepresentativesModalOpen: (val) =>
+    set({ isRepresentativesModalOpen: val }),
+
+  setRepresentativesLoading: (loading) =>
+    set({ representativesLoading: loading }),
+
+  setSelectedRepresentative: (representative) =>
+    set({ selectedRepresentative: representative }),
+
+  setIsAddRepresentativeModalOpen: (val) =>
+    set({ isAddRepresentativeModalOpen: val }),
+
+  setIsDeleteRepresentativeModalOpen: (val) =>
+    set({ isDeleteRepresentativeModalOpen: val }),
+
+  setIsRepresentativeDetailsModalOpen: (val) =>
+    set({ isRepresentativeDetailsModalOpen: val }),
+
+  setIsViewRepresentativeModalOpen: (val) =>
+    set({ isViewRepresentativeModalOpen: val }),
+
+  fetchRepresentatives: async (forceRefresh = false) => {
+    const { representativesLoaded, representativesLoading } = get();
+
+    if (representativesLoaded && !forceRefresh) {
+      return;
+    }
+
+    // Zaten yükleniyorsa, çık
+    if (representativesLoading) {
+      return;
+    }
+
+    set({ representativesLoading: true, representativesError: null });
+
+    try {
+      const representatives = await representativeService.getRepresentatives(
+        forceRefresh
+      );
+
+      set({
+        representatives: representatives,
+        representativesLoaded: true,
+        representativesLoading: false,
+        representativesError: null,
+      });
+    } catch (error) {
+      set({
+        representativesError: error.message || "Temsilci verileri yüklenemedi",
+        representativesLoading: false,
+      });
+    }
+  },
+
+  addRepresentative: async (representativeData) => {
+    set({ representativesLoading: true, representativesError: null });
+
+    try {
+      const newRepresentative =
+        await representativeService.createRepresentative(representativeData);
+
+      set((state) => ({
+        representatives: [...state.representatives, newRepresentative],
+        representativesLoading: false,
+      }));
+    } catch (error) {
+      set({
+        representativesError: error.message || "Müşteri oluşturulamadı",
+        representativesLoading: false,
+      });
+    }
+  },
+
+  updateRepresentative: async (id, representativeData) => {
+    set({ representativesLoading: true, representativesError: null });
+
+    try {
+      const updatedRepresentative =
+        await representativeService.updateRepresentative(representativeData);
+
+      const refreshedRepresentatives =
+        await representativeService.getRepresentativesById(id);
+
+      if (!refreshedRepresentatives) {
+        throw new Error("Temsilci verileri yüklenemedi");
+      }
+
+      set((state) => ({
+        representatives: state.representatives.map((representative) =>
+          representative.id === id ? updatedRepresentative : representative
+        ),
+        representativesLoading: false,
+      }));
+    } catch (error) {
+      set({
+        representativesError: error.message || "Temsilci güncellenemedi",
+        representativesLoading: false,
+      });
+    }
+  },
+
+  deleteRepresentative: async (id) => {
+    set({ representativesLoading: true, representativesError: null });
+
+    try {
+      await representativeService.deleteRepresentative(id);
+
+      set((state) => ({
+        representatives: state.representatives.filter(
+          (representative) => representative.id !== id
+        ),
+        representativesLoading: false,
+      }));
+    } catch (error) {
+      set({
+        representativesError: error.message || "Temsilci silinemedi",
+        representativesLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  // refreshRepresentatives: async () => {
+  //   const { fetchRepresentatives } = get();
+  //   await fetchRepresentatives(true); // Force refresh
+  // },
+
+  clearRepresentativesError: () => set({ representativesError: null }),
 }));

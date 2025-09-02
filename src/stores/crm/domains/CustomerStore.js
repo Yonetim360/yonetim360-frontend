@@ -14,7 +14,6 @@ export const CustomerStore = create((set, get) => ({
   isViewCustomerModalOpen: false,
 
   setCustomerForm: (form) => set({ customerForm: form }),
-  setCustomerModalOpen: (val) => set({ isCustomerModalOpen: val }),
   setIsCustomerModalOpen: (val) => set({ isCustomerModalOpen: val }),
   setSelectedCustomer: (customer) => set({ selectedCustomer: customer }),
 
