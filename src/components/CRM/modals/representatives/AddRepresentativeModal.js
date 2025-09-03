@@ -31,7 +31,7 @@ const representativeSchema = z.object({
   lastName: z.string().min(1, "Soyadı zorunludur"),
   email: z.email("Geçerli bir e-posta adresi giriniz"),
   phoneNumber: z.string().min(1, "Telefon zorunludur"),
-  department: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  department: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   notes: z.string().optional(),
 });
 

@@ -56,7 +56,7 @@ class RepresentativeService extends BaseService {
     try {
       const authenticatedFetch = this.getAuthenticatedFetch();
       const response = await authenticatedFetch(
-        `${this.baseURL}/representative/${id}`
+        `${this.baseURL}/representatives/${id}`
       );
 
       if (!response.ok) {
@@ -116,15 +116,26 @@ class RepresentativeService extends BaseService {
     await this.ensureAuth();
 
     try {
+      const userId = this.getUserId();
+
+      if (!userId) {
+        throw new Error(
+          "You are not authorized to update this representative."
+        );
+      }
+      const dataToSend = {
+        ...representativeData,
+        userId,
+      };
       const authenticatedFetch = this.getAuthenticatedFetch();
       const response = await authenticatedFetch(
-        `${this.baseURL}/representative`,
+        `${this.baseURL}/representatives`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(representativeData),
+          body: JSON.stringify(dataToSend),
         }
       );
 

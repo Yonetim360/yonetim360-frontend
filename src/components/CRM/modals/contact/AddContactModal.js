@@ -215,7 +215,7 @@ export default function AddContactModal() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Notlar *</Label>
+            <Label>Notlar</Label>
             <Textarea
               {...register("notes")}
               placeholder="İletişim detayları ve notlar..."

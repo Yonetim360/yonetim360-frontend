@@ -105,19 +105,21 @@ export const RepresentativeStore = create((set, get) => ({
       const updatedRepresentative =
         await representativeService.updateRepresentative(representativeData);
 
-      const refreshedRepresentatives =
-        await representativeService.getRepresentativesById(id);
-
-      if (!refreshedRepresentatives) {
-        throw new Error("Temsilci verileri yüklenemedi");
+      const refreshedRepresentative =
+        await representativeService.getRepresentativeById(id);
+      if (!refreshedRepresentative) {
+        throw new Error("Temsilci bilgileri yüklenemedi");
       }
 
       set((state) => ({
         representatives: state.representatives.map((representative) =>
-          representative.id === id ? updatedRepresentative : representative
+          representative.id === id
+            ? { ...refreshedRepresentative }
+            : representative
         ),
         representativesLoading: false,
       }));
+      return updatedRepresentative;
     } catch (error) {
       set({
         representativesError: error.message || "Temsilci güncellenemedi",

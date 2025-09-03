@@ -64,3 +64,43 @@ export async function POST(request) {
     );
   }
 }
+
+export async function PUT(request) {
+  const accessToken = request.headers
+    .get("Authorization")
+    ?.replace("Bearer ", "");
+
+  if (!accessToken) {
+    return NextResponse.json({ error: "Yetkisiz Giriş" }, { status: 401 });
+  }
+
+  try {
+    const representativeData = await request.json();
+    console.log(representativeData);
+
+    const sendToData = {
+      representativeDto: {
+        ...representativeData,
+      },
+    };
+
+    const response = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/representative`,
+      sendToData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    return NextResponse.json(response.data);
+  } catch (error) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      { error: "Representative data could not be updated" },
+      { status: 500 }
+    );
+  }
+}

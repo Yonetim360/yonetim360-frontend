@@ -14,13 +14,15 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RepresentativeStore } from "@/stores/crm/domains/RepresentativeStore";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingModule from "@/components/common/LoadingModule";
 import AddRepresentativeModal from "../../modals/representatives/AddRepresentativeModal";
 import useDebounce from "@/hooks/useDebounce";
 import DeleteRepresentativeModal from "../../modals/representatives/DeleteRepresentativeModal";
+import ViewRepresentativeModal from "../../modals/representatives/ViewRepresentativeModal";
+import RepresentativeDetailsModal from "../../modals/representatives/RepresentativeDetailsModal";
 
 export default function Representatives() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,27 +59,17 @@ export default function Representatives() {
     });
   }, [representatives, debouncedSearchTerm]);
 
-  const handleDelete = useCallback(
-    (rep) => {
-      setSelectedRepresentative(rep), setIsDeleteRepresentativeModalOpen(true);
-    },
-    [setIsDeleteRepresentativeModalOpen, setSelectedRepresentative]
-  );
+  const handleDelete = (rep) => {
+    setSelectedRepresentative(rep), setIsDeleteRepresentativeModalOpen(true);
+  };
 
-  const handleView = useCallback(
-    (rep) => {
-      setSelectedRepresentative(rep), setIsViewRepresentativeModalOpen(true);
-    },
-    [setIsViewRepresentativeModalOpen, setSelectedRepresentative]
-  );
+  const handleView = (rep) => {
+    setSelectedRepresentative(rep), setIsViewRepresentativeModalOpen(true);
+  };
 
-  const handleEdit = useCallback(
-    (rep) => {
-      setSelectedRepresentative(rep), setIsRepresentativeDetailsModalOpen(true);
-    },
-    [setIsRepresentativeDetailsModalOpen, setSelectedRepresentative]
-  );
-
+  const handleEdit = (rep) => {
+    setSelectedRepresentative(rep), setIsRepresentativeDetailsModalOpen(true);
+  };
   //   // Loading durumu
 
   if (representativesLoading || !representativesLoaded) {
@@ -249,6 +241,8 @@ export default function Representatives() {
       </Card>
       <AddRepresentativeModal />
       <DeleteRepresentativeModal />
+      <ViewRepresentativeModal />
+      <RepresentativeDetailsModal />
     </div>
   );
 }
