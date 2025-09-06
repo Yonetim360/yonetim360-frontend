@@ -1,4 +1,29 @@
 /**
+ * Backend int değerini para birimi koduna çeviren eşleme
+ */
+export const CURRENCY_CODE_MAP = {
+  0: "TL",
+  1: "USD",
+  2: "EUR",
+  3: "GBP",
+};
+
+/**
+ * int veya string currency değerini para birimi koduna çevirir
+ * @param {string|number} currency
+ * @returns {string}
+ */
+export const getCurrencyCode = (currency) => {
+  if (typeof currency === "number") {
+    return CURRENCY_CODE_MAP[currency] || "TL";
+  }
+  if (typeof currency === "string" && !isNaN(currency)) {
+    // string olarak gelen int
+    return CURRENCY_CODE_MAP[Number(currency)] || "TL";
+  }
+  return currency?.toString().toUpperCase() || "TL";
+};
+/**
  * Para birimi sembolleri
  */
 export const CURRENCY_SYMBOLS = {
@@ -30,8 +55,8 @@ export const CURRENCY_SYMBOLS = {
  * @returns {string} Para birimi sembolü
  */
 export const getCurrencySymbol = (currency) => {
-  const upperCurrency = currency?.toString().toUpperCase();
-  return CURRENCY_SYMBOLS[upperCurrency] || currency;
+  const code = getCurrencyCode(currency);
+  return CURRENCY_SYMBOLS[code] || code;
 };
 
 /**
@@ -63,7 +88,7 @@ export const CURRENCY_FORMATS = {
 /**
  * Sayıyı para birimi formatında döndürür
  */
-export const formatCurrency = (amount, currency = "TL", options = {}) => {
+export const formatCurrency = (amount, currency = 0, options = {}) => {
   const {
     locale = "tr-TR",
     showCurrency = true,
@@ -77,8 +102,8 @@ export const formatCurrency = (amount, currency = "TL", options = {}) => {
 
   if (typeof amount === "object" && amount !== null) {
     actualAmount = amount.amount;
-    if (amount.currency) {
-      actualCurrency = amount.currency === "TRY" ? "TL" : amount.currency;
+    if (amount.currency !== undefined) {
+      actualCurrency = amount.currency;
     }
   }
 
@@ -98,7 +123,13 @@ export const formatCurrency = (amount, currency = "TL", options = {}) => {
     numericValue = 0;
   }
 
-  const formatted = new Intl.NumberFormat(locale, {
+  // currency int ise kodunu bul
+  const currencyCode = getCurrencyCode(actualCurrency);
+  // locale'yi koddan al
+  const currencyFormat = CURRENCY_FORMATS[currencyCode];
+  const usedLocale = currencyFormat?.locale || locale;
+
+  const formatted = new Intl.NumberFormat(usedLocale, {
     minimumFractionDigits,
     maximumFractionDigits,
   }).format(numericValue);
@@ -108,10 +139,10 @@ export const formatCurrency = (amount, currency = "TL", options = {}) => {
   }
 
   const currencyDisplay = useSymbol
-    ? getCurrencySymbol(actualCurrency)
-    : actualCurrency;
+    ? getCurrencySymbol(currencyCode)
+    : currencyCode;
 
-  if (actualCurrency === "TL" || actualCurrency === "TRY") {
+  if (currencyCode === "TL" || currencyCode === "TRY") {
     return `${formatted}${currencyDisplay}`;
   } else {
     return `${currencyDisplay}${formatted}`;
@@ -144,15 +175,13 @@ export const parseCurrency = (formattedAmount) => {
 /**
  * Para birimi koduna göre formatlama
  */
-export const formatCurrencyByCode = (amount, currencyCode = "TL") => {
-  const code = currencyCode.toUpperCase();
+export const formatCurrencyByCode = (amount, currency = 0) => {
+  const code = getCurrencyCode(currency);
   const currencyConfig = CURRENCY_FORMATS[code];
 
   if (!currencyConfig) {
-    console.warn(
-      `Desteklenmeyen para birimi: ${currencyCode}. TL kullanılıyor.`
-    );
-    return formatCurrency(amount, "TL");
+    console.warn(`Desteklenmeyen para birimi: ${currency}. TL kullanılıyor.`);
+    return formatCurrency(amount, 0);
   }
 
   return formatCurrency(amount, code, {

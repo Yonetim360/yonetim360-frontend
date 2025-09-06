@@ -58,7 +58,7 @@ export default function ViewSalesModal() {
                     selectedSale.status === "Onaylandı"
                       ? "bg-green-500"
                       : selectedSale.status === "Reddedildi"
-                      ? "bg-red-500"
+                      ? "bg-customRed-500"
                       : "bg-yellow-500"
                   }
                 >

@@ -171,7 +171,7 @@ export default function OfferDetailsModal() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-dark-gray">
-                Müşteri <span className="text-red">*</span>
+                Müşteri <span className="text-customRed">*</span>
               </Label>
               <Controller
                 name="customer"
@@ -192,13 +192,15 @@ export default function OfferDetailsModal() {
                 )}
               />
               {errors.customer && (
-                <p className="text-sm text-red">{errors.customer.message}</p>
+                <p className="text-sm text-customRed">
+                  {errors.customer.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-dark-gray">
-                Durum <span className="text-red">*</span>
+                Durum <span className="text-customRed">*</span>
               </Label>
               <Controller
                 control={control}
@@ -217,7 +219,9 @@ export default function OfferDetailsModal() {
                 )}
               />
               {errors.status && (
-                <p className="text-sm text-red">{errors.status.message}</p>
+                <p className="text-sm text-customRed">
+                  {errors.status.message}
+                </p>
               )}
             </div>
           </div>
@@ -225,7 +229,7 @@ export default function OfferDetailsModal() {
           {/* Ürün/Hizmetler */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-dark-gray">
-              Ürün/Hizmetler <span className="text-red">*</span>
+              Ürün/Hizmetler <span className="text-customRed">*</span>
             </Label>
             <Textarea
               {...register("workDescription")}
@@ -234,7 +238,7 @@ export default function OfferDetailsModal() {
               className="resize-none"
             />
             {errors.workDescription && (
-              <p className="text-sm text-red">
+              <p className="text-sm text-customRed">
                 {errors.workDescription.message}
               </p>
             )}
@@ -244,7 +248,7 @@ export default function OfferDetailsModal() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-dark-gray">
-                Tutar <span className="text-red">*</span>
+                Tutar <span className="text-customRed">*</span>
               </Label>
               <div className="flex">
                 <Controller
@@ -271,13 +275,13 @@ export default function OfferDetailsModal() {
                 />
               </div>
               {errors.offer && (
-                <p className="text-sm text-red">{errors.offer.message}</p>
+                <p className="text-sm text-customRed">{errors.offer.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-dark-gray">
-                Geçerlilik Tarihi <span className="text-red">*</span>
+                Geçerlilik Tarihi <span className="text-customRed">*</span>
               </Label>
               <Input
                 {...register("validityDate")}
@@ -286,7 +290,7 @@ export default function OfferDetailsModal() {
                 className="h-11"
               />
               {errors.validityDate && (
-                <p className="text-sm text-red">
+                <p className="text-sm text-customRed">
                   {errors.validityDate.message}
                 </p>
               )}
@@ -399,7 +403,7 @@ export default function OfferDetailsModal() {
             </Button>
             <Button
               type="submit"
-              className="bg-red hover:bg-red/90 text-white px-6"
+              className="bg-customRed hover:bg-customRed/90 text-white px-6"
             >
               Teklif Kaydet
             </Button>

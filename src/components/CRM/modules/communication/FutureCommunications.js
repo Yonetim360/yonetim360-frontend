@@ -35,7 +35,6 @@ import {
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
-import AddOfferModal from "../../modals/offerSales/AddOfferModal";
 import { CommunicationStore } from "@/stores/crm/domains/CommunicationStore";
 
 export default function FutureCommunications() {
@@ -516,9 +515,6 @@ export default function FutureCommunications() {
           </CardContent>
         </Card>
       )}
-
-      {/* Modals */}
-      <AddOfferModal />
     </div>
   );
 }

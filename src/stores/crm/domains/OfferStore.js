@@ -66,4 +66,67 @@ export const OfferStore = create((set, get) => ({
       });
     }
   },
+  addOffer: async (offerData) => {
+    set({ offersLoading: true, offersError: null });
+
+    try {
+      const newOffer = await offerservice.createoffer(offerData);
+
+      set((state) => ({
+        offers: [...state.offers, newOffer],
+        offersLoading: false,
+      }));
+    } catch (error) {
+      set({
+        offersError: error.message || "Müşteri oluşturulamadı",
+        offersLoading: false,
+      });
+    }
+  },
+  updateOffer: async (id, offerData) => {
+    set({ offersLoading: true, offersError: null });
+
+    try {
+      const updatedOffer = await offerservice.updateoffer(offerData);
+
+      const refreshedOffer = await offerservice.getofferById(id);
+      if (!refreshedOffer) {
+        throw new Error("Müşteri bilgileri yüklenemedi");
+      }
+
+      set((state) => ({
+        offers: state.offers.map((offer) =>
+          offer.id === id ? { ...refreshedOffer } : offer
+        ),
+        offersLoading: false,
+      }));
+      return updatedOffer;
+    } catch (error) {
+      set({
+        offersError: error.message || "Müşteri güncellenemedi",
+        offersLoading: false,
+      });
+    }
+  },
+  deleteOffer: async (id) => {
+    set({ offersLoading: true, offersError: null });
+
+    try {
+      await offerservice.deleteoffer(id);
+
+      set((state) => ({
+        offers: state.offers.filter((offer) => offer.id !== id),
+        offersLoading: false,
+      }));
+    } catch (error) {
+      set({
+        offersError: error.message || "Müşteri silinemedi",
+        offersLoading: false,
+      });
+      throw error;
+    }
+  },
+  clearOffersError: () => {
+    set({ offersError: null });
+  },
 }));

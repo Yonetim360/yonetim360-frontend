@@ -59,6 +59,7 @@ export const ModalStore = create((set, get) => ({
       color: "text-red",
       bgColor: "bg-red/10",
       subModules: [
+        { id: "addOffer", name: "Teklif Ekle" },
         { id: "offers", name: "Teklif Takibi" },
         { id: "sales", name: "Satış Takibi" },
       ],

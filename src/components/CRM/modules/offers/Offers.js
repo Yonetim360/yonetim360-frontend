@@ -34,7 +34,7 @@ export default function Offers() {
           </p>
         </div>
         <Button
-          className="bg-red hover:bg-red/90"
+          className="bg-customRed hover:bg-customRed/90"
           onClick={() => setIsOfferModalOpen(true)}
         >
           <Plus className="mr-2 h-4 w-4" />

@@ -59,7 +59,7 @@ export default function ViewOfferModal() {
                     selectedOffer.status === "Onaylandı"
                       ? "bg-green-500"
                       : selectedOffer.status === "Reddedildi"
-                      ? "bg-red-500"
+                      ? "bg-customRed-500"
                       : "bg-yellow-500"
                   }
                 >

@@ -117,14 +117,14 @@ export default function SalesDetailsModal() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-dark-gray">
-                Müşteri <span className="text-red">*</span>
+                Müşteri <span className="text-customRed">*</span>
               </Label>
               <p>{selectedSale?.customer}</p>
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-dark-gray">
-                Durum <span className="text-red">*</span>
+                Durum <span className="text-customRed">*</span>
               </Label>
               <Controller
                 control={control}
@@ -143,7 +143,9 @@ export default function SalesDetailsModal() {
                 )}
               />
               {errors.status && (
-                <p className="text-sm text-red">{errors.status.message}</p>
+                <p className="text-sm text-customRed">
+                  {errors.status.message}
+                </p>
               )}
             </div>
           </div>
@@ -160,7 +162,7 @@ export default function SalesDetailsModal() {
             </Button>
             <Button
               type="submit"
-              className="bg-red hover:bg-red/90 text-white px-6"
+              className="bg-customRed hover:bg-customRed/90 text-white px-6"
             >
               Satış Durumunu Kaydet
             </Button>

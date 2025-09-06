@@ -65,15 +65,15 @@ export default function Overview() {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-red">
+        <Card className="border-l-4 border-l-customRed">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Aylık Satış</p>
                 <p className="text-3xl font-bold text-dark-gray">₺2.4M</p>
-                <p className="text-xs text-red">+18% bu ay</p>
+                <p className="text-xs text-customRed">+18% bu ay</p>
               </div>
-              <BarChart3 className="h-10 w-10 text-red" />
+              <BarChart3 className="h-10 w-10 text-customRed" />
             </div>
           </CardContent>
         </Card>
@@ -115,7 +115,7 @@ export default function Overview() {
               <span className="text-sm">İletişim Ekle</span>
             </Button>
             <Button
-              className="h-20 flex-col bg-red hover:bg-red/90"
+              className="h-20 flex-col bg-customRed hover:bg-customRed/90"
               onClick={() => setIsOfferModalOpen(true)}
             >
               <FileText className="h-6 w-6 mb-2" />
@@ -160,8 +160,8 @@ export default function Overview() {
                   <p className="text-xs text-gray-500">4 saat önce</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-4 p-3 bg-red/10 rounded-lg">
-                <div className="w-2 h-2 bg-red rounded-full"></div>
+              <div className="flex items-center space-x-4 p-3 bg-customRed/10 rounded-lg">
+                <div className="w-2 h-2 bg-customRed rounded-full"></div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-dark-gray">
                     Destek talebi çözüldü: DEF Danışmanlık
@@ -190,15 +190,15 @@ export default function Overview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 border border-red/30 rounded-lg bg-red/5">
-                <AlertCircle className="h-5 w-5 text-red" />
+              <div className="flex items-center space-x-3 p-3 border border-customRed/30 rounded-lg bg-customRed/5">
+                <AlertCircle className="h-5 w-5 text-customRed" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-dark-gray">
                     ABC Teknoloji ile toplantı
                   </p>
                   <p className="text-xs text-gray-500">Bugün 14:00</p>
                 </div>
-                <Badge className="bg-red text-white">Acil</Badge>
+                <Badge className="bg-customRed text-white">Acil</Badge>
               </div>
               <div className="flex items-center space-x-3 p-3 border border-orange/30 rounded-lg bg-orange/5">
                 <Clock className="h-5 w-5 text-orange" />
@@ -244,7 +244,7 @@ export default function Overview() {
               <p className="text-sm text-gray-600">Teklif Dönüşüm Oranı</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-red">2.3 gün</p>
+              <p className="text-2xl font-bold text-customRed">2.3 gün</p>
               <p className="text-sm text-gray-600">Ortalama Yanıt Süresi</p>
             </div>
             <div className="text-center">
