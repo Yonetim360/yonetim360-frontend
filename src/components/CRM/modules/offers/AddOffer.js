@@ -17,7 +17,7 @@ import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 import { OfferStore } from "@/stores/crm/domains/OfferStore";
 import { RepresentativeStore } from "@/stores/crm/domains/RepresentativeStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import {
@@ -41,7 +41,7 @@ const offerSchema = z.object({
   discountType: z.number().optional(),
   discountValue: z.number().optional(),
   vatIncluded: z.boolean().optional(),
-  note: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 export default function AddOffer() {
@@ -91,44 +91,42 @@ export default function AddOffer() {
   const discountValue = watch("discountValue");
   const discountType = watch("discountType");
   const vatIncluded = watch("vatIncluded");
+  const [total, setTotal] = useState(Number.parseFloat(offer) || 0);
 
   useEffect(() => {
-    let total = Number.parseFloat(offer) || 0;
+    let calculatedTotal = Number.parseFloat(offer) || 0;
 
-    const discount = Number.parseFloat(discountValue);
+    // İndirim hesaplama
+    if (
+      isDiscounted &&
+      discountValue &&
+      !isNaN(Number.parseFloat(discountValue))
+    ) {
+      const discount = Number.parseFloat(discountValue);
 
-    if (isDiscounted && discountValue && !isNaN(discount)) {
-      if (discountType === "percentage") {
-        total -= total * (discount / 100);
-      } else if (discountType === "fixed") {
-        total -= discount;
+      if (discountType === 0) {
+        // Yüzde indirimi
+        calculatedTotal = offer * (1 - discount / 100);
+      } else if (discountType === 1) {
+        // Sabit tutar indirimi
+        calculatedTotal = offer - discount;
       }
     }
 
+    // KDV hesaplama (KDV dahil değilse %20 ekle)
     if (!vatIncluded) {
-      total *= 1.2; // Sadece dahil değilse KDV ekle
+      calculatedTotal = calculatedTotal * 1.2;
     }
 
-    if (total < 0) total = 0;
+    // Negatif değerleri önle
+    if (calculatedTotal < 0) {
+      calculatedTotal = 0;
+    }
 
-    // form alanına düz sayı olarak yaz
-    reset((prev) => ({
-      ...prev,
-      total: CurrencyFormatter(total, currency), // örneğin: 108000
-    }));
-  }, [
-    offer,
-    discountValue,
-    discountType,
-    vatIncluded,
-    isDiscounted,
-    reset,
-    currency,
-  ]);
+    setTotal(calculatedTotal);
+  }, [offer, discountValue, discountType, vatIncluded, isDiscounted, currency]); // reset ve total'i dependencies'den çıkardık
 
   const onSubmit = (data) => {
-    console.log(data);
-
     addOffer(data);
     reset();
   };
@@ -415,11 +413,14 @@ export default function AddOffer() {
                 )}
               </div>
 
-              <div className="bg-primary-green/5 rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Label className="text-lg font-semibold text-gray-900">
-                    Toplam Tutar
-                  </Label>
+              <div className="bg-gradient-to-br from-primary-green/5 to-primary-green/10 rounded-xl p-6 border border-primary-green/20">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-primary-green" />
+                    <Label className="text-lg font-semibold text-gray-900">
+                      Toplam Tutar
+                    </Label>
+                  </div>
                   <div className="flex items-center gap-3">
                     <Controller
                       name="vatIncluded"
@@ -441,11 +442,90 @@ export default function AddOffer() {
                     </Label>
                   </div>
                 </div>
-                <Input
-                  {...register("total")}
-                  className="text-xl font-bold text-center bg-white border-2 borderprimary-green/20 h-14"
-                  disabled={true}
-                />
+
+                {/* Hesaplama detayları */}
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between items-center text-sm text-gray-600">
+                    <span>Ana Tutar:</span>
+                    <span className="font-medium">
+                      {CurrencyFormatter(offer || 0, currency)}
+                    </span>
+                  </div>
+
+                  {isDiscounted && discountValue > 0 && (
+                    <div className="flex justify-between items-center text-sm text-orange-600">
+                      <span>
+                        İndirim (
+                        {discountType === 0
+                          ? `%${discountValue}`
+                          : CurrencyFormatter(discountValue, currency)}
+                        ):
+                      </span>
+                      <span className="font-medium">
+                        -
+                        {CurrencyFormatter(
+                          discountType === 0
+                            ? (offer * discountValue) / 100
+                            : discountValue,
+                          currency
+                        )}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center text-sm text-blue-600">
+                    <span>KDV (%20):</span>
+                    <span className="font-medium">
+                      {!vatIncluded
+                        ? `+${CurrencyFormatter((total / 1.2) * 0.2, currency)}`
+                        : "KDV Fiyata Dahildir"}
+                    </span>
+                  </div>
+
+                  <hr className="border-gray-200" />
+                </div>
+
+                {/* Toplam tutar gösterimi */}
+                <div className="relative">
+                  <div className="bg-white rounded-lg border-2 border-primary-green/30 shadow-sm overflow-hidden">
+                    <div className="bg-primary-green/10 px-4 py-2 border-b border-primary-green/20">
+                      <span className="text-xs font-medium text-primary-green/80 uppercase tracking-wide">
+                        Toplam Tutar{" "}
+                        {vatIncluded ? "(KDV Dahil)" : "(KDV Hariç)"}
+                      </span>
+                    </div>
+                    <div className="p-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-900 mb-1">
+                          {CurrencyFormatter(total, currency)}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {currency === 0 && "Türk Lirası"}
+                          {currency === 1 && "Amerikan Doları"}
+                          {currency === 2 && "Euro"}
+                          {currency === 3 && "İngiliz Sterlini"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dekoratif element */}
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-primary-green/20 rounded-full flex items-center justify-center">
+                    <div className="w-3 h-3 bg-primary-green/60 rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* Ek bilgi */}
+                <div className="mt-4 text-center">
+                  <p className="text-xs text-gray-500">
+                    {isDiscounted &&
+                      discountValue > 0 &&
+                      "İndirim uygulandı • "}
+                    {!vatIncluded
+                      ? "KDV oranı %20 olarak hesaplanmıştır"
+                      : "Tüm vergiler dahildir"}
+                  </p>
+                </div>
               </div>
             </div>
 

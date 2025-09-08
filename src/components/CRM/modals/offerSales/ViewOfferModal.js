@@ -51,19 +51,19 @@ export default function ViewOfferModal() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
-                {selectedOffer.customer}
+                {selectedOffer[0].customer}
               </h3>
               <div className="flex gap-2">
                 <Badge
                   className={
-                    selectedOffer.status === "Onaylandı"
+                    selectedOffer[0].offerStatus === 0
                       ? "bg-green-500"
-                      : selectedOffer.status === "Reddedildi"
-                      ? "bg-customRed-500"
-                      : "bg-yellow-500"
+                      : selectedOffer[0].offerStatus === 1
+                      ? "bg-yellow-500"
+                      : "bg-red-500"
                   }
                 >
-                  {selectedOffer.status}
+                  {selectedOffer[0].status}
                 </Badge>
               </div>
             </div>
@@ -76,7 +76,9 @@ export default function ViewOfferModal() {
                 <User className="h-4 w-4 text-gray-500" />
                 <div>
                   <p className="text-sm font-medium text-gray-700">Temsilci</p>
-                  <p className="text-sm text-gray-900">Temsilci</p>
+                  <p className="text-sm text-gray-900">
+                    {selectedOffer[0].representativeName}
+                  </p>
                 </div>
               </div>
 
@@ -86,8 +88,8 @@ export default function ViewOfferModal() {
                   <p className="text-sm font-medium text-gray-700">Teklif</p>
                   <p className="text-sm text-gray-900">
                     <CurrencyFormatter
-                      amount={selectedOffer.amount}
-                      currency={selectedOffer.currency}
+                      amount={selectedOffer[0].amount}
+                      currency={selectedOffer[0].currency}
                     />
                   </p>
                 </div>
@@ -97,14 +99,14 @@ export default function ViewOfferModal() {
                 <Percent className="h-4 w-4 text-gray-500" />
                 <div>
                   <p className="text-sm font-medium text-gray-700">İndirim</p>
-                  {selectedOffer.discountValue ? (
+                  {selectedOffer[0].discountValue !== 0 ? (
                     <p className="text-sm text-gray-900">
-                      {selectedOffer.discountType === "fixed"
+                      {selectedOffer[0].discountType === 0
                         ? "Sabit Tutar: "
                         : "%"}{" "}
                       <CurrencyFormatter
-                        amount={selectedOffer.discountValue}
-                        currency={selectedOffer.currency}
+                        amount={selectedOffer[0].discountValue}
+                        currency={selectedOffer[0].currency}
                       />
                     </p>
                   ) : (
@@ -120,7 +122,40 @@ export default function ViewOfferModal() {
                     KDV Durumu
                   </p>
                   <p className="text-sm text-gray-900">
-                    KDV DAHİL{selectedOffer.vatIncluded ? "DİR" : " DEĞİLDİR"}
+                    KDV DAHİL
+                    {selectedOffer[0].vatIncluded ? "DİR" : " DEĞİLDİR"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <DollarSign className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Son Fiyat</p>
+                  <p>
+                    {selectedOffer[0].discountValue ? (
+                      <CurrencyFormatter
+                        amount={selectedOffer[0].amount}
+                        currency={selectedOffer[0].currency}
+                      />
+                    ) : (
+                      <CurrencyFormatter
+                        amount={selectedOffer[0].amount}
+                        currency={selectedOffer[0].currency}
+                      />
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium text-gray-700">
+                    Teklifin Baslangıc Tarihi
+                  </p>
+                  <p className="text-sm text-gray-900">
+                    {formatDate(selectedOffer[0].startDate)}
                   </p>
                 </div>
               </div>
@@ -132,7 +167,7 @@ export default function ViewOfferModal() {
                     Teklifin Son Geçerlilik Tarihi
                   </p>
                   <p className="text-sm text-gray-900">
-                    {formatDate(selectedOffer.validUntil)}
+                    {formatDate(selectedOffer[0].validityDate)}
                   </p>
                 </div>
               </div>
@@ -140,27 +175,27 @@ export default function ViewOfferModal() {
           </div>
 
           {/* Adres */}
-          {selectedOffer.products && (
+          {selectedOffer[0].products && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-gray-500" />
                 <h4 className="text-sm font-medium text-gray-700">Açıklama</h4>
               </div>
               <p className="text-sm text-gray-900 ml-6 bg-gray-50 p-3 rounded-md">
-                {selectedOffer.products}
+                {selectedOffer[0].products}
               </p>
             </div>
           )}
 
           {/* Notlar */}
-          {selectedOffer.notes && (
+          {selectedOffer[0].notes && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-gray-500" />
                 <h4 className="text-sm font-medium text-gray-700">Notlar</h4>
               </div>
               <p className="text-sm text-gray-900 ml-6 bg-gray-50 p-3 rounded-md">
-                {selectedOffer.notes}
+                {selectedOffer[0].notes}
               </p>
             </div>
           )}

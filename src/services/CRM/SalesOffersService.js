@@ -32,7 +32,7 @@ class SalesOffersService extends BaseService {
       this.isLoading = true;
 
       const authenticatedFetch = this.getAuthenticatedFetch();
-      const response = await authenticatedFetch(`${this.baseURL}/offer`);
+      const response = await authenticatedFetch(`${this.baseURL}/offers`);
 
       if (!response.ok) throw new Error("Failed to fetch offers");
 
@@ -101,7 +101,7 @@ class SalesOffersService extends BaseService {
         userId,
       };
 
-      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
+      const response = await authenticatedFetch(`${this.baseURL}/offers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +144,7 @@ class SalesOffersService extends BaseService {
         userId,
       };
 
-      const response = await authenticatedFetch(`${this.baseURL}/customers`, {
+      const response = await authenticatedFetch(`${this.baseURL}/offers`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -175,7 +175,7 @@ class SalesOffersService extends BaseService {
     try {
       const authenticatedFetch = this.getAuthenticatedFetch();
       const response = await authenticatedFetch(
-        `${this.baseURL}/customers/${id}`,
+        `${this.baseURL}/offers/${id}`,
         {
           method: "DELETE",
           headers: {

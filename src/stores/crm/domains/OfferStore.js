@@ -1,3 +1,4 @@
+import { salesOffersService } from "@/services/CRM/SalesOffersService";
 import { create } from "zustand";
 
 export const OfferStore = create((set, get) => ({
@@ -51,7 +52,7 @@ export const OfferStore = create((set, get) => ({
     set({ offersLoading: true, offersError: null });
 
     try {
-      const offers = await offerservice.getoffers(forceRefresh);
+      const offers = await salesOffersService.getOffers(forceRefresh);
 
       set({
         offers: offers,
@@ -70,7 +71,7 @@ export const OfferStore = create((set, get) => ({
     set({ offersLoading: true, offersError: null });
 
     try {
-      const newOffer = await offerservice.createoffer(offerData);
+      const newOffer = await salesOffersService.createOffer(offerData);
 
       set((state) => ({
         offers: [...state.offers, newOffer],

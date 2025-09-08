@@ -79,6 +79,22 @@ export const RepresentativeStore = create((set, get) => ({
     }
   },
 
+  getRepresentativeById: async (id) => {
+    set({ representativesLoading: true, representativesError: null });
+
+    try {
+      const representative = await representativeService.getRepresentativeById(
+        id
+      );
+      return representative;
+    } catch (error) {
+      set({
+        representativesError: error.message || "Temsilci verileri yüklenemedi",
+        representativesLoading: false,
+      });
+    }
+  },
+
   addRepresentative: async (representativeData) => {
     set({ representativesLoading: true, representativesError: null });
 

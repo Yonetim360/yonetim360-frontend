@@ -69,6 +69,20 @@ export const CustomerStore = create((set, get) => ({
     }
   },
 
+  getCustomerById: async (id) => {
+    set({ customersLoading: true, customersError: null });
+
+    try {
+      const customer = await customerService.getCustomerById(id);
+      return customer;
+    } catch (error) {
+      set({
+        customersError: error.message || "Müşteri verileri yüklenemedi",
+        customersLoading: false,
+      });
+    }
+  },
+
   // Yeni müşteri ekle
   addCustomer: async (customerData) => {
     set({ customersLoading: true, customersError: null });

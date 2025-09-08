@@ -7,7 +7,9 @@ import ViewOfferModal from "../../modals/offerSales/ViewOfferModal";
 import CurrencyFormatter from "@/components/common/CurrencyFormatter";
 import EndingOfferModal from "../../modals/offerSales/EndingOfferModal";
 import { OfferStore } from "@/stores/crm/domains/OfferStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
+import { RepresentativeStore } from "@/stores/crm/domains/RepresentativeStore";
 
 export default function Offers() {
   const {
@@ -23,6 +25,46 @@ export default function Offers() {
   useEffect(() => {
     fetchOffers();
   }, [fetchOffers]);
+
+  const { getCustomerById } = CustomerStore();
+  const { getRepresentativeById } = RepresentativeStore();
+
+  const [offersWithNames, setOffersWithNames] = useState([]);
+
+  useEffect(() => {
+    const loadOffersWithCustomerNames = async () => {
+      const offersWithNames = await Promise.all(
+        offers.map(async (offer) => {
+          try {
+            const customer = await getCustomerById(offer.customerId);
+            const representative = await getRepresentativeById(
+              offer.representativeId
+            );
+            return {
+              ...offer,
+              customerName: `${customer.companyName}`,
+              representativeName: `${representative.firstName} ${representative.lastName}`,
+            };
+          } catch (error) {
+            console.error(
+              `Error fetching customer ${offer.customerId}:`,
+              error
+            );
+            return {
+              ...offer,
+              customerName: "Unknown Customer",
+            };
+          }
+        })
+      );
+      setOffersWithNames(offersWithNames);
+      console.log("offersWithNames", offersWithNames);
+    };
+
+    if (offers.length > 0) {
+      loadOffersWithCustomerNames();
+    }
+  }, [offers, getCustomerById, getRepresentativeById]);
 
   return (
     <div className="space-y-6">
@@ -91,7 +133,7 @@ export default function Offers() {
                 </p>
               </div>
             ) : (
-              offers.map((offer) => (
+              offersWithNames.map((offer) => (
                 <div
                   key={offer.id}
                   className="p-4 border border-gray-200 rounded-lg"
@@ -99,12 +141,17 @@ export default function Offers() {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h4 className="font-semibold text-dark-gray">
-                        {offer.customer}
+                        {offer.customerName}
                       </h4>
-                      <p className="text-sm text-gray-600">
+                      {/* <p className="text-sm text-gray-600">
                         Teklif No: {offer.offerNo}
+                      </p> */}
+                      <h5 className=" text-dark-gray">
+                        Temsilci: {offer.representativeName}
+                      </h5>
+                      <p className="text-sm text-gray-600">
+                        Hizmet: {offer.serviceExplanation}
                       </p>
-                      <p className="text-sm text-gray-600">{offer.products}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-dark-gray">
@@ -115,21 +162,33 @@ export default function Offers() {
                       </p>
                       <Badge
                         variant={
-                          offer.status === "Onaylandı" ? "default" : "secondary"
+                          offer.offerStatus === 0
+                            ? "default"
+                            : offer.offerStatus === 1
+                            ? "success"
+                            : "danger"
                         }
                         className={
-                          offer.status === "Onaylandı"
+                          offer.offerStatus === 0
+                            ? "bg-orange"
+                            : offer.offerStatus === 1
                             ? "bg-primary-green"
-                            : "bg-orange"
+                            : "bg-customRed"
                         }
                       >
-                        {offer.status}
+                        {
+                          {
+                            0: "Bekliyor",
+                            1: "Onaylandı",
+                            2: "Reddedildi",
+                          }[offer.offerStatus]
+                        }
                       </Badge>
                       <div className="mt-2">
                         <Button
                           onClick={() => (
                             setIsViewOfferModalOpen(true),
-                            setSelectedOffer(offer)
+                            setSelectedOffer(offersWithNames)
                           )}
                           variant="ghost"
                           size="sm"
@@ -140,7 +199,7 @@ export default function Offers() {
                         <Button
                           onClick={() => (
                             setIsOfferDetailsModalOpen(true),
-                            setSelectedOffer(offer)
+                            setSelectedOffer(offersWithNames)
                           )}
                           variant="ghost"
                           size="sm"
@@ -154,7 +213,7 @@ export default function Offers() {
                           className={"ml-1"}
                           onClick={() => (
                             setIsEndingOfferModalOpen(true),
-                            setSelectedOffer(offer)
+                            setSelectedOffer(offersWithNames)
                           )}
                         >
                           Sonuçlandır
@@ -164,7 +223,10 @@ export default function Offers() {
                   </div>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span>Tarih: {offer.date}</span>
-                    <span>Geçerlilik: {offer.validUntil}</span>
+                    <span>
+                      Geçerlilik:{" "}
+                      {new Date(offer.validityDate).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
               ))
