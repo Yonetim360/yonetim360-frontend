@@ -49,6 +49,28 @@ const useAuthStore = create((set, get) => ({
     set({ isAuthenticated: false, user: null, accessToken: null });
   },
 
+  // Me endpoint'i için yeni action
+  fetchUser: async () => {
+    try {
+      const response = await get().authenticatedFetch("/api/auth/me", {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const { user } = await response.json();
+        console.log("Fetched user!!!!");
+
+        set({ user });
+        return user;
+      } else {
+        throw new Error("Failed to fetch user");
+      }
+    } catch (error) {
+      console.error("Fetch user error:", error);
+      throw error;
+    }
+  },
+
   refreshToken: async () => {
     const { isRefreshing } = get();
 

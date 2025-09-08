@@ -67,6 +67,7 @@ export const OfferStore = create((set, get) => ({
       });
     }
   },
+
   addOffer: async (offerData) => {
     set({ offersLoading: true, offersError: null });
 

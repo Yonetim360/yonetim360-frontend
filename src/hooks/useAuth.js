@@ -29,6 +29,7 @@ export function useAuth() {
     initializeAuth,
     authenticatedFetch,
     ensureValidToken,
+    fetchUser,
   } = useAuthStore();
 
   // Uygulama başlangıcında auth durumunu kontrol et
@@ -73,6 +74,7 @@ export function useAuth() {
     logout,
     refreshToken,
     authenticatedFetch,
+    fetchUser,
 
     // Utility
     initializeAuth,
