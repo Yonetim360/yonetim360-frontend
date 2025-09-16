@@ -23,32 +23,34 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useEffect } from "react";
-import CurrencyFormatter from "@/components/common/CurrencyFormatter";
+import { useEffect, useMemo, useState } from "react";
 import { OfferStore } from "@/stores/crm/domains/OfferStore";
-import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 
 // Zod şeması
 const offerSchema = z.object({
-  customer: z.string().min(1, "Müşteri seçimi zorunludur"),
-  status: z.string().min(1, "Durum seçimi zorunludur"),
-  workDescription: z.string().min(1, "Ürün/hizmet bilgisi zorunludur"),
-  currency: z.string().min(1, "Para birimi seçimi zorunludur"),
-  offer: z.string().min(1, "Tutar bilgisi zorunludur"),
+  representativeId: z.string().optional(),
+  offerStatus: z.number().min(0).max(2, "Durum seçimi zorunludur"),
+  serviceExplanation: z.string().min(1, "Ürün/hizmet bilgisi zorunludur"),
+  currency: z.number().min(0).max(3, "Para birimi seçimi zorunludur"),
+  amount: z.number().min(1, "Tutar bilgisi zorunludur"),
   validityDate: z.string().min(1, "Geçerlilik tarihi zorunludur"),
-  isDiscounted: z.boolean(),
-  total: z.number().optional(),
-  discountType: z.string().optional(),
-  discountValue: z.string().optional(),
+  discountType: z.number().optional(),
+  discountValue: z.number().optional(),
   vatIncluded: z.boolean().optional(),
-  notes: z.string().optional(),
+  note: z.string().optional(),
 });
 
 export default function OfferDetailsModal() {
-  const { isOfferDetailsModalOpen, setIsOfferDetailsModalOpen, selectedOffer } =
-    OfferStore();
+  const {
+    isOfferDetailsModalOpen,
+    setIsOfferDetailsModalOpen,
+    selectedOffer,
+    setSelectedOffer,
+    updateOffer,
+  } = OfferStore();
 
-  const { customers } = CustomerStore();
+  // Fiyat değiştirme durumu
+  const [isPriceEditEnabled, setIsPriceEditEnabled] = useState(false);
 
   const {
     register,
@@ -60,90 +62,102 @@ export default function OfferDetailsModal() {
   } = useForm({
     resolver: zodResolver(offerSchema),
     defaultValues: {
-      customer: "",
-      status: "beklemede",
-      workDescription: "",
-      currency: "TRY",
-      offer: "",
+      offerStatus: 0,
+      serviceExplanation: "",
+      currency: 0,
+      amount: 0,
       validityDate: "",
-      discountType: "percentage",
-      discountValue: "",
+      discountType: 0,
+      discountValue: 0,
       vatIncluded: false,
-      notes: "",
+      note: "",
     },
   });
 
   useEffect(() => {
     if (selectedOffer) {
       reset({
-        customer: selectedOffer.customer || "",
-        status:
-          selectedOffer.status?.toLowerCase().replace("ı", "i") || "beklemede",
-        workDescription:
-          selectedOffer.products || selectedOffer.workDescription || "",
-        currency: selectedOffer.currency || "TRY",
-        offer: selectedOffer.amount || selectedOffer.offer || "",
-        validityDate:
-          selectedOffer.validUntil || selectedOffer.validityDate || "",
-        discountType: selectedOffer.discountType || "percentage",
-        discountValue: selectedOffer.discountValue || "",
-        vatIncluded: selectedOffer.vatIncluded || false,
-        notes: selectedOffer.notes || "",
+        offerStatus: selectedOffer.offerStatus ?? 0,
+        serviceExplanation: selectedOffer.serviceExplanation ?? "",
+        currency: selectedOffer.currency ?? 0,
+        amount: selectedOffer.amount ?? 0,
+        validityDate: selectedOffer.validityDate
+          ? new Date(selectedOffer.validityDate).toISOString().split("T")[0]
+          : "",
+        discountType: selectedOffer.discountType ?? 0,
+        discountValue: selectedOffer.discountValue ?? 0,
+        vatIncluded: Boolean(selectedOffer.vatIncluded),
+        note: selectedOffer.note ?? "",
       });
     }
   }, [selectedOffer, reset]);
 
-  const isDiscounted = watch("isDiscounted");
-
-  /* Total ücret hesapla*/
+  // Watch form değerleri
   const currency = watch("currency");
-  const offer = watch("offer");
+  const amount = watch("amount");
   const discountValue = watch("discountValue");
   const discountType = watch("discountType");
   const vatIncluded = watch("vatIncluded");
 
-  useEffect(() => {
-    let total = parseFloat(offer) || 0;
+  // Para birimi simgesi fonksiyonu
+  const getCurrencySymbol = (currencyCode) => {
+    const symbols = {
+      0: "₺",
+      1: "$",
+      2: "€",
+      3: "£",
+    };
+    return symbols[currencyCode] || "₺";
+  };
 
-    const discount = parseFloat(discountValue);
+  // Toplam tutar hesaplama
+  const totalAmount = useMemo(() => {
+    const baseAmount = amount || 0;
+    const discount = discountValue || 0;
+    const discType = discountType || 0;
 
-    if (isDiscounted && discountValue && !isNaN(discount)) {
-      if (discountType === "percentage") {
-        total -= total * (discount / 100);
-      } else if (discountType === "fixed") {
-        total -= discount;
+    let discountedAmount = baseAmount;
+
+    // İndirim hesaplama (sadece fiyat değiştirme aktifken)
+    if (isPriceEditEnabled && discount > 0) {
+      if (discType === 0) {
+        // Yüzde indirim
+        discountedAmount = baseAmount - (baseAmount * discount) / 100;
+      } else {
+        // Sabit tutar indirim
+        discountedAmount = baseAmount - discount;
       }
     }
 
-    if (!vatIncluded) {
-      total *= 1.2; // Sadece dahil değilse KDV ekle
+    // KDV hesaplama (sadece fiyat değiştirme aktifken ve KDV dahil değilse %20 ekle)
+    let finalAmount = discountedAmount;
+    if (isPriceEditEnabled && !vatIncluded && discountedAmount > 0) {
+      finalAmount = discountedAmount * 1.2;
     }
 
-    if (total < 0) total = 0;
+    return Math.max(0, finalAmount);
+  }, [amount, discountValue, discountType, vatIncluded, isPriceEditEnabled]);
 
-    // form alanına düz sayı olarak yaz
-    reset((prev) => ({
-      ...prev,
-      total: CurrencyFormatter(total, currency), // örneğin: 108000
-    }));
-  }, [
-    offer,
-    discountValue,
-    discountType,
-    vatIncluded,
-    isDiscounted,
-    reset,
-    currency,
-  ]);
+  const onSubmit = async (data) => {
+    const dataToSend = {
+      ...data,
+      id: selectedOffer.id,
+      representativeId: data.representativeId || selectedOffer.representativeId,
+      customerId: selectedOffer.customerId,
+      title: "changed offer title",
+      documentUrl: "notnullable!!1",
+    };
 
-  const onSubmit = (data) => {
-    console.log(data);
+    await updateOffer(selectedOffer.id, dataToSend);
     reset();
+    setIsPriceEditEnabled(false);
     setIsOfferDetailsModalOpen(false);
   };
 
   const handleClose = () => {
     reset();
+    setIsPriceEditEnabled(false);
+    setSelectedOffer(null);
     setIsOfferDetailsModalOpen(false);
   };
 
@@ -162,253 +176,264 @@ export default function OfferDetailsModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-6"
-          noValidate
-        >
-          {/* Müşteri ve Durum */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-dark-gray">
-                Müşteri <span className="text-customRed">*</span>
-              </Label>
-              <Controller
-                name="customer"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Müşteri seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {customers?.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.name}>
-                          {customer.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.customer && (
-                <p className="text-sm text-customRed">
-                  {errors.customer.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-dark-gray">
-                Durum <span className="text-customRed">*</span>
-              </Label>
-              <Controller
-                control={control}
-                name="status"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Teklif Durumu" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beklemede">Beklemede</SelectItem>
-                      <SelectItem value="onaylandi">Onaylandı</SelectItem>
-                      <SelectItem value="reddedildi">Reddedildi</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.status && (
-                <p className="text-sm text-customRed">
-                  {errors.status.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Ürün/Hizmetler */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-dark-gray">
-              Ürün/Hizmetler <span className="text-customRed">*</span>
-            </Label>
-            <Textarea
-              {...register("workDescription")}
-              placeholder="Web Sitesi + Mobil Uygulama"
-              rows={3}
-              className="resize-none"
-            />
-            {errors.workDescription && (
-              <p className="text-sm text-customRed">
-                {errors.workDescription.message}
-              </p>
-            )}
-          </div>
-
-          {/* Tutar ve Geçerlilik Tarihi */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-dark-gray">
-                Tutar <span className="text-customRed">*</span>
-              </Label>
-              <div className="flex">
-                <Controller
-                  name="currency"
-                  control={control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="w-20 rounded-r-none border-r-0">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="TRY">₺</SelectItem>
-                        <SelectItem value="USD">$</SelectItem>
-                        <SelectItem value="EUR">€</SelectItem>
-                        <SelectItem value="GBP">£</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <Input
-                  {...register("offer")}
-                  placeholder="125.000"
-                  className="rounded-l-none flex-1"
-                />
+        {selectedOffer ? (
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+            noValidate
+          >
+            {/* Müşteri ve Durum */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-dark-gray">
+                  Müşteri
+                </div>
+                <div>{selectedOffer.customerName}</div>
               </div>
-              {errors.offer && (
-                <p className="text-sm text-customRed">{errors.offer.message}</p>
-              )}
-            </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-dark-gray">
-                Geçerlilik Tarihi <span className="text-customRed">*</span>
-              </Label>
-              <Input
-                {...register("validityDate")}
-                type="date"
-                placeholder="gg.aa.yyyy"
-                className="h-11"
-              />
-              {errors.validityDate && (
-                <p className="text-sm text-customRed">
-                  {errors.validityDate.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* İndirim */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-dark-gray">
-              İndirim
-            </Label>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                {" "}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-dark-gray">
+                  Durum <span className="text-customRed">*</span>
+                </Label>
                 <Controller
-                  name="isDiscounted"
                   control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="isDiscounted"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Controller
-                  name="discountType"
-                  control={control}
+                  name="offerStatus"
                   render={({ field }) => (
                     <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      disabled={!isDiscounted}
+                      value={field.value?.toString()}
+                      onValueChange={(val) => field.onChange(Number(val))}
                     >
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Tür" />
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Teklif Durumu" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="percentage">Yüzde (%)</SelectItem>
-                        <SelectItem value="fixed">Sabit Tutar</SelectItem>
+                        <SelectItem value="0">Beklemede</SelectItem>
+                        <SelectItem value="1">Onaylandı</SelectItem>
+                        <SelectItem value="2">Reddedildi</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
                 />
-                <Input
-                  {...register("discountValue")}
-                  placeholder="10"
-                  className="w-20"
-                  disabled={!isDiscounted}
-                />
-              </div>
-
-              <div className="flex items-center justify-center gap-2">
-                <Controller
-                  name="vatIncluded"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="vatIncluded"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Label
-                  htmlFor="vatIncluded"
-                  className="text-sm font-medium text-dark-gray cursor-pointer"
-                >
-                  KDV Dahil
-                </Label>
+                {errors.offerStatus && (
+                  <p className="text-sm text-customRed">
+                    {errors.offerStatus.message}
+                  </p>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className="space-y-2 flex flex-row gap-5">
-            <Label
-              htmlFor="total"
-              className="text-sm font-medium text-dark-gray cursor-pointer"
-            >
-              Toplam Tutar
-            </Label>
-            <Input
-              {...register("total")}
-              placeholder=""
-              className="w-50"
-              disabled={true}
-            />
-          </div>
+            {/* Ürün/Hizmetler */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-dark-gray">
+                Ürün/Hizmetler <span className="text-customRed">*</span>
+              </Label>
+              <Textarea
+                {...register("serviceExplanation")}
+                placeholder="Web Sitesi + Mobil Uygulama"
+                rows={3}
+                className="resize-none"
+              />
+              {errors.serviceExplanation && (
+                <p className="text-sm text-customRed">
+                  {errors.serviceExplanation.message}
+                </p>
+              )}
+            </div>
 
-          {/* Notlar */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-dark-gray">Notlar</Label>
-            <Textarea
-              {...register("notes")}
-              placeholder="Teklif detayları ve özel notlar..."
-              rows={4}
-              className="resize-none"
-            />
-          </div>
+            {/* Fiyat Değiştirme Seçeneği */}
+            <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+              <Checkbox
+                id="priceEditEnabled"
+                checked={isPriceEditEnabled}
+                onCheckedChange={setIsPriceEditEnabled}
+              />
+              <Label
+                htmlFor="priceEditEnabled"
+                className="text-sm font-medium text-dark-gray cursor-pointer"
+              >
+                Fiyatı değiştirmek istiyorum
+              </Label>
+            </div>
 
-          {/* Footer Buttons */}
-          <DialogFooter className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="px-6 bg-transparent"
-            >
-              İptal
-            </Button>
-            <Button
-              type="submit"
-              className="bg-customRed hover:bg-customRed/90 text-white px-6"
-            >
-              Teklif Kaydet
-            </Button>
-          </DialogFooter>
-        </form>
+            {/* Tutar ve Geçerlilik Tarihi */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Tutar - sadece fiyat değiştirme aktifken görünür */}
+              {isPriceEditEnabled && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-dark-gray">
+                    Tutar <span className="text-customRed">*</span>
+                  </Label>
+                  <div className="flex">
+                    <Controller
+                      name="currency"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value?.toString()}
+                          onValueChange={(val) => field.onChange(Number(val))}
+                        >
+                          <SelectTrigger className="w-20 rounded-r-none border-r-0">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">₺</SelectItem>
+                            <SelectItem value="1">$</SelectItem>
+                            <SelectItem value="2">€</SelectItem>
+                            <SelectItem value="3">£</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <Input
+                      {...register("amount", { valueAsNumber: true })}
+                      placeholder="125.000"
+                      className="rounded-l-none flex-1"
+                    />
+                  </div>
+                  {errors.amount && (
+                    <p className="text-sm text-customRed">
+                      {errors.amount.message}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-dark-gray">
+                  Geçerlilik Tarihi <span className="text-customRed">*</span>
+                </Label>
+                <Input
+                  {...register("validityDate")}
+                  type="date"
+                  placeholder="gg.aa.yyyy"
+                  className="h-11"
+                />
+                {errors.validityDate && (
+                  <p className="text-sm text-customRed">
+                    {errors.validityDate.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* İndirim - sadece fiyat değiştirme aktifken görünür */}
+            {isPriceEditEnabled && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-dark-gray">
+                  İndirim
+                </Label>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Controller
+                      name="discountType"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value?.toString()}
+                          onValueChange={(val) => field.onChange(Number(val))}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Tür" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">Yüzde (%)</SelectItem>
+                            <SelectItem value="1">Sabit Tutar</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <Input
+                      {...register("discountValue", { valueAsNumber: true })}
+                      placeholder="10"
+                      className="w-20"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-center gap-2">
+                    <Controller
+                      name="vatIncluded"
+                      control={control}
+                      render={({ field }) => (
+                        <Checkbox
+                          id="vatIncluded"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      )}
+                    />
+                    <Label
+                      htmlFor="vatIncluded"
+                      className="text-sm font-medium text-dark-gray cursor-pointer"
+                    >
+                      KDV Dahil
+                    </Label>
+                  </div>
+                </div>
+
+                {/* İndirim bilgisi göster */}
+                {discountValue > 0 && (
+                  <div className="text-sm text-green-600">
+                    İndirim:{" "}
+                    {discountType === 0
+                      ? `%${discountValue}`
+                      : `${getCurrencySymbol(
+                          currency
+                        )} ${discountValue.toLocaleString("tr-TR")}`}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Toplam Tutar - Her zaman görünür */}
+            <div className="space-y-2 flex flex-row gap-5 items-center">
+              <div className="text-sm font-medium text-dark-gray">
+                Toplam Tutar
+              </div>
+              <div className="font-semibold text-lg text-green-600">
+                {getCurrencySymbol(currency)}{" "}
+                {totalAmount.toLocaleString("tr-TR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+            </div>
+
+            {/* Notlar */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-dark-gray">
+                Notlar
+              </Label>
+              <Textarea
+                {...register("note")}
+                placeholder="Teklif detayları ve özel notlar..."
+                rows={4}
+                className="resize-none"
+              />
+            </div>
+
+            {/* Footer Buttons */}
+            <DialogFooter className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="px-6 bg-transparent"
+              >
+                İptal
+              </Button>
+              <Button
+                type="submit"
+                className="bg-customRed hover:bg-customRed/90 text-white px-6"
+              >
+                Teklifi Düzenle
+              </Button>
+            </DialogFooter>
+          </form>
+        ) : (
+          <div className="flex justify-center items-center h-full">
+            <p className="text-lg text-muted-foreground">Teklif bulunamadı</p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

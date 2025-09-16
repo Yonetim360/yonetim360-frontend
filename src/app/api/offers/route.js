@@ -1,4 +1,5 @@
 import axios from "axios";
+import { LucideChartNoAxesColumnIncreasing } from "lucide-react";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
@@ -42,6 +43,8 @@ export async function POST(request) {
 
   try {
     const data = await request.json();
+    console.log(data);
+
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/offer`,
       data,
@@ -58,6 +61,40 @@ export async function POST(request) {
     console.error("API Error:", error);
     return NextResponse.json(
       { error: "Teklif verileri alınamadı" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request) {
+  const accessToken = request.headers
+    .get("Authorization")
+    ?.replace("Bearer ", "");
+  if (!accessToken) {
+    return NextResponse.json({ error: "Yetkisiz Giriş" }, { status: 401 });
+  }
+  try {
+    const data = await request.json();
+    const dataToSend = {
+      offerDto: {
+        ...data,
+      },
+    };
+    const response = await axios.put(
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/offer/`,
+      dataToSend,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return NextResponse.json(response.data);
+  } catch (error) {
+    console.error("API Error:", error);
+    return NextResponse.json(
+      { error: "Teklif verileri güncellenemedi" },
       { status: 500 }
     );
   }

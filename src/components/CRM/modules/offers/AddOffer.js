@@ -29,26 +29,25 @@ import {
   MessageSquare,
 } from "lucide-react";
 import InputError from "@/components/common/InputError";
+import CalculatePrice from "@/utils/CalculatePrice";
 
 const offerSchema = z.object({
-  customer: z.string().min(1, "Müşteri seçimi zorunludur"),
+  customerId: z.string().min(1, "Müşteri seçimi zorunludur"),
+  representativeId: z.string().optional(),
   offerStatus: z.number().min(0).max(2, "Durum seçimi zorunludur"),
   serviceExplanation: z.string().min(1, "Ürün/hizmet bilgisi zorunludur"),
   currency: z.number().min(0).max(3, "Para birimi seçimi zorunludur"),
   amount: z.number().min(1, "Tutar bilgisi zorunludur"),
   validityDate: z.string().min(1, "Geçerlilik tarihi zorunludur"),
-  isDiscounted: z.boolean(),
   discountType: z.number().optional(),
   discountValue: z.number().optional(),
   vatIncluded: z.boolean().optional(),
-  notes: z.string().optional(),
+  note: z.string().optional(),
 });
 
 export default function AddOffer() {
   const { customers, fetchCustomers } = CustomerStore();
-
   const { addOffer, offersLoading } = OfferStore();
-
   const { representatives, fetchRepresentatives } = RepresentativeStore();
 
   useEffect(() => {
@@ -70,7 +69,8 @@ export default function AddOffer() {
   } = useForm({
     resolver: zodResolver(offerSchema),
     defaultValues: {
-      customer: "",
+      customerId: "",
+      representativeId: "",
       offerStatus: 0,
       serviceExplanation: "",
       currency: 0,
@@ -79,13 +79,14 @@ export default function AddOffer() {
       discountType: 0,
       discountValue: 0,
       vatIncluded: false,
-      notes: "",
-      isDiscounted: false,
+      note: "",
     },
   });
 
+  // İndirim kontrol state'i - form'dan bağımsız
+  const [isDiscounted, setIsDiscounted] = useState(false);
+
   /* Total ücret hesapla*/
-  const isDiscounted = watch("isDiscounted");
   const currency = watch("currency");
   const offer = watch("amount");
   const discountValue = watch("discountValue");
@@ -94,40 +95,26 @@ export default function AddOffer() {
   const [total, setTotal] = useState(Number.parseFloat(offer) || 0);
 
   useEffect(() => {
-    let calculatedTotal = Number.parseFloat(offer) || 0;
-
-    // İndirim hesaplama
-    if (
-      isDiscounted &&
-      discountValue &&
-      !isNaN(Number.parseFloat(discountValue))
-    ) {
-      const discount = Number.parseFloat(discountValue);
-
-      if (discountType === 0) {
-        // Yüzde indirimi
-        calculatedTotal = offer * (1 - discount / 100);
-      } else if (discountType === 1) {
-        // Sabit tutar indirimi
-        calculatedTotal = offer - discount;
-      }
-    }
-
-    // KDV hesaplama (KDV dahil değilse %20 ekle)
-    if (!vatIncluded) {
-      calculatedTotal = calculatedTotal * 1.2;
-    }
-
-    // Negatif değerleri önle
-    if (calculatedTotal < 0) {
-      calculatedTotal = 0;
-    }
+    let calculatedTotal = CalculatePrice({
+      offer,
+      discountValue,
+      discountType,
+      vatIncluded,
+      isDiscounted,
+      currency,
+    });
 
     setTotal(calculatedTotal);
-  }, [offer, discountValue, discountType, vatIncluded, isDiscounted, currency]); // reset ve total'i dependencies'den çıkardık
+  }, [offer, discountValue, discountType, vatIncluded, isDiscounted, currency]);
 
   const onSubmit = (data) => {
-    addOffer(data);
+    const dataToSend = {
+      ...data,
+      title: "title asd1",
+      vatIncluded: vatIncluded === true ? 1 : 0,
+      documentUrl: "not nullable!",
+    };
+    addOffer(dataToSend);
     reset();
   };
 
@@ -166,7 +153,7 @@ export default function AddOffer() {
                     Müşteri <span className="text-red-500">*</span>
                   </Label>
                   <Controller
-                    name="customer"
+                    name="customerId"
                     control={control}
                     render={({ field }) => (
                       <Select
@@ -180,7 +167,7 @@ export default function AddOffer() {
                           {customers?.map((customer) => (
                             <SelectItem
                               key={customer.id}
-                              value={customer.companyName}
+                              value={customer.id.toString()}
                             >
                               {customer.companyName}
                             </SelectItem>
@@ -189,9 +176,9 @@ export default function AddOffer() {
                       </Select>
                     )}
                   />
-                  {errors.customer && (
+                  {errors.customerId && (
                     <p className="text-xs text-red-500">
-                      {errors.customer.message}
+                      {errors.customerId.message}
                     </p>
                   )}
                 </div>
@@ -246,7 +233,7 @@ export default function AddOffer() {
                   </Label>
                   <Controller
                     control={control}
-                    name="representative"
+                    name="representativeId"
                     render={({ field }) => (
                       <Select
                         onValueChange={field.onChange}
@@ -259,7 +246,7 @@ export default function AddOffer() {
                           {representatives?.map((representative) => (
                             <SelectItem
                               key={representative.id}
-                              value={representative.lastName}
+                              value={representative.id.toString()}
                             >
                               {representative.firstName}{" "}
                               {representative.lastName}
@@ -367,20 +354,14 @@ export default function AddOffer() {
                   <Label className="text-sm font-medium text-gray-700">
                     İndirim Uygula
                   </Label>
-                  <Controller
-                    name="isDiscounted"
-                    control={control}
-                    render={({ field }) => (
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-primary-green/95 data-[state=checked]:border-primary-green/75"
-                      />
-                    )}
+                  <Checkbox
+                    checked={isDiscounted}
+                    onCheckedChange={setIsDiscounted}
+                    className="data-[state=checked]:bg-primary-green/95 data-[state=checked]:border-primary-green/75"
                   />
                 </div>
 
-                {watch("isDiscounted") && (
+                {isDiscounted && (
                   <div className="flex items-center gap-4">
                     <Controller
                       name="discountType"
@@ -404,7 +385,7 @@ export default function AddOffer() {
                       {...register("discountValue", { valueAsNumber: true })}
                       placeholder="10"
                       className="w-24 bg-white"
-                      disabled={!watch("isDiscounted")}
+                      disabled={!isDiscounted}
                     />
                     {errors.discountValue && (
                       <InputError message={errors.discountValue.message} />
@@ -542,7 +523,7 @@ export default function AddOffer() {
                   Notlar
                 </Label>
                 <Textarea
-                  {...register("notes")}
+                  {...register("note")}
                   placeholder="Teklif detayları, özel şartlar ve diğer önemli notlar..."
                   rows={4}
                   className="resize-none border-gray-200 focus:border-primary-green/65 focus:ring-primary-green/20"

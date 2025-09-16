@@ -89,9 +89,9 @@ export const OfferStore = create((set, get) => ({
     set({ offersLoading: true, offersError: null });
 
     try {
-      const updatedOffer = await offerservice.updateoffer(offerData);
+      const updatedOffer = await salesOffersService.updateOffer(offerData);
 
-      const refreshedOffer = await offerservice.getofferById(id);
+      const refreshedOffer = await salesOffersService.getOfferById(id);
       if (!refreshedOffer) {
         throw new Error("Müşteri bilgileri yüklenemedi");
       }
@@ -114,7 +114,7 @@ export const OfferStore = create((set, get) => ({
     set({ offersLoading: true, offersError: null });
 
     try {
-      await offerservice.deleteoffer(id);
+      await salesOffersService.deleteOffer(id);
 
       set((state) => ({
         offers: state.offers.filter((offer) => offer.id !== id),

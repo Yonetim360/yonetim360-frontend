@@ -56,7 +56,7 @@ class SalesOffersService extends BaseService {
     try {
       const authenticatedFetch = this.getAuthenticatedFetch();
       const response = await authenticatedFetch(
-        `${this.baseURL}/customers/${id}`,
+        `${this.baseURL}/offers/${id}`,
         {
           method: "GET",
           headers: {
@@ -127,7 +127,7 @@ class SalesOffersService extends BaseService {
   }
 
   // Müşteri güncelle
-  async updateOffer(customerData) {
+  async updateOffer(offerData) {
     await this.ensureAuth();
 
     try {
@@ -140,7 +140,7 @@ class SalesOffersService extends BaseService {
       }
 
       const dataToSend = {
-        ...customerData,
+        ...offerData,
         userId,
       };
 
