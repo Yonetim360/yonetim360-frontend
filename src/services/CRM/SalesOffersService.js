@@ -5,7 +5,7 @@ class SalesOffersService extends BaseService {
     super("sales-offers");
   }
 
-  // Müşterileri getir
+  // Teklif getir
   async getOffers(forceRefresh = false) {
     // Önce authentication'ı kontrol et
     await this.ensureAuth();
@@ -49,7 +49,7 @@ class SalesOffersService extends BaseService {
     }
   }
 
-  // Müşteri bilgilerini getir
+  // Teklif bilgilerini getir
   getOfferById = async (id) => {
     await this.ensureAuth();
 
@@ -83,7 +83,7 @@ class SalesOffersService extends BaseService {
     }
   };
 
-  // Yeni müşteri oluştur
+  // Yeni teklif oluştur
   async createOffer(offerData) {
     await this.ensureAuth();
 
@@ -121,12 +121,12 @@ class SalesOffersService extends BaseService {
 
       return data;
     } catch (error) {
-      console.error("Müşteri oluşturulamadı:", error);
+      console.error("Teklif oluşturulamadı:", error);
       throw error;
     }
   }
 
-  // Müşteri güncelle
+  // Teklif güncelle
   async updateOffer(offerData) {
     await this.ensureAuth();
 
@@ -163,12 +163,12 @@ class SalesOffersService extends BaseService {
 
       return data;
     } catch (error) {
-      console.error("Müşteri güncellenemedi:", error);
+      console.error("Teklif güncellenemedi:", error);
       throw error;
     }
   }
 
-  // Müşteri sil
+  // Teklif sil
   async deleteOffer(id) {
     await this.ensureAuth();
 
@@ -195,7 +195,7 @@ class SalesOffersService extends BaseService {
 
       return data;
     } catch (error) {
-      console.error("Müşteri silinemedi:", error);
+      console.error("Teklif silinemedi:", error);
       throw error;
     }
   }

@@ -1,38 +1,27 @@
 export default function CalculatePrice({
-  isDiscounted = 0,
-  discountValue = 0,
-  discountType = 0,
-  vatIncluded = 0,
   offer,
+  discountValue,
+  discountType,
+  taxIncluded,
+  isDiscounted,
+  currency,
 }) {
-  let calculatedTotal = Number.parseFloat(offer) || 0;
+  let total = Number(offer) || 0;
 
-  // İndirim hesaplama
-  if (
-    isDiscounted &&
-    discountValue &&
-    !isNaN(Number.parseFloat(discountValue))
-  ) {
-    const discount = Number.parseFloat(discountValue);
-
-    if (discountType === 0) {
-      // Yüzde indirimi
-      calculatedTotal = offer * (1 - discount / 100);
-    } else if (discountType === 1) {
-      // Sabit tutar indirimi
-      calculatedTotal = offer - discount;
+  if (isDiscounted) {
+    if (discountType === 1 && discountValue > 0) {
+      // yüzde
+      total = total - (total * discountValue) / 100;
+    } else if (discountType === 2 && discountValue > 0) {
+      // sabit tutar
+      total = total - discountValue;
     }
   }
 
-  // KDV hesaplama (KDV dahil değilse %20 ekle)
-  if (!vatIncluded) {
-    calculatedTotal = calculatedTotal * 1.2;
+  // KDV
+  if (!taxIncluded) {
+    total = total * 1.2;
   }
 
-  // Negatif değerleri önle
-  if (calculatedTotal < 0) {
-    calculatedTotal = 0;
-  }
-
-  return calculatedTotal;
+  return total < 0 ? 0 : total; // eksiye düşmesin
 }

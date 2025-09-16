@@ -29,14 +29,14 @@ import { OfferStore } from "@/stores/crm/domains/OfferStore";
 // Zod şeması
 const offerSchema = z.object({
   representativeId: z.string().optional(),
-  offerStatus: z.number().min(0).max(2, "Durum seçimi zorunludur"),
+  offerStatus: z.number().min(1).max(4, "Durum seçimi zorunludur"),
   serviceExplanation: z.string().min(1, "Ürün/hizmet bilgisi zorunludur"),
   currency: z.number().min(0).max(3, "Para birimi seçimi zorunludur"),
   amount: z.number().min(1, "Tutar bilgisi zorunludur"),
   validityDate: z.string().min(1, "Geçerlilik tarihi zorunludur"),
-  discountType: z.number().optional(),
+  discountType: z.number().min(0).max(2, "İndirim türü zorunludur"),
   discountValue: z.number().optional(),
-  vatIncluded: z.boolean().optional(),
+  taxIncluded: z.number().min(0).max(1, "KDV bilgisi zorunludur"),
   note: z.string().optional(),
 });
 
@@ -62,14 +62,14 @@ export default function OfferDetailsModal() {
   } = useForm({
     resolver: zodResolver(offerSchema),
     defaultValues: {
-      offerStatus: 0,
+      offerStatus: 1,
       serviceExplanation: "",
       currency: 0,
       amount: 0,
       validityDate: "",
-      discountType: 0,
+      discountType: 1,
       discountValue: 0,
-      vatIncluded: false,
+      taxIncluded: 0,
       note: "",
     },
   });
@@ -77,16 +77,16 @@ export default function OfferDetailsModal() {
   useEffect(() => {
     if (selectedOffer) {
       reset({
-        offerStatus: selectedOffer.offerStatus ?? 0,
+        offerStatus: selectedOffer.offerStatus ?? 1,
         serviceExplanation: selectedOffer.serviceExplanation ?? "",
         currency: selectedOffer.currency ?? 0,
         amount: selectedOffer.amount ?? 0,
         validityDate: selectedOffer.validityDate
           ? new Date(selectedOffer.validityDate).toISOString().split("T")[0]
           : "",
-        discountType: selectedOffer.discountType ?? 0,
+        discountType: selectedOffer.discountType ?? 1,
         discountValue: selectedOffer.discountValue ?? 0,
-        vatIncluded: Boolean(selectedOffer.vatIncluded),
+        taxIncluded: selectedOffer.taxIncluded,
         note: selectedOffer.note ?? "",
       });
     }
@@ -97,7 +97,7 @@ export default function OfferDetailsModal() {
   const amount = watch("amount");
   const discountValue = watch("discountValue");
   const discountType = watch("discountType");
-  const vatIncluded = watch("vatIncluded");
+  const taxIncluded = watch("taxIncluded");
 
   // Para birimi simgesi fonksiyonu
   const getCurrencySymbol = (currencyCode) => {
@@ -114,16 +114,16 @@ export default function OfferDetailsModal() {
   const totalAmount = useMemo(() => {
     const baseAmount = amount || 0;
     const discount = discountValue || 0;
-    const discType = discountType || 0;
+    const discType = discountType || 1;
 
     let discountedAmount = baseAmount;
 
     // İndirim hesaplama (sadece fiyat değiştirme aktifken)
     if (isPriceEditEnabled && discount > 0) {
-      if (discType === 0) {
+      if (discType === 1) {
         // Yüzde indirim
         discountedAmount = baseAmount - (baseAmount * discount) / 100;
-      } else {
+      } else if (discType === 2) {
         // Sabit tutar indirim
         discountedAmount = baseAmount - discount;
       }
@@ -131,12 +131,12 @@ export default function OfferDetailsModal() {
 
     // KDV hesaplama (sadece fiyat değiştirme aktifken ve KDV dahil değilse %20 ekle)
     let finalAmount = discountedAmount;
-    if (isPriceEditEnabled && !vatIncluded && discountedAmount > 0) {
+    if (isPriceEditEnabled && taxIncluded === 0 && discountedAmount > 0) {
       finalAmount = discountedAmount * 1.2;
     }
 
     return Math.max(0, finalAmount);
-  }, [amount, discountValue, discountType, vatIncluded, isPriceEditEnabled]);
+  }, [amount, discountValue, discountType, taxIncluded, isPriceEditEnabled]);
 
   const onSubmit = async (data) => {
     const dataToSend = {
@@ -147,6 +147,7 @@ export default function OfferDetailsModal() {
       title: "changed offer title",
       documentUrl: "notnullable!!1",
     };
+    console.log(dataToSend);
 
     await updateOffer(selectedOffer.id, dataToSend);
     reset();
@@ -207,9 +208,9 @@ export default function OfferDetailsModal() {
                         <SelectValue placeholder="Teklif Durumu" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="0">Beklemede</SelectItem>
-                        <SelectItem value="1">Onaylandı</SelectItem>
-                        <SelectItem value="2">Reddedildi</SelectItem>
+                        <SelectItem value="1">Beklemede</SelectItem>
+                        <SelectItem value="2">Onaylandı</SelectItem>
+                        <SelectItem value="3">Reddedildi</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -351,18 +352,20 @@ export default function OfferDetailsModal() {
 
                   <div className="flex items-center justify-center gap-2">
                     <Controller
-                      name="vatIncluded"
+                      name="taxIncluded"
                       control={control}
                       render={({ field }) => (
                         <Checkbox
-                          id="vatIncluded"
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
+                          id="taxIncluded"
+                          checked={field.value === 1}
+                          onCheckedChange={(checked) =>
+                            field.onChange(checked ? 1 : 0)
+                          }
                         />
                       )}
                     />
                     <Label
-                      htmlFor="vatIncluded"
+                      htmlFor="taxIncluded"
                       className="text-sm font-medium text-dark-gray cursor-pointer"
                     >
                       KDV Dahil
@@ -374,7 +377,7 @@ export default function OfferDetailsModal() {
                 {discountValue > 0 && (
                   <div className="text-sm text-green-600">
                     İndirim:{" "}
-                    {discountType === 0
+                    {discountType === 1
                       ? `%${discountValue}`
                       : `${getCurrencySymbol(
                           currency

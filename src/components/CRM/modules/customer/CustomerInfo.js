@@ -100,7 +100,7 @@ export default function CustomerInfo() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={clearError}
+              // onClick={clearError}
               className="ml-2"
             >
               Kapat

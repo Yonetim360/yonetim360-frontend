@@ -34,14 +34,14 @@ import CalculatePrice from "@/utils/CalculatePrice";
 const offerSchema = z.object({
   customerId: z.string().min(1, "Müşteri seçimi zorunludur"),
   representativeId: z.string().optional(),
-  offerStatus: z.number().min(0).max(2, "Durum seçimi zorunludur"),
+  offerStatus: z.number().min(1).max(4, "Durum seçimi zorunludur"),
   serviceExplanation: z.string().min(1, "Ürün/hizmet bilgisi zorunludur"),
   currency: z.number().min(0).max(3, "Para birimi seçimi zorunludur"),
   amount: z.number().min(1, "Tutar bilgisi zorunludur"),
   validityDate: z.string().min(1, "Geçerlilik tarihi zorunludur"),
-  discountType: z.number().optional(),
+  discountType: z.number().min(0).max(2, "İndirim türü zorunludur"),
   discountValue: z.number().optional(),
-  vatIncluded: z.boolean().optional(),
+  taxIncluded: z.number().min(0).max(1, "KDV bilgisi zorunludur"),
   note: z.string().optional(),
 });
 
@@ -71,14 +71,14 @@ export default function AddOffer() {
     defaultValues: {
       customerId: "",
       representativeId: "",
-      offerStatus: 0,
+      offerStatus: 1,
       serviceExplanation: "",
       currency: 0,
       amount: 0,
       validityDate: "",
-      discountType: 0,
+      discountType: 1,
       discountValue: 0,
-      vatIncluded: false,
+      taxIncluded: 0,
       note: "",
     },
   });
@@ -91,7 +91,7 @@ export default function AddOffer() {
   const offer = watch("amount");
   const discountValue = watch("discountValue");
   const discountType = watch("discountType");
-  const vatIncluded = watch("vatIncluded");
+  const taxIncluded = watch("taxIncluded");
   const [total, setTotal] = useState(Number.parseFloat(offer) || 0);
 
   useEffect(() => {
@@ -99,19 +99,18 @@ export default function AddOffer() {
       offer,
       discountValue,
       discountType,
-      vatIncluded,
+      taxIncluded,
       isDiscounted,
       currency,
     });
 
     setTotal(calculatedTotal);
-  }, [offer, discountValue, discountType, vatIncluded, isDiscounted, currency]);
+  }, [offer, discountValue, discountType, taxIncluded, isDiscounted, currency]);
 
   const onSubmit = (data) => {
     const dataToSend = {
       ...data,
       title: "title asd1",
-      vatIncluded: vatIncluded === true ? 1 : 0,
       documentUrl: "not nullable!",
     };
     addOffer(dataToSend);
@@ -200,19 +199,19 @@ export default function AddOffer() {
                           <SelectValue placeholder="Teklif Durumu" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0">
+                          <SelectItem value="1">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
                               Beklemede
                             </div>
                           </SelectItem>
-                          <SelectItem value="1">
+                          <SelectItem value="2">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-green-500"></div>
                               Onaylandı
                             </div>
                           </SelectItem>
-                          <SelectItem value="2">
+                          <SelectItem value="3">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-red-500"></div>
                               Reddedildi
@@ -375,8 +374,9 @@ export default function AddOffer() {
                             <SelectValue placeholder="İndirim Türü" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="0">Yüzde (%)</SelectItem>
-                            <SelectItem value="1">Sabit Tutar</SelectItem>
+                            <SelectItem value="0">Yok</SelectItem>
+                            <SelectItem value="1">Yüzde (%)</SelectItem>
+                            <SelectItem value="2">Sabit Tutar</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
@@ -385,7 +385,7 @@ export default function AddOffer() {
                       {...register("discountValue", { valueAsNumber: true })}
                       placeholder="10"
                       className="w-24 bg-white"
-                      disabled={!isDiscounted}
+                      disabled={!isDiscounted && discountType === 0}
                     />
                     {errors.discountValue && (
                       <InputError message={errors.discountValue.message} />
@@ -404,19 +404,21 @@ export default function AddOffer() {
                   </div>
                   <div className="flex items-center gap-3">
                     <Controller
-                      name="vatIncluded"
+                      name="taxIncluded"
                       control={control}
                       render={({ field }) => (
                         <Checkbox
-                          id="vatIncluded"
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
+                          id="taxIncluded"
+                          checked={field.value === 1}
+                          onCheckedChange={(checked) =>
+                            field.onChange(checked ? 1 : 0)
+                          }
                           className="data-[state=checked]:bg-primary-green/95 data-[state=checked]:border-primary-green/75"
                         />
                       )}
                     />
                     <Label
-                      htmlFor="vatIncluded"
+                      htmlFor="taxIncluded"
                       className="text-sm font-medium text-gray-700 cursor-pointer"
                     >
                       KDV Dahil
@@ -433,11 +435,11 @@ export default function AddOffer() {
                     </span>
                   </div>
 
-                  {isDiscounted && discountValue > 0 && (
+                  {isDiscounted && discountType > 0 && discountValue > 0 && (
                     <div className="flex justify-between items-center text-sm text-orange-600">
                       <span>
                         İndirim (
-                        {discountType === 0
+                        {discountType === 1
                           ? `%${discountValue}`
                           : CurrencyFormatter(discountValue, currency)}
                         ):
@@ -445,7 +447,7 @@ export default function AddOffer() {
                       <span className="font-medium">
                         -
                         {CurrencyFormatter(
-                          discountType === 0
+                          discountType === 1
                             ? (offer * discountValue) / 100
                             : discountValue,
                           currency
@@ -457,7 +459,7 @@ export default function AddOffer() {
                   <div className="flex justify-between items-center text-sm text-blue-600">
                     <span>KDV (%20):</span>
                     <span className="font-medium">
-                      {!vatIncluded
+                      {!taxIncluded
                         ? `+${CurrencyFormatter((total / 1.2) * 0.2, currency)}`
                         : "KDV Fiyata Dahildir"}
                     </span>
@@ -472,7 +474,7 @@ export default function AddOffer() {
                     <div className="bg-primary-green/10 px-4 py-2 border-b border-primary-green/20">
                       <span className="text-xs font-medium text-primary-green/80 uppercase tracking-wide">
                         Toplam Tutar{" "}
-                        {vatIncluded ? "(KDV Dahil)" : "(KDV Hariç)"}
+                        {taxIncluded ? "(KDV Dahil)" : "(KDV Hariç)"}
                       </span>
                     </div>
                     <div className="p-4">
@@ -499,10 +501,10 @@ export default function AddOffer() {
                 {/* Ek bilgi */}
                 <div className="mt-4 text-center">
                   <p className="text-xs text-gray-500">
-                    {isDiscounted &&
+                    {isDiscounted > 0 &&
                       discountValue > 0 &&
                       "İndirim uygulandı • "}
-                    {!vatIncluded
+                    {!taxIncluded
                       ? "KDV oranı %20 olarak hesaplanmıştır"
                       : "Tüm vergiler dahildir"}
                   </p>
