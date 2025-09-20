@@ -2,33 +2,15 @@ import { communicationService } from "@/services/CRM/CommunicationService";
 import { create } from "zustand";
 
 export const CommunicationStore = create((set, get) => ({
-  communications: [
-    {
-      id: 1,
-      customer: "ABC Teknoloji A.Ş.",
-      type: "Telefon",
-      date: "2026-01-15",
-      time: "14:30",
-      duration: "25 dk",
-      subject: "Proje görüşmesi",
-      notes: "Yeni proje için detaylar konuşuldu. Teklif hazırlanacak.",
-      status: "Tamamlandı",
-    },
-    {
-      id: 2,
-      customer: "XYZ İnşaat Ltd.",
-      type: "E-posta",
-      date: "2024-01-14",
-      time: "10:15",
-      subject: "Teklif sunumu",
-      notes: "Hazırlanan teklif e-posta ile gönderildi.",
-      status: "Beklemede",
-    },
-  ],
-
+  communications: [],
+  selectedCommunication: null,
   communicationsLoading: false,
   communicationsLoaded: false,
   isCommunicationModalOpen: false,
+  isViewCommunicationModalOpen: false,
+  isCommunicationDetailsModalOpen: false,
+  isDeleteCommunicationModalOpen: false,
+  communicationsError: null,
 
   communicationForm: {
     customer: "",
@@ -47,6 +29,22 @@ export const CommunicationStore = create((set, get) => ({
   setCommunicationsLoading: (val) => set({ communicationsLoading: val }),
 
   setCommunications: (val) => set({ communications: val }),
+
+  setCommunicationsError: (val) => set({ communicationsError: val }),
+
+  setSelectedCommunication: (comm) => set({ selectedCommunication: comm }),
+
+  setIsViewCommunicationModalOpen: (val) =>
+    set({ isViewCommunicationModalOpen: val }),
+
+  setIsDeleteCommunicationModalOpen: (val) =>
+    set({ isDeleteCommunicationModalOpen: val }),
+
+  setIsCommunicationDetailsModalOpen: (val) =>
+    set({ isCommunicationDetailsModalOpen: val }),
+
+  //
+  //
 
   fetchCommunications: async (forceRefresh = false) => {
     const { communicationsLoaded, communicationsLoading } = get();
@@ -74,7 +72,7 @@ export const CommunicationStore = create((set, get) => ({
       });
     } catch (error) {
       set({
-        communicationsError: error.message || "Müşteri verileri yüklenemedi",
+        communicationsError: error.message || "İletişim verileri yüklenemedi",
         communicationsLoading: false,
       });
     }
@@ -92,7 +90,7 @@ export const CommunicationStore = create((set, get) => ({
       }));
     } catch (error) {
       set({
-        communicationsError: error.message || "Müşteri oluşturulamadı",
+        communicationsError: error.message || "Görüşme oluşturulamadı",
         communicationsLoading: false,
       });
     }
@@ -120,7 +118,7 @@ export const CommunicationStore = create((set, get) => ({
       return updatedCommunication;
     } catch (error) {
       set({
-        communicationsError: error.message || "Müşteri oluşturulamadı",
+        communicationsError: error.message || "Görüşme oluşturulamadı",
         communicationsLoading: false,
       });
     }
@@ -138,7 +136,7 @@ export const CommunicationStore = create((set, get) => ({
       }));
     } catch (error) {
       set({
-        communicationsError: error.message || "Müşteri silinemedi",
+        communicationsError: error.message || "Görüşme silinemedi",
         communicationsLoading: false,
       });
       throw error;

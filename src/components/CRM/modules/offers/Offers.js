@@ -10,6 +10,7 @@ import { OfferStore } from "@/stores/crm/domains/OfferStore";
 import { useEffect, useState } from "react";
 import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 import { RepresentativeStore } from "@/stores/crm/domains/RepresentativeStore";
+import StatusBadge from "@/components/common/StatusBadge";
 
 export default function Offers() {
   const {
@@ -180,30 +181,7 @@ export default function Offers() {
                           currency={offer.currency}
                         />
                       </p>
-                      <Badge
-                        variant={
-                          offer.offerStatus === 0
-                            ? "default"
-                            : offer.offerStatus === 1
-                            ? "success"
-                            : "danger"
-                        }
-                        className={
-                          offer.offerStatus === 0
-                            ? "bg-orange"
-                            : offer.offerStatus === 1
-                            ? "bg-primary-green"
-                            : "bg-customRed"
-                        }
-                      >
-                        {
-                          {
-                            0: "Bekliyor",
-                            1: "Onaylandı",
-                            2: "Reddedildi",
-                          }[offer.offerStatus]
-                        }
-                      </Badge>
+                      <StatusBadge type={"offer"} status={offer.offerStatus} />
                       <div className="mt-2">
                         <Button
                           onClick={() => handleViewOffer(offer)}

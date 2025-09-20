@@ -41,7 +41,7 @@ class CommunicationService extends BaseService {
       this.isLoading = false;
       return data;
     } catch (error) {
-      console.error("Müşteriler getirilemedi:", error);
+      console.error("İletişimler getirilemedi:", error);
       throw error;
     } finally {
       this.isLoading = false;
@@ -69,7 +69,7 @@ class CommunicationService extends BaseService {
 
       return communication;
     } catch (error) {
-      console.error("Müşteri verileri yüklenemedi:", error);
+      console.error("İletişim verileri yüklenemedi:", error);
       throw error;
     } finally {
       this.isLoading = false;
@@ -115,7 +115,7 @@ class CommunicationService extends BaseService {
 
       return communication;
     } catch (error) {
-      console.error("Müşteri oluşturulamadı:", error);
+      console.error("İletişim oluşturulamadı:", error);
       throw error;
     } finally {
       this.isLoading = false;
@@ -160,7 +160,7 @@ class CommunicationService extends BaseService {
 
       return communication;
     } catch (error) {
-      console.error("Müşteri güncellenemedi:", error);
+      console.error("Görüşme güncellenemedi:", error);
       throw error;
     } finally {
       this.isLoading = false;
@@ -192,7 +192,7 @@ class CommunicationService extends BaseService {
 
       return data;
     } catch (error) {
-      console.error("Müşteri silinemedi:", error);
+      console.error("Görüşme silinemedi:", error);
       throw error;
     } finally {
       this.isLoading = false;

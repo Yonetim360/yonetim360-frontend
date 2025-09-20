@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 import DeleteCustomerModal from "../../modals/customer/DeleteCustomerModal";
 import LoadingModule from "@/components/common/LoadingModule";
+import StatusBadge from "@/components/common/StatusBadge";
 
 export default function CustomerInfo() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -169,22 +170,7 @@ export default function CustomerInfo() {
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
                     {/* Durum badge'i */}
                     <div className="flex justify-start sm:justify-center">
-                      <Badge
-                        variant={customer.state === 0 ? "default" : "secondary"}
-                        className={`text-xs ${
-                          customer.state === 1
-                            ? "bg-primary-green hover:bg-primary-green/90"
-                            : customer.state === 2
-                            ? "bg-orange hover:bg-orange/90"
-                            : "bg-red hover:bg-red/90"
-                        }`}
-                      >
-                        {customer.state === 1
-                          ? "Aktif"
-                          : customer.state === 2
-                          ? "Beklemede"
-                          : "Pasif"}
-                      </Badge>
+                      <StatusBadge type={"customer"} status={customer.state} />
                     </div>
 
                     {/* Aksiyon butonları */}

@@ -25,32 +25,18 @@ import { CustomerStore } from "@/stores/crm/domains/CustomerStore";
 import { CommunicationStore } from "@/stores/crm/domains/CommunicationStore";
 
 // Zod şeması
-const communicationSchema = z
-  .object({
-    customer: z.string().min(1, "Müşteri seçimi zorunludur"),
-    type: z.enum(["telefon", "email", "toplanti", "whatsapp"]),
-    subject: z.string().min(1, "Konu zorunludur"),
-    date: z.string().min(1, "Tarih zorunludur"),
-    time: z.string().min(1, "Saat zorunludur"),
-    duration: z.string().optional(),
-    notes: z.string().optional(),
-    meetingType: z.string().optional(), // Başlangıçta isteğe bağlı yapıldı
-  })
-  .refine(
-    (data) => {
-      // Eğer iletişim türü 'toplanti' ise ve meetingType boşsa hata döndür
-      if (data.type === "toplanti") {
-        return data.meetingType && data.meetingType.length > 0;
-      }
-      return true; // 'toplanti' değilse meetingType kontrolüne gerek yok
-    },
-    {
-      message: "Toplantı türü seçimi zorunludur",
-      path: ["meetingType"], // Hatanın hangi alana ait olduğunu belirtir
-    }
-  );
+const communicationSchema = z.object({
+  customer: z.string().min(1, "Müşteri seçimi zorunludur"),
+  type: z.number().min(1).max(5, "İletişim Türünü Seçiniz"),
+  subject: z.string().min(1, "Konu zorunludur"),
+  date: z.string().min(1, "Tarih zorunludur"),
+  time: z.string().min(1, "Saat zorunludur"),
+  duration: z.string().optional(),
+  conversationInformation: z.string().optional(),
+  meetingType: z.string().optional(), // Başlangıçta isteğe bağlı yapıldı
+});
 
-export default function AddContactModal() {
+export default function AddCommunicationModal() {
   const {
     isCommunicationModalOpen,
     setIsCommunicationModalOpen,
@@ -76,7 +62,7 @@ export default function AddContactModal() {
       date: "",
       time: "",
       duration: "",
-      notes: "",
+      conversationInformation: "",
       meetingType: "", // Yeni alanı varsayılan değerlere ekle
     },
   });
@@ -194,6 +180,19 @@ export default function AddContactModal() {
               <p className="text-sm text-red-500">{errors.subject.message}</p>
             )}
           </div>
+          <div className="space-y-2">
+            <Label>Görüşme İçeriği</Label>
+            <Textarea
+              {...register("conversationInformation")}
+              placeholder="İletişim detayları ve notlar..."
+              rows={4}
+            />
+            {errors.conversationInformation && (
+              <p className="text-sm text-red-500">
+                {errors.conversationInformation.message}
+              </p>
+            )}
+          </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Tarih *</Label>
@@ -214,17 +213,7 @@ export default function AddContactModal() {
               <Input {...register("duration")} placeholder="25 dk" />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Notlar</Label>
-            <Textarea
-              {...register("notes")}
-              placeholder="İletişim detayları ve notlar..."
-              rows={4}
-            />
-            {errors.notes && (
-              <p className="text-sm text-red-500">{errors.notes.message}</p>
-            )}
-          </div>
+
           <DialogFooter>
             <Button
               type="button"

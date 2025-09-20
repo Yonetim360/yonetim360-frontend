@@ -11,7 +11,7 @@ export async function GET(request) {
   }
   try {
     const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/offer`,
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/conversation`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -25,7 +25,7 @@ export async function GET(request) {
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json(
-      { error: "Teklif verileri alınamadı" },
+      { error: "İletişim verileri alınamadı" },
       { status: 500 }
     );
   }
@@ -45,7 +45,7 @@ export async function POST(request) {
     console.log(data);
 
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/offer`,
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/conversation`,
       data,
       {
         headers: {
@@ -59,7 +59,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json(
-      { error: "Teklif verileri alınamadı" },
+      { error: "İletişim verileri alınamadı" },
       { status: 500 }
     );
   }
@@ -80,7 +80,7 @@ export async function PUT(request) {
       },
     };
     const response = await axios.put(
-      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/offer/`,
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/conversation`,
       dataToSend,
       {
         headers: {
@@ -93,7 +93,7 @@ export async function PUT(request) {
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json(
-      { error: "Teklif verileri güncellenemedi" },
+      { error: "İletişim verileri güncellenemedi" },
       { status: 500 }
     );
   }

@@ -16,7 +16,6 @@ import SalesOffers from "@/components/CRM/modules/offers/SalesOffers";
 import Support from "@/components/CRM/modules/support/Support";
 import DefaultCase from "@/components/CRM/modules/DefaultCase";
 import AddCustomerModal from "@/components/CRM/modals/customer/AddCustomerModal";
-import AddContactModal from "@/components/CRM/modals/contact/AddContactModal";
 import AddSupportModal from "@/components/CRM/modals/support/AddSupportModal";
 
 import { useState } from "react";
@@ -32,6 +31,7 @@ import { KnowledgeBase } from "@/components/CRM/modules/solution/KnowledgeBase";
 import { useRouter } from "next/navigation";
 import Announcements from "@/components/CRM/modules/announcement/Announcements";
 import AddOffer from "@/components/CRM/modules/offers/AddOffer";
+import AddCommunicationModal from "@/components/CRM/modals/communications/AddCommunicationModal";
 
 export default function Page() {
   const router = useRouter();
@@ -224,7 +224,7 @@ export default function Page() {
 
       {/* Modals */}
       <AddCustomerModal />
-      <AddContactModal />
+      <AddCommunicationModal />
       <AddSupportModal />
     </div>
   );
