@@ -72,7 +72,7 @@ const useAuthStore = create((set, get) => ({
   },
 
   refreshToken: async () => {
-    const { isRefreshing } = get();
+    const { isRefreshing, logout } = get();
 
     // Eğer zaten refresh işlemi devam ediyorsa, bekle
     if (isRefreshing) {
@@ -121,6 +121,7 @@ const useAuthStore = create((set, get) => ({
         throw new Error("Refresh failed");
       }
     } catch (error) {
+      logout();
       set({
         isAuthenticated: false,
         user: null,

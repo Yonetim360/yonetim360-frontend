@@ -1,11 +1,11 @@
 "use client";
 
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 // CustomThemeProvider'ı kullanıyorsanız yorum satırını kaldırın
 // import CustomThemeProvider from "@/providers/themeProvider";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();

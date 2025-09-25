@@ -1,41 +1,22 @@
+import { supportService } from "@/services/CRM/SupportService";
 import { create } from "zustand";
 
 export const SupportStore = create((set, get) => ({
   selectedSupport: null,
   supportsLoading: false,
+  supportsLoaded: false,
+
   isSupportModalOpen: false,
   isSupportDetailsModalOpen: false,
   isViewSupportModalOpen: false,
+  isDeleteSupportModalOpen: false,
 
-  supportTickets: [
-    {
-      id: 1,
-      customer: "ABC Teknoloji A.Ş.",
-      ticketNo: "DES-2024-001",
-      subject: "Sistem yavaşlığı",
-      priority: "Yüksek",
-      status: "Açık",
-      createdDate: "2024-01-15",
-      assignedTo: "Sadık-Turan",
-      description: "İnternet problemi varmış.",
-    },
-    {
-      id: 2,
-      customer: "DEF Danışmanlık",
-      ticketNo: "DES-2024-002",
-      subject: "Rapor hatası",
-      priority: "Orta",
-      status: "cozuldu",
-      createdDate: "2024-01-14",
-      assignedTo: "Yeliz-Biri",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    },
-  ],
+  supportTickets: [],
 
   supportForm: {
     customer: "",
     subject: "",
-    description: "",
+    explanation: "",
     priority: "",
     assignedTo: "",
   },
@@ -48,5 +29,125 @@ export const SupportStore = create((set, get) => ({
   setIsSupportDetailsModalOpen: (val) =>
     set({ isSupportDetailsModalOpen: val }),
 
+  setIsDeleteSupportModalOpen: (val) => set({ isDeleteSupportModalOpen: val }),
+
+  setSupportsLoading: (val) => set({ supportsLoading: val }),
+
   setSelectedSupport: (support) => set({ selectedSupport: support }),
+
+  fetchSupportTickets: async (forceRefresh = false) => {
+    const { supportsLoaded, supportsLoading } = get();
+
+    if (supportsLoaded && !forceRefresh) {
+      return;
+    }
+
+    if (supportsLoading) {
+      return;
+    }
+
+    set({ supportsLoading: true });
+
+    try {
+      const supportTickets = await supportService.getSupportTickets(
+        forceRefresh
+      );
+
+      set({
+        supportTickets: supportTickets,
+        supportsLoaded: true,
+        supportsLoading: false,
+      });
+    } catch (error) {
+      set({
+        supportsError: error.message || "Destek talebi verileri yüklenemedi",
+        supportsLoading: false,
+      });
+    }
+  },
+
+  getSupportTicketById: async (id) => {
+    set({ supportsLoading: true, supportsError: null });
+
+    try {
+      const supportTicket = await supportService.getSupportTicketById(id);
+      return supportTicket;
+    } catch (error) {
+      set({
+        supportsError: error.message || "Destek talebi verileri yüklenemedi",
+        supportsLoading: false,
+      });
+    }
+  },
+
+  addSupportTicket: async (supportData) => {
+    set({ supportsLoading: true, supportsError: null });
+
+    try {
+      const newSupportTicket = await supportService.createSupportTicket(
+        supportData
+      );
+
+      set((state) => ({
+        supportTickets: [...state.supportTickets, newSupportTicket],
+        supportsLoading: false,
+      }));
+    } catch (error) {
+      set({
+        supportsError: error.message || "Destek talebi verileri yüklenemedi",
+        supportsLoading: false,
+      });
+    }
+  },
+
+  updateSupportTicket: async (id, supportData) => {
+    set({ supportsLoading: true, supportsError: null });
+
+    try {
+      const updatedSupportTicket = await supportService.updateSupportTicket(
+        supportData
+      );
+
+      const refreshedSupportTicket = await supportService.getSupportTicketById(
+        id
+      );
+
+      if (!refreshedSupportTicket) {
+        throw new Error("Destek talebi verileri yüklenemedi");
+      }
+
+      set((state) => ({
+        supportTickets: state.supportTickets.map((support) =>
+          support.id === id ? { ...updatedSupportTicket } : support
+        ),
+        supportsLoading: false,
+      }));
+    } catch (error) {
+      set({
+        supportsError: error.message || "Destek talebi verileri yüklenemedi",
+        supportsLoading: false,
+      });
+    }
+  },
+
+  deleteSupportTicket: async (id) => {
+    set({ supportsLoading: true, supportsError: null });
+
+    try {
+      await supportService.deleteSupportTicket(id);
+
+      set((state) => ({
+        supportTickets: state.supportTickets.filter(
+          (support) => support.id !== id
+        ),
+        supportsLoading: false,
+      }));
+    } catch (error) {
+      set({
+        supportsError: error.message || "Destek talebi verileri yüklenemedi",
+        supportsLoading: false,
+      });
+      throw error;
+    }
+  },
 }));

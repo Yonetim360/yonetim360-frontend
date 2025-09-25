@@ -4,9 +4,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Bell, Settings, User, Menu, X } from "lucide-react";
 import { useState } from "react";
+import useAuthStore from "@/stores/shared/AuthStore";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuthStore();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -81,11 +83,19 @@ export default function Navbar() {
                 <User className="h-5 w-5" />
               </Link>
             </Button>
-            <Link href="/login">
-              <Button className="bg-[#4CAF50] hover:bg-[#4CAF50]/90 text-white">
-                Giriş Yap
-              </Button>
-            </Link>
+            {user ? (
+              <Link href="/login">
+                <Button className="bg-red-500 hover:bg-red-800 text-white">
+                  Çıkış Yap
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button className="bg-[#4CAF50] hover:bg-[#4CAF50]/90 text-white">
+                  Giriş Yap
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
