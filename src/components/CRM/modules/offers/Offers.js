@@ -166,10 +166,11 @@ export default function Offers() {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h4 className="font-semibold text-dark-gray">
-                        {offer.customerName}
+                        {offer.customer.companyName}
                       </h4>
                       <h5 className=" text-dark-gray">
-                        Temsilci: {offer.representativeName}
+                        Temsilci: {offer.representative.firstName}{" "}
+                        {offer.representative.lastName}
                       </h5>
                       <p className="text-sm text-gray-600">
                         Hizmet: {offer.serviceExplanation}
@@ -178,7 +179,7 @@ export default function Offers() {
                     <div className="text-right">
                       <p className="font-bold text-dark-gray">
                         <CurrencyFormatter
-                          amount={offer.amount}
+                          amount={offer.finalAmount}
                           currency={offer.currency}
                         />
                       </p>

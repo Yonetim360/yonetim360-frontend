@@ -42,7 +42,6 @@ export async function POST(request) {
 
   try {
     const data = await request.json();
-    console.log(data);
 
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api/offer`,
@@ -74,6 +73,8 @@ export async function PUT(request) {
   }
   try {
     const data = await request.json();
+    console.log("data:", data);
+
     const dataToSend = {
       offerDto: {
         ...data,

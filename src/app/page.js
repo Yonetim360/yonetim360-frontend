@@ -23,7 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function HomePage() {
   const { user, accessToken } = useAuth();
   if (!user) console.log("no user");
-  else console.log(user);
+  else console.log(user, accessToken);
 
   return (
     <div className="min-h-screen bg-cream">

@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Bell, Settings, User, Menu, X } from "lucide-react";
@@ -9,7 +7,7 @@ import { toast } from "sonner";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuthStore();
+  const { user, logout, loading } = useAuthStore();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -24,6 +22,49 @@ export default function Navbar() {
       console.error("Çıkış yaparken hata oluştu:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <header className="bg-white shadow-sm border-b border-gray-200 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo - Normal görünsün */}
+            <Link href="/" className="flex items-center">
+              <h1 className="text-2xl font-bold text-[#4CAF50]">Yönetim360</h1>
+            </Link>
+
+            {/* Desktop Navigation - Skeleton */}
+            <nav className="hidden md:flex space-x-8">
+              <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+            </nav>
+
+            {/* Desktop Actions - Skeleton */}
+            <div className="hidden md:flex items-center space-x-4">
+              {/* Icon butonları için skeleton */}
+              <div className="h-9 w-9 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-9 w-9 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-9 w-9 bg-gray-200 rounded animate-pulse"></div>
+
+              {/* Giriş/Çıkış butonu için skeleton */}
+              <div className="h-9 w-24 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center space-x-2">
+              {/* Mobile Quick Action */}
+              <div className="h-9 w-9 bg-gray-200 rounded animate-pulse"></div>
+
+              {/* Hamburger Menu */}
+              <div className="h-9 w-9 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 relative">

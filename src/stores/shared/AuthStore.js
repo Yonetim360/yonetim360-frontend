@@ -181,25 +181,36 @@ const useAuthStore = create((set, get) => ({
   initializeAuth: async () => {
     const { accessToken, user, isRefreshing } = get();
 
-    // Eğer zaten token ve user varsa, initialize etmeye gerek yok
+    // Eğer zaten authenticated ise, tekrar kontrol etmeye gerek yok
     if (accessToken && user) {
-      set({ isAuthenticated: true });
+      set({ isAuthenticated: true }); // ✅ Eksik olan bu satır eklendi
+      console.log("[v0] Already authenticated, skipping initialization");
       return;
     }
 
-    // Eğer refresh işlemi devam ediyorsa, bekle
     if (isRefreshing) {
+      console.log("[v0] Refresh already in progress");
       return;
     }
 
     try {
-      set({ loading: true });
+      set({ loading: true, error: null });
+      console.log("[v0] Starting auth initialization...");
+
       const newToken = await get().refreshToken();
+
       if (newToken) {
+        // refreshToken fonksiyonu zaten isAuthenticated: true set ediyor
         console.log("[v0] Auth initialized successfully");
       }
     } catch (error) {
-      console.log("[v0] Auth initialization failed:", error);
+      console.log("[v0] Auth initialization failed:", error.message);
+      set({
+        isAuthenticated: false,
+        user: null,
+        accessToken: null,
+        error: error.message,
+      });
     } finally {
       set({ loading: false });
     }

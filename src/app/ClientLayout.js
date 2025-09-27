@@ -1,11 +1,10 @@
 "use client";
 
-// CustomThemeProvider'ı kullanıyorsanız yorum satırını kaldırın
-// import CustomThemeProvider from "@/providers/themeProvider";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -51,26 +50,36 @@ export default function ClientLayout({ children }) {
     return () => clearTimeout(timer); // Temizleme fonksiyonu
   }, [pathname]); // Sadece pathname'e bağlı, children burada gerekli değil
 
+  function AuthInitializer({ children }) {
+    const { initializeAuth } = useAuth();
+
+    useEffect(() => {
+      // Uygulama başlangıcında bir kez çalışır
+      initializeAuth();
+    }, []);
+
+    return children;
+  }
+
   return (
-    // CustomThemeProvider'ı kullanıyorsanız yorum satırını kaldırın
-    // <CustomThemeProvider>
-    <div
-      style={{
-        opacity: contentLoaded ? 1 : 0,
-        transition: "opacity 0.2s ease-in-out", // Biraz daha uzun geçiş
-      }}
-      className="flex flex-col min-h-screen"
-    >
-      {!hideHeaderFooter && <Navbar />}
-      <div ref={contentRef} className="flex-1">
-        {children}
+    <AuthInitializer>
+      <div
+        style={{
+          opacity: contentLoaded ? 1 : 0,
+          transition: "opacity 0.2s ease-in-out",
+        }}
+        className="flex flex-col min-h-screen"
+      >
+        {!hideHeaderFooter && <Navbar />}
+        <div ref={contentRef} className="flex-1">
+          {children}
+        </div>
+        {!hideHeaderFooter && (
+          <footer>
+            <Footer />
+          </footer>
+        )}
       </div>
-      {!hideHeaderFooter && (
-        <footer>
-          <Footer />
-        </footer>
-      )}
-    </div>
-    // </CustomThemeProvider>
+    </AuthInitializer>
   );
 }

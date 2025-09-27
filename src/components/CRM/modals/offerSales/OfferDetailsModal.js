@@ -110,7 +110,7 @@ export default function OfferDetailsModal() {
     return symbols[currencyCode] || "₺";
   };
 
-  // Toplam tutar hesaplama
+  // Toplam tutar hesaplama - isPriceEditEnabled durumundan bağımsız
   const totalAmount = useMemo(() => {
     const baseAmount = amount || 0;
     const discount = discountValue || 0;
@@ -118,8 +118,8 @@ export default function OfferDetailsModal() {
 
     let discountedAmount = baseAmount;
 
-    // İndirim hesaplama (sadece fiyat değiştirme aktifken)
-    if (isPriceEditEnabled && discount > 0) {
+    // İndirim hesaplama
+    if (discount > 0) {
       if (discType === 1) {
         // Yüzde indirim
         discountedAmount = baseAmount - (baseAmount * discount) / 100;
@@ -129,14 +129,14 @@ export default function OfferDetailsModal() {
       }
     }
 
-    // KDV hesaplama (sadece fiyat değiştirme aktifken ve KDV dahil değilse %20 ekle)
+    // KDV hesaplama (KDV dahil değilse %20 ekle)
     let finalAmount = discountedAmount;
-    if (isPriceEditEnabled && taxIncluded === 0 && discountedAmount > 0) {
+    if (taxIncluded === 0 && discountedAmount > 0) {
       finalAmount = discountedAmount * 1.2;
     }
 
     return Math.max(0, finalAmount);
-  }, [amount, discountValue, discountType, taxIncluded, isPriceEditEnabled]);
+  }, [amount, discountValue, discountType, taxIncluded]);
 
   const onSubmit = async (data) => {
     const dataToSend = {
@@ -147,7 +147,6 @@ export default function OfferDetailsModal() {
       title: "changed offer title",
       documentUrl: "notnullable!!1",
     };
-    console.log(dataToSend);
 
     await updateOffer(selectedOffer.id, dataToSend);
     reset();
@@ -337,8 +336,9 @@ export default function OfferDetailsModal() {
                             <SelectValue placeholder="Tür" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="0">Yüzde (%)</SelectItem>
-                            <SelectItem value="1">Sabit Tutar</SelectItem>
+                            <SelectItem value="0">Yok</SelectItem>
+                            <SelectItem value="1">Yüzde (%)</SelectItem>
+                            <SelectItem value="2">Sabit Tutar</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
