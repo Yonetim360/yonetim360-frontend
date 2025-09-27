@@ -31,6 +31,7 @@ export default function Offers() {
   useEffect(() => {
     fetchOffers();
   }, [fetchOffers]);
+  console.log(offers);
 
   useEffect(() => {
     const loadOffersWithCustomerNames = async () => {

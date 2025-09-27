@@ -5,13 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Bell, Settings, User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import useAuthStore from "@/stores/shared/AuthStore";
+import { toast } from "sonner";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Başarıyla çıkış yapıldı.");
+      // Başarılı çıkış işlemi sonrası yapılacak işlemler (örneğin, yönlendirme)
+    } catch (error) {
+      console.error("Çıkış yaparken hata oluştu:", error);
+    }
   };
 
   return (
@@ -84,11 +95,12 @@ export default function Navbar() {
               </Link>
             </Button>
             {user ? (
-              <Link href="/login">
-                <Button className="bg-red-500 hover:bg-red-800 text-white">
-                  Çıkış Yap
-                </Button>
-              </Link>
+              <Button
+                className="bg-red-500 hover:bg-red-800 text-white"
+                onClick={() => handleLogout()}
+              >
+                Çıkış Yap
+              </Button>
             ) : (
               <Link href="/login">
                 <Button className="bg-[#4CAF50] hover:bg-[#4CAF50]/90 text-white">
